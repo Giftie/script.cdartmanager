@@ -41,7 +41,7 @@
             <height>220</height>
             <visible>Control.HasFocus(122)</visible>
         </control>
-             
+        
         <control type="image">
             <description>Menu panel</description>
             <posx>0</posx>
