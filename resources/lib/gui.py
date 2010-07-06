@@ -238,7 +238,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             
         if search_dialog: 
             select = None
-            select = xbmcgui.Dialog().select( _(32032), search_dialog)
+            select = nDialog().select( _(32032), search_dialog)
             #Onscreen Select Menu
             print select
             if not select == -1:
@@ -247,7 +247,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         artist_album_list.append(item)
         
         else:
-            xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
+            nDialog(().ok( _(32033), "%s %s" % ( _(32034), name) )
             #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No CDArt found for 
         return artist_album_list
     
@@ -304,7 +304,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 pass
             
         except:
-            message = [_(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+            message = [ _(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
             #message = [Download Problem, Check file paths - CDArt Not Downloaded]           
             print_exc()
         #conn.commit()
@@ -355,7 +355,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         conn.commit()
         c.close()
         pDialog.close()
-        valid = xbmcgui.Dialog().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
+        valid = nDialog(().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
         print valid
         return
 
@@ -404,7 +404,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             
         if not cdart_url:
             #no cdart found
-            xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
+            nDialog(().ok( _(32033), _(32030), _(32031) )
             #Onscreen Dialog - Not Found on XBMCSTUFF.COM, Please contribute! Upload your CDArts, On www.xbmcstuff.com
         else:
             local_album_list = self.get_local_album(cdart_url[0]["local_name"])
@@ -494,6 +494,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if album["cdart"] == "TRUE" :
                    cdart_existing = cdart_existing + 1
                 c.execute("insert into alblist(cdart, path, artist_id, title, artist) values (?, ?, ?, ?, ?)", (album["cdart"], album["path"], album["artist_id"], album["title"], album["artist"]))
+                if (pDialog.iscanceled()):
+                    break
+            if (pDialog.iscanceled()):
+                break
+        if (pDialog.iscanceled()):
+            pDialog.close()
+            nDialog(().ok(_(32050), _(32051), _(32052), _(32053))
         pDialog.close()
         conn.commit()
         c.close()
@@ -668,11 +675,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     album_search.append(album["search_name"])
                     album_selection.append(album["search_url"])
                     count=count+1
-                select = xbmcgui.Dialog().select(_(32022), album_search)
+                select = nDialog(().select(_(32022), album_search)
                 #print select
                 cdart_url = album_selection[select]
                 message = self.download_cdart( cdart_url, cdart_path )
-            xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+            nDialog(().ok(message[0] ,message[1] ,message[2] ,message[3])
             
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 

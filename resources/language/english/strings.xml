@@ -51,4 +51,9 @@
   <string id="32047">Downloading.....</string>
   <string id="32048">Retrieving Recognized Artist List...."</string>
   <string id="32049">Artists Matched: "</string>
+  <string id="32050">Database setup aborted...</string>
+  <string id="32051">Addon Database is crucial to script!</string>
+  <string id="32052">Please go to the Advanced Menu and</string>
+  <string id="32053">Refresh Addon Database</string>
+  
 </strings>
