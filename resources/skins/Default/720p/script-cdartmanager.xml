@@ -68,7 +68,7 @@
             <height>30</height>
             <font>font18</font>
             <textcolor>white</textcolor>
-            <label>$ADDON[script.cdartdownloader 32043]</label>
+            <label>$ADDON[script.cdartmanager 32043]</label>
             <aligny>center</aligny>
             <align>center</align>
         </control>
@@ -81,7 +81,7 @@
             <height>30</height>
             <font>font18</font>
             <textcolor>white</textcolor>
-            <label>$ADDON[script.cdartdownloader 32045]</label>
+            <label>$ADDON[script.cdartmanager 32045]</label>
             <aligny>center</aligny>
             <align>center</align>
             <label></label>
@@ -95,7 +95,7 @@
             <height>30</height>
             <font>font18</font>
             <textcolor>white</textcolor>
-            <label>$ADDON[script.cdartdownloader 32044]</label>
+            <label>$ADDON[script.cdartmanager 32044]</label>
             <aligny>center</aligny>
             <align>center</align>
         </control>
@@ -127,7 +127,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32002]</label>
+                <label>$ADDON[script.cdartmanager 32002]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -153,7 +153,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-				<label>$ADDON[script.cdartdownloader 32003]</label>
+				<label>$ADDON[script.cdartmanager 32003]</label>
                 <texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -179,7 +179,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32004]</label>
+                <label>$ADDON[script.cdartmanager 32004]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -199,7 +199,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32011]</label>
+                <label>$ADDON[script.cdartmanager 32011]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -225,7 +225,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32006]</label>
+                <label>$ADDON[script.cdartmanager 32006]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -245,7 +245,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32009]</label>
+                <label>$ADDON[script.cdartmanager 32009]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -295,7 +295,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32000]</label>
+                <label>$ADDON[script.cdartmanager 32000]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -315,7 +315,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32001]</label>
+                <label>$ADDON[script.cdartmanager 32001]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -367,7 +367,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32005]</label>
+                <label>$ADDON[script.cdartmanager 32005]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -387,7 +387,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32012]</label>
+                <label>$ADDON[script.cdartmanager 32012]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -407,7 +407,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32013]</label>
+                <label>$ADDON[script.cdartmanager 32013]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -427,7 +427,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32014]</label>
+                <label>$ADDON[script.cdartmanager 32014]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -478,7 +478,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader 32000]</label>
+                <label>$ADDON[script.cdartmanager 32000]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
@@ -498,7 +498,7 @@
 				<textwidth>220</textwidth>
 				<aligny>center</aligny>
 				<font>font16</font>
-                <label>$ADDON[script.cdartdownloader32001]</label>
+                <label>$ADDON[script.cdartmanager32001]</label>
 				<texturefocus border="5">button-focus.png</texturefocus>
 				<texturenofocus>-</texturenofocus>
 				<pulseonselect>false</pulseonselect>
