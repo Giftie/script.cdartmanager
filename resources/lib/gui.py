@@ -45,10 +45,10 @@ album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCe
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cross"
 addon_db = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__, "l_cdart.db")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
-addon_image = os.path.join( addon_image_path , "cdart-icon.png" )
+addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 nDialog = xbmcgui.Dialog()
-#print addon_image
+
 
 try:
     storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
@@ -151,7 +151,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             d.close
         return local_album_list
     
-    
+#match artists on xbmcstuff.com with local database    
     def get_recognized( self , distant_artist , l_artist  ):
         true = 0
         artist_list = []
@@ -244,35 +244,23 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
         return artist_album_list
     
-    
+    # finds the cdart for the album list    
     def find_cdart( self , album , artist_album_list):
-        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(album["title"]) , urllib.quote_plus(artist_album_list[0]["artist"])))
+        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(album["title"].replace("&", "&amp;")) , urllib.quote_plus(artist_album_list[0]["artist"])))
+        # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         match = re.findall( "<picture>(.*?)</picture>", xml )
         return match
     
-    
+    #finds the cdart for auto download
     def find_cdart2(self , album):
-        url = cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(album["title"].replace(",","")) , urllib.quote_plus(album["artist"]))
-        xml = self.get_html_source( url ) 
-        #xml = get_html_source( cross_url + "&album=%s&artist=%s" % (album["title"].replace(" " , "%").replace("," , "").replace("'" , "%") , artist_album_list[0]["artist"].replace(" " , "%" )))
-        #print cross_url + "&album=%s&artist=%s" % (album["title"].replace(" " , "%").replace("," , "").replace("'" , "%"), artist_album_list[0]["artist"].replace(" " , "%" ))
+        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus((album["title"].replace(",","")).replace("&", "&amp;")) , urllib.quote_plus(album["artist"])))
+        # the .replace("&", "&amp;") is in place to correctly match the albums containing '&'
         match = re.findall( "<picture>(.*?)</picture>", xml )
-        #print "url: " + url  #DEBUG
-        #print "xml: " + xml   #DEBUG
-        #try:
-            #print "# Album Title: " + urllib.quote_plus(album["title"])
-        #except:
-            #print_exc()
-
-        #try:
-            #print "# Artist: " + urllib.quote_plus(urllib.quote_plus(album["artist"]))
-        #except:
-            #print_exc()
         return match
         
 
     def download_cdart( self, url_cdart , album ):
-	destination = os.path.join( album["path"] , "cdart.png")
+	destination = os.path.join( album["path"] , "cdart.png").replace('/"/cdart.png','/cdart.png"')
 	print url_cdart
 	print destination
         pDialog.create("Downloading")
@@ -317,7 +305,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 album_count = album_count + 1
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
                 test_album = self.find_cdart2(album)
-                #print "test_album: %s" % test_album
                 print "#        %s" % album["title"]
                 if not test_album == [] : 
                     print "#            ALBUM MATCH FOUND"
@@ -340,24 +327,28 @@ class GUI( xbmcgui.WindowXMLDialog ):
         valid = xbmcgui.Dialog().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
         print valid
         return download_count
-    
+
 
     def populate_album_list(self, artist_menu):
         cdart_url = []
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         self.getControl( 122 ).reset()
-        #If there is something in artist_menu["distant_id"] build cdart_url 
+        #If there is something in artist_menu["distant_id"] build cdart_url
+        print "distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
             artist_xml = self.get_html_source( album_url + "&id_artist=%s" % artist_menu["distant_id"] )
             raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
             for i in raw:
                 album = {}            
                 album["local_name"] = album["artist"] = artist_menu["name"]
-                match = re.search( 'album="(.*?)">', i )
+                match = re.search('album="(.*?)">', i )
                 #search for album title match, if found, store in album["title"], if not found store empty space
                 if match:
-                    album["title"] = (match.group(1))                
-
+                    album["title"] = match.group(1)               
+                    print "album title before: %s" % album["title"]
+                    album["title"] = album["title"].replace("&amp;", "&")
+                    print "album title before: %s" % album["title"]
+                    
                 else:
                     album["title"] = ""
                 #search for album thumb match, if found, store in album["thumb"], if not found store empty space
@@ -379,11 +370,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #If artist_menu["distant_id"] is empty, search for name match
         else :
             cdart_url = self.search( artist_menu["name"] )
-            print cdart_url
+            
         if not cdart_url:
             #no cdart found
-            OK = False
-        
+            #ok dialog stating that there was no albums found for the artist
+            pass
         else:
             local_album_list = self.get_local_album(cdart_url[0]["local_name"])
             cdart_img = ""
@@ -401,7 +392,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     #colour the label green if not
                     label2 = "%s&&%s" % (album["path"], cdart_img)
                     if album["cdart"] == "TRUE":
-                        label1 = "%s - %s     ***CDArt Already Exists***" % (album["artist"] , album["title"])
+                        label1 = "%s - %s     ***CDArt Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , "yellow" , label1 ) )
@@ -542,7 +533,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.cdart_url = []
         self.local_artists = []
         self.label_1 = ""
-        self.label_2 = addon_image
+        self.label_2 = addon_img
         self.cdartimg = ""
         self.local_artist_count = 0
         self.local_album_count = 0
@@ -619,7 +610,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local = ""
             url = ""
             album = {}
+            album_search=[]
+            album_selection=[]
             cdart_path = {}
+            count = 0
             url = (self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
             cdart_path["path"] = (self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[0]
             local = self.getControl( 122 ).getSelectedItem().getLabel()
@@ -628,15 +622,24 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "url: %s" % url
             if not url =="" : # If it is a recognized Album...
                 message = self.download_cdart( url, cdart_path )
-                xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
-            else : # If it is an unrecognized Album...
-                artist = local.replace("choose for ","").split(" - ")
-                album["artist"] = artist[0]
-                album["title"] = artist[1]
-                print album["artist"]
-                print album["title"]
-                
-                
+            else : # If it is not a recognized Album...
+                #artist = local.replace("choose for ","").split(" - ")
+                #album["artist"] = artist[0]
+                #album["title"] = artist[1]
+                #print album["artist"]
+                #print album["title"]
+                for elem in self.cdart_url:
+                    album["search_name"] = elem["title"]
+                    album["search_url"] = elem["picture"]
+                    album_search.append(album["search_name"])
+                    album_selection.append(album["search_url"])
+                    count=count+1
+                select = xbmcgui.Dialog().select(_(32022), album_search)
+                #print select
+                cdart_url = album_selection[select]
+                message = self.download_cdart( cdart_url, cdart_path )
+            xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+            
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu
@@ -655,17 +658,20 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def onFocus( self, controlId ):
         if controlId == 122 :
-            self.getControl( 210 ).setImage( self.getControl( 122 ).getSelectedItem().getLabel2().split("&&")[1] )
+            if re.search("&&", self.getControl( 122 ).getSelectedItem().getLabel2()):
+                image=(self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
+            else:
+                image=addon_img
+            self.getControl( 210 ).setImage( image )
             
         	
     def onAction( self, action ):
         print action
-        self.getControl( 210 ).setImage( self.getControl( 122 ).getSelectedItem().getLabel2().split("&&")[1] )
-        #if re.search("&&", self.getControl( 122 ).getSelectedItem().getLabel2()):
-        image=self.getControl( 122 ).getSelectedItem().getLabel2().split("&&")[1]
-        #else:
-        #    image=addon_img
-        #self.getControl( 210 ).setImage( image )
+        if re.search("&&", self.getControl( 122 ).getSelectedItem().getLabel2()):
+            image=(self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
+        else:
+            image=addon_img
+        self.getControl( 210 ).setImage( image )
             
         #if action == 10:
         #    print "Closing"
