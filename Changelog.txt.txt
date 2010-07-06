@@ -1,0 +1,5 @@
+0.2.0 - 0.5.0 - gui created, change over to script
+
+0.1.0 - post merge 
+
+0.0.1 - life begins as cdart downloader pre-merge
