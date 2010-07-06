@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+  <!-- Script Strings -->
+  <string id="32000">Artistes Reconnus</string>
+  <string id="32001">Tout les artistes</string>
+  <string id="32002">Artistes Recherche</string>
+  <string id="32003">Albums Recherche</string>
+  <string id="32004">Téléchargement Réussi</string>
+  <string id="32005">Enregistrer Local CDArt Liste</string>
+  <string id="32006">Paramètres</string>
+  <string id="32007">Artistes Existantes: %s</string>
+  <string id="32008">CDArts Existantes: %s</string>
+  <string id="32009">Sortie</string>
+  <string id="32010">Local Albums: %s</string>
+  <string id="32011"></string>
+  <string id="32012"></string>
+  <string id="32013"></string>
+  <string id="32014"></string>
+  <string id="32015"></string>
+  <string id="32016"></string>
+  <string id="32017">Répertoire CDarts</string>
+  <string id="32018">Skin/.../artiste-album.png</string>
+  <string id="32019">Répertoire de l'album/cdart.png</string>
+  <string id="32020"></string>
+  <string id="32021"></string>
+  <string id="32022">Choisir un CDart disponible</string>
+  <string id="32023"></string>
+  <string id="32024">CDart téléchargé !</string>
+  <string id="32025"></string>
+  <string id="32026">Erreur de téléchargement</string>
+  <string id="32027">CDart non téléchargé !</string>
+  <string id="32028">Téléchargement annulé !</string>
+  <string id="32029">Pas de CDarts trouvé ?</string>
+  <string id="32030">Contribuez ! Partagez les votres</string>
+  <string id="32031">Sur www.xbmcstuff.com</string>
+  <string id="32032">Choisir un artiste</string>
+  <string id="32033">Non trouvé sur XBMCSTUFF.com</string>
+  <string id="32034">Pas de CDarts trouvé pour</string>
+  <string id="32035"></string>
+  <string id="32036">Recherche CDarts</string>
+  <string id="32037">Recupération des Artistes locaux</string>
+  <string id="32038">Artiste: </string>
+  <string id="32039">Album: </string>
+  <string id="32040">Fin de la recherche</string>
+  <string id="32041">CDarts téléchargés</string>
+</strings>

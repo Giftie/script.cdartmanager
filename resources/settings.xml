@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="Settings">
+    <setting type="lsep" label="32015" />
+    <setting id="folder" type="enum" label="32017" lvalues="32018|32019" default="1"/>
+    </category>
+</settings>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+  <!-- Script Strings -->
+  <string id="32000">Recognized Artists</string>
+  <string id="32001">All Artists</string>
+  <string id="32002">Search Artists</string>
+  <string id="32003">Search Albums</string>
+  <string id="32004">Automatic Download</string>
+  <string id="32005">Save Local CDArt List</string>
+  <string id="32006">Settings</string>
+  <string id="32007">Local Artists: %s</string>
+  <string id="32008">Local CDArts: %s</string>
+  <string id="32009">Exit</string>
+  <string id="32010">Local Albums: %s</string>
+  <string id="32011">Advanced</string>
+  <string id="32012">Refresh Local Database</string>
+  <string id="32013">Clean Music Database</string>
+  <string id="32014">Update Music Database</string>
+  <string id="32015">Delete Local Database?</string>
+  <string id="32016"></string>
+  <string id="32017">CDarts folder</string>
+  <string id="32018">Skin/.../artist-album.png</string>
+  <string id="32019">Album folder/cdart.png</string>
+  <string id="32020"></string>
+  <string id="32021"></string>
+  <string id="32022">Choose Available CDart</string>
+  <string id="32023">Download Successfull</string>
+  <string id="32024">CDart Downloaded!</string>
+  <string id="32025"></string>
+  <string id="32026">Download Error!</string>
+  <string id="32027">CDart Not Download!</string>
+  <string id="32028">Download aborded!</string>
+  <string id="32029">No CDart found?</string>
+  <string id="32030">Please contribute! Upload your CDArts</string>
+  <string id="32031">On www.xbmcstuff.com</string>
+  <string id="32032">Choose an Artist</string>
+  <string id="32033">Not Found on XBMCSTUFF.com</string>
+  <string id="32034">No CDart found for</string>
+  <string id="32035"></string>
+  <string id="32036">CDarts search</string>
+  <string id="32037">Getting local artists</string>
+  <string id="32038">Artist: </string>
+  <string id="32039">Album: </string>
+  <string id="32040">Completed</string>
+  <string id="32041">New CDarts downloaded</string>
+  <string id="32042">CDArt Manager"</string>
+  <string id="32043">Local Artists:</string>  <!-- string insert for local artist -->
+  <string id="32044">Local CDArts:</string>  <!-- string insert for local CDArts -->
+  <string id="32045">Local Albums:</string>  <!-- string insert for local albums -->
+</strings>
