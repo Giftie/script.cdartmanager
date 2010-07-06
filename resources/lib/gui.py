@@ -1,3 +1,9 @@
+#to do:
+#   add skin folder storage.  right now only albumfolder storage is working
+#   add comments showing what local strings are being displayed   _(32002) = Search Artist
+#   add log printing
+#   insure mouse use works properly - at the moment it seems to break everything!
+#   add save local cdart list, showing which album have or don't have cdarts
 import platform
 import urllib
 import sys
@@ -48,12 +54,6 @@ addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media"
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 nDialog = xbmcgui.Dialog()
-
-#to do:
-#   add skin folder storage.  right now only albumfolder storage is working
-#   add comments showing what local strings are being displayed   _(32002) = Search Artist
-#   add log printing
-#   insure mouse use works properly - at the moment it seems to break everything!
 
 try:
     storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
