@@ -20,7 +20,134 @@
         <texture border="40">default-panel.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
+
+        <control type="group" id="9004">
+            <posx>30</posx>
+			<posy>0</posy>
+            
+            <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9004).HasFocus + !Control.HasFocus(122)">conditional</animation>
+            <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
+			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">WindowClose</animation>
+			<animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
+            <visible>Control.HasFocus(122)</visible>
+            <control type="image" id = 201>
+                <posx>-10</posx>
+                <posy>0</posy>
+                <width>850</width>
+                <height>600</height>
+                <texture border="40">default-panel.png</texture>
+            </control>
         
+            <control type="list" id="122">
+                <description>Album List</description>
+                <posx>20</posx>
+                <posy>25</posy>
+                <width>800</width>
+                <height>550</height>
+                <onleft>120</onleft>
+                <onright>122</onright>
+                <onup>122</onup>
+                <ondown>122</ondown>
+                <viewtype label="535">list</viewtype>
+                <pagecontrol>123</pagecontrol>
+                <scrolltime>200</scrolltime>
+                <itemlayout width="780" height="40">
+                    <control type="image">
+                        <posx>60</posx>
+                        <posy>40</posy>
+                        <width>740</width>
+                        <height>40</height>
+                        <texture>default-list-nofocus.png</texture>
+                    </control>
+                    
+                    <control type="image">
+                        <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=True>Conditional</animation> -->
+                        <posx>10</posx>
+                        <posy>0</posy>
+                        <width>40</width>
+                        <height>40</height>
+                        <info>Listitem.Thumb</info>
+                    </control>
+                    
+                    <control type="label">
+                        <posx>70</posx>
+                        <posy>0</posy>
+                        <width>720</width>
+                        <height>40</height>
+                        <font>font18</font>
+                        <aligny>center</aligny>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>green</selectedcolor>
+                        <align>left</align>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="780" height="40">
+                    <control type="image">
+                        <posx>60</posx>
+                        <posy>40</posy>
+                        <width>740</width>
+                        <height>40</height>
+                        <texture>default-list-nofocus.png</texture>
+                    </control>
+                    <control type="image">
+                        <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=True>conditional</animation> -->
+                        <posx>10</posx>
+                        <posy>0</posy>
+                        <width>40</width>
+                        <height>40</height>
+                        <info>Listitem.Thumb</info>
+                        <visible>Control.HasFocus(122)</visible>
+                    </control>
+                    <control type="image">
+                        <posx>60</posx>
+                        <posy>0</posy>
+                        <width>740</width>
+                        <height>40</height>
+                        <texture>button-focus.png</texture>
+                        <visible>Control.HasFocus(122)</visible>
+                    </control>
+                    <control type="label">
+                        <posx>70</posx>
+                        <posy>0</posy>
+                        <width>720</width>
+                        <height>40</height>
+                        <font>font18</font>
+                        <aligny>center</aligny>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>green</selectedcolor>
+                        <align>left</align>
+                        <info>ListItem.Label</info>
+                    </control>
+      
+                </focusedlayout>
+            </control>
+            <control type="spincontrol" id="123">
+                <description>Next page button</description>
+                <posx>790</posx>
+                <posy>560</posy>
+                <width>20</width>
+                <height>20</height>
+                <font>font13</font>
+                <align>right</align>
+                <subtype>page</subtype>
+                <textcolor>FFFFFFFF</textcolor>
+                <onleft>122</onleft>
+                <onright>122</onright>
+                <ondown>122</ondown>
+                <onup>122</onup>
+                <textoffsetx>10</textoffsetx>
+                <textureup>default-scroll-up.png</textureup>
+                <texturedown>default-scroll-down.png</texturedown>
+                <textureupfocus>default-scroll-up-focus.png</textureupfocus>
+                <texturedownfocus>default-scroll-down-focus.png</texturedownfocus>
+                <showonepage>false</showonepage>
+                <visible>Control.IsVisible(120)</visible>
+            </control>
+
+        </control>
+      
+      
         <control type="image" id="200">
             <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=Control.HasFocus(122)>conditional</animation> -->
             <description>page header tab icon</description>
@@ -263,6 +390,7 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
+            <visible>Control.HasFocus(105) | Control.HasFocus(100)</visible>
             <!--
             <control type="button">
 					<description>Fake button for mouse control</description>
@@ -335,6 +463,7 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
+            <visible>Control.HasFocus(103) | Control.HasFocus(130)</visible>
             <!--
             <control type="button">
 					<description>Fake button for mouse control</description>
@@ -518,8 +647,8 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
-            
-            <control type="image" id = 200>
+            <visible>Control.HasFocus(120)</visible>
+            <control type="image" id ="220">
                 <posx>-10</posx>
                 <posy>0</posy>
                 <width>430</width>
@@ -638,135 +767,6 @@
             </control>
             -->
         </control>
-        
-        <control type="group" id="9004">
-            <posx>30</posx>
-			<posy>0</posy>
-            
-            <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9004).HasFocus + !Control.HasFocus(122)">conditional</animation>
-            <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
-			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">WindowClose</animation>
-			<animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
-            
-            <control type="image" id = 201>
-                <posx>-10</posx>
-                <posy>0</posy>
-                <width>850</width>
-                <height>600</height>
-                <texture border="40">default-panel.png</texture>
-            </control>
-        
-            <control type="list" id="122">
-                <description>Album List</description>
-                <posx>20</posx>
-                <posy>25</posy>
-                <width>800</width>
-                <height>550</height>
-                <onleft>120</onleft>
-                <onright>122</onright>
-                <onup>122</onup>
-                <ondown>122</ondown>
-                <viewtype label="535">list</viewtype>
-                <pagecontrol>123</pagecontrol>
-                <scrolltime>200</scrolltime>
-                <itemlayout width="780" height="40">
-                    <control type="image">
-                        <posx>60</posx>
-                        <posy>40</posy>
-                        <width>740</width>
-                        <height>40</height>
-                        <texture>default-list-nofocus.png</texture>
-                    </control>
-                    
-                    <control type="image">
-                        <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=True>Conditional</animation> -->
-                        <posx>10</posx>
-                        <posy>0</posy>
-                        <width>40</width>
-                        <height>40</height>
-                        <info>Listitem.Thumb</info>
-                    </control>
-                    
-                    <control type="label">
-                        <posx>70</posx>
-                        <posy>0</posy>
-                        <width>720</width>
-                        <height>40</height>
-                        <font>font18</font>
-                        <aligny>center</aligny>
-                        <textcolor>white</textcolor>
-                        <selectedcolor>green</selectedcolor>
-                        <align>left</align>
-                        <info>ListItem.Label</info>
-                    </control>
-                </itemlayout>
-                <focusedlayout width="780" height="40">
-                    <control type="image">
-                        <posx>60</posx>
-                        <posy>40</posy>
-                        <width>740</width>
-                        <height>40</height>
-                        <texture>default-list-nofocus.png</texture>
-                    </control>
-                    <control type="image">
-                        <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=True>conditional</animation> -->
-                        <posx>10</posx>
-                        <posy>0</posy>
-                        <width>40</width>
-                        <height>40</height>
-                        <info>Listitem.Thumb</info>
-                        <visible>Control.HasFocus(122)</visible>
-                    </control>
-                    <control type="image">
-                        <posx>60</posx>
-                        <posy>0</posy>
-                        <width>740</width>
-                        <height>40</height>
-                        <texture>button-focus.png</texture>
-                        <visible>Control.HasFocus(122)</visible>
-                    </control>
-                    <control type="label">
-                        <posx>70</posx>
-                        <posy>0</posy>
-                        <width>720</width>
-                        <height>40</height>
-                        <font>font18</font>
-                        <aligny>center</aligny>
-                        <textcolor>white</textcolor>
-                        <selectedcolor>green</selectedcolor>
-                        <align>left</align>
-                        <info>ListItem.Label</info>
-                    </control>
-      
-                </focusedlayout>
-            </control>
-            <control type="spincontrol" id="123">
-                <description>Next page button</description>
-                <posx>790</posx>
-                <posy>560</posy>
-                <width>20</width>
-                <height>20</height>
-                <font>font13</font>
-                <align>right</align>
-                <subtype>page</subtype>
-                <textcolor>FFFFFFFF</textcolor>
-                <onleft>122</onleft>
-                <onright>122</onright>
-                <ondown>122</ondown>
-                <onup>122</onup>
-                <textoffsetx>10</textoffsetx>
-                <textureup>default-scroll-up.png</textureup>
-                <texturedown>default-scroll-down.png</texturedown>
-                <textureupfocus>default-scroll-up-focus.png</textureupfocus>
-                <texturedownfocus>default-scroll-down-focus.png</texturedownfocus>
-                <showonepage>false</showonepage>
-                <visible>Control.IsVisible(120)</visible>
-            </control>
-
-        </control>
-      
-      
-
     </control>
   </controls>
 </window>
