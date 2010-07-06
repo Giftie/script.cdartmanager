@@ -296,6 +296,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         download_count = 0
         cdart_existing = 0
         album_count = 0
+        conn = sqlite3.connect(addon_db)
+        c = conn.cursor()
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
@@ -312,7 +314,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         print "test_album[0]: %s" % test_album[0]
                         self.download_cdart( test_album[0] , album )
                         download_count = download_count + 1
-                    
+                        album["cdart"] = "TRUE"
+                        c.execute("insert into alblist(cdart, path, artist_id, title, artist) values (?, ?, ?, ?, ?)", (album["cdart"], album["path"], album["artist_id"], album["title"], album["artist"]))
+
                     else :
                         cdart_existing = cdart_existing + 1
                         print "#            CDArt file already exists, skipped..."
@@ -323,10 +327,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     break
             if ( pDialog.iscanceled() ):
                     break    
+        conn.commit()
+        c.close()
         pDialog.close()
         valid = xbmcgui.Dialog().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
         print valid
-        return download_count
+        return
 
 
     def populate_album_list(self, artist_menu):
@@ -558,13 +564,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 102 : #Automatic Download
             self.menu_mode = 3
             download_count = self.auto_download()
-            if download_count > 0 :
-                self.local_cdart_count = self.local_cdart_count + download_count
-                #print "local cdart count: %s    download_count: %s " % (self.local_cdart_count, download_count)
-                self.getControl( 109 ).setLabel( _(32007) % self.local_artist_count)
-                self.getControl( 110 ).setLabel( _(32010) % self.local_album_count)
-                self.getControl( 112 ).setLabel( _(32008) % self.local_cdart_count)
-            #print "local cdart count: %s    download_count: %s " % (self.local_cdart_count, download_count)
+            self.local_album_count, self.local_artist_count, self.local_cdart_count = self.new_local_count()
+            self.getControl( 109 ).setLabel( _(32007) % self.local_artist_count)
+            self.getControl( 110 ).setLabel( _(32010) % self.local_album_count)
+            self.getControl( 112 ).setLabel( _(32008) % self.local_cdart_count)
         if controlId == 103 : #Advanced
             self.setFocusId( 130 )
         if controlId in [105, 106]:
