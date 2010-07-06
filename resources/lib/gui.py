@@ -1,9 +1,14 @@
 #to do:
-#   add skin folder storage.  right now only albumfolder storage is working
-#   add comments showing what local strings are being displayed   _(32002) = Search Artist
-#   add log printing
-#   insure mouse use works properly - at the moment it seems to break everything!
-#   add save local cdart list, showing which album have or don't have cdarts
+# -  add skin folder storage.  right now only albumfolder storage is working
+# -  add comments showing what local strings are being displayed   _(32002) = Search Artist
+# -  add log printing
+# -  insure mouse use works properly - at the moment it seems to break everything!
+# -  add save local cdart list, showing which album have or don't have cdarts
+# -  add user input(ie keyboard) to get more advanced searches
+# -  add database update for any downloads
+#        many need to read local database(l_cdart - lalist) to find local id #'s
+#        then write to l_cdart - alblist with the important information
+#
 import platform
 import urllib
 import sys
@@ -55,17 +60,6 @@ addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 nDialog = xbmcgui.Dialog()
 
-try:
-    storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
-except:
-    __settings__.openSettings()
-    storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
-if storage == "skin":
-    cdart_path = os.path.join(xbmc.translatePath("special://skin\media"),"backdrops","artist_fanart","cd")
-    if not os.path.exists(cdart_path):
-        os.makedirs(cdart_path)
-    
-
 class GUI( xbmcgui.WindowXMLDialog ):
     def __init__( self, *args, **kwargs ):    	
         pass
@@ -84,7 +78,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             color="ffFFFF00"
         colored_text = text.replace( colorword , "[COLOR=%s]%s[/COLOR]" % ( color , colorword ) )
         return colored_text
-    
+
+
+    def set_cdart_folder( self ):
+        
 
     def get_html_source( self , url ):
         """ fetch the html source """
@@ -164,7 +161,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         true = 0
         artist_list = []
         recognized = []
-        pDialog.create("Retrieving Recognized Artist....")
+        pDialog.create( _(32048) )
+        #Onscreen dialog - Retrieving Recognized Artist List....
         for artist in l_artist:
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(artist["name"]) ), distant_artist )
             if match: 
@@ -175,7 +173,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 artist["distant_id"] = ""
                 artist_list.append(artist)
-            pDialog.update(true, "Artists Matched %s" % true)
+            pDialog.update(true, (_(32049) % true))
+            #Onscreen Dialog - Artists Matched: %
             if ( pDialog.iscanceled() ):
                 break
         print "# Total Artists Matched: %s" % true
@@ -186,8 +185,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #search xbmcstuff.com for similar artists if an artist match is not made
     #between local artist and distant artist
-#To Do:
-# add user input(ie keyboard) to get more advanced searches
     def search( self , name):
         artist_album_list = []
         search_list = []
@@ -242,6 +239,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if search_dialog: 
             select = None
             select = xbmcgui.Dialog().select( _(32032), search_dialog)
+            #Onscreen Select Menu
             print select
             if not select == -1:
                 for item in search_list : 
@@ -250,7 +248,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
         else:
             xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
-        
+            #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No CDArt found for 
         return artist_album_list
     
     # finds the cdart for the album list    
@@ -269,14 +267,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
     # downloads the cdart.  used from album list selections
     def download_cdart( self, url_cdart , album ):
-#To Do:
-#   add database update for any downloads
-#      many need to read local database(l_cdart - lalist) to find local id #'s
-#      then write to l_cdart - alblist with the important information
 	destination = os.path.join( album["path"] , "cdart.png").replace('/"/cdart.png','/cdart.png"')
 	#print url_cdart
 	#print destination
-        pDialog.create("Downloading")
+        pDialog.create( _(32047) )
+        #Onscreen Dialog - "Downloading...."
+        #
         #conn = sqlite3.connect(addon_db)
         #c = conn.cursor()
         try:
@@ -286,8 +282,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 percent = int( float( count * blocksize * 100 ) / totalsize )
                 strProgressBar = str( percent )
                 #print "percent: %s:" % percent
-#need to create a local string - *DOWNLOADING CDART* 
-                pDialog.update( percent," *DOWNLOADING CDART* " )
+                pDialog.update( percent, _(32035) )
+                #Onscreen Dialog - *DOWNLOADING CDART*
                 if ( pDialog.iscanceled() ):
                     pass
                 
@@ -295,28 +291,31 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
                 print fp, h
                 message = [_(32023), _(32024), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+                #message = ["Download Sucessful!"]
+                #
                 #album["cdart"] = "TRUE"  #for storage in the database update
                 #album["artist_id] = output from l_cdart database artist id
                 #c.execute("insert into alblist(cdart, path, artist_id, title, artist) values (?, ?, ?, ?, ?)", (album["cdart"], album["path"], album["artist_id"], album["title"], album["artist"]))
 
             else:
-#need to create a local string for - Download Problem
-#need to create a local string for - Check file paths
-                message = ["Download problem", "Check file paths", "File: %s" % album["path"] , "Url: %s" % url_cdart]
+                message = [ _(32026), ( _(32025), _(32027) ), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+                #message = Download Problem, Check file paths - CDArt Not Downloaded]           
             if ( pDialog.iscanceled() ):
                 pass
             
         except:
-            message = [_(32026), _(32027), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+            message = [_(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+            #message = [Download Problem, Check file paths - CDArt Not Downloaded]           
             print_exc()
         #conn.commit()
         #c.close()
         pDialog.close()
-        return message
+        return message  # returns one of the messages built based on success or lack of
 
     #Automatically downloads non existing cdarts and refreshes addon's db
     def auto_download( self ):
-        pDialog.create( _(32036) )
+        pDialog.create( _(32046) )
+        #Onscreen Dialog - Automatically Downloading CDArt
         count_artist_local = len(local_artist)
         artist_count = 0
         download_count = 0
@@ -405,8 +404,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             
         if not cdart_url:
             #no cdart found
-#create dialog stating that there was no albums found for the artist
-            pass
+            xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
+            #Onscreen Dialog - Not Found on XBMCSTUFF.COM, Please contribute! Upload your CDArts, On www.xbmcstuff.com
         else:
             local_album_list = self.get_local_album(cdart_url[0]["local_name"])
             cdart_img = ""
@@ -476,9 +475,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         cdart_existing = 0
         album_count = 0
         percent=0
-#create local string - Creating Addon Database
-#create local string - Please Wait...
-        pDialog.create( "Creating Addon Database", "Please Wait..." )
+        pDialog.create( _(32021), _(32016) )
+        #Onscreen Dialog - Creating Addon Database
+        #                      Please Wait....
         print addon_db
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
@@ -490,7 +489,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             percent = int((artist_count / float(count_artist_local)) * 100) 
             local_album_list = self.get_local_album( artist["name"] )
             for album in local_album_list:
-                pDialog.update( percent, "Please Wait...", "" , "%s - %s" % ( artist["name"] , album["title"] ) )
+                pDialog.update( percent, _(32016), "" , "%s - %s" % ( artist["name"] , album["title"] ) )
                 album_count = album_count + 1               
                 if album["cdart"] == "TRUE" :
                    cdart_existing = cdart_existing + 1
@@ -520,9 +519,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #retrieves counts for local album, artist and cdarts
     def new_local_count( self ):
-#create local string - Retrieving Local Music Database
-#create local string - Please Wait...
-        pDialog.create( "Retrieving Local Music Database", "Please Wait..." )
+        pDialog.create( _(32020), _(32016) )
+        #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         global local_artist
         local_artist, count_artist_local = self.get_local_artist()
         artist_count = 0
@@ -532,7 +530,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent=0
         local_album_list = self.get_local_db( )
         for album in local_album_list:
-            pDialog.update( percent, "Please Wait...", "" , "%s - %s" % ( album["artist"] , album["title"] ) )
+            pDialog.update( percent, _(32016), "" , "%s - %s" % ( album["artist"] , album["title"] ) )
             album_count = album_count + 1               
             if album["cdart"] == "TRUE" :
                cdart_existing = cdart_existing + 1
@@ -573,9 +571,23 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.local_artist_count = 0
         self.local_album_count = 0
         self.local_cdart_count = 0
+        #check settings to see if storage location has been set, open settings if not.
+        try:
+            storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
+        except:
+            __settings__.openSettings()
+            storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
+        #if skin storage has been selected, check to see if cdart directory exists
+        #if not, create one.
+        if storage == "skin":
+            cdart_path = os.path.join(xbmc.translatePath("special://skin\media"),"backdrops","artist_fanart","cd")
+            if not os.path.exists(cdart_path):
+            os.makedirs(cdart_path)
+            
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)
+        #checking to see if addon_db exists, if not, run database_setup()
         if not os.path.isfile((addon_db).replace("\\\\" , "\\").encode("utf-8")):
             self.local_album_count, self.local_artist_count, self.local_cdart_count = self.database_setup()
         else:
