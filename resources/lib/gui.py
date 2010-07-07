@@ -19,6 +19,10 @@ from traceback import print_exc
 import xbmcgui
 import xbmcaddon
 import xbmc
+import socket
+import shutil
+#time socket out at 2 mins.
+socket.setdefaulttimeout(120)
 
 KEY_BUTTON_BACK = 275
 KEY_KEYBOARD_ESC = 61467
@@ -57,7 +61,8 @@ xmlfile = os.path.join( BASE_RESOURCE_PATH , "temp.xml" )
 artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=artists"
 album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cdarts"
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cross"
-addon_db = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__, "l_cdart.db")
+addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
+addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
@@ -171,9 +176,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist["distant_id"] = match.group(1)
                 recognized.append(artist)
                 artist_list.append(artist)
-            else:
-                artist["distant_id"] = ""
-                artist_list.append(artist)
+            else: # give it one more try, but changing special characters
+                match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape((artist["name"].replace("/","")).replace("&","&amp;") ) ), distant_artist )
+                if match: 
+                    true = true + 1
+                    artist["distant_id"] = match.group(1)
+                    recognized.append(artist)
+                    artist_list.append(artist)
+                else:    
+                    artist["distant_id"] = ""
+                    artist_list.append(artist)
             pDialog.update(true, (_(32049) % true))
             #Onscreen Dialog - Artists Matched: %
             if ( pDialog.iscanceled() ):
@@ -210,7 +222,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     album["local_name"] = name
                     match = re.search( "<artist>(.*?)</artist>", i )
                     if match:
-                        album["artist"] = set_entity_or_charref(match.group(1))
+                        album["artist"] = set_entity_or_charref((match.group(1).replace("&amp;", "&")).replace("'",""))
                     else:
                         album["artist"] = ""
                     if not album["artist"] in search_dialog:
@@ -218,7 +230,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     
                     match = re.search( "<album>(.*?)</album>", i )
                     if match:
-                        album["title"] = (match.group(1))
+                        album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")
                     else:
                         album["title"] = ""
                     
@@ -255,14 +267,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     # finds the cdart for the album list    
     def find_cdart( self , album , artist_album_list):
-        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(album["title"].replace("&", "&amp;")) , urllib.quote_plus(artist_album_list[0]["artist"])))
+        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus((album["title"].replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((artist_album_list[0]["artist"].replace("&", "&amp;")).replace("/",""))))
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         match = re.findall( "<picture>(.*?)</picture>", xml )
         return match
     
     #finds the cdart for auto download
     def find_cdart2(self , album):
-        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus((album["title"].replace(",","")).replace("&", "&amp;")) , urllib.quote_plus(album["artist"])))
+        xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(((album["title"].replace(",","")).replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((album["artist"].replace("&", "&amp;")).replace("/",""))))
         # the .replace("&", "&amp;") is in place to correctly match the albums containing '&'
         match = re.findall( "<picture>(.*?)</picture>", xml )
         return match
@@ -308,7 +320,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 message = [ _(32026),  _(32025) , "File: %s" % album["path"] , "Url: %s" % url_cdart]
                 #message = Download Problem, Check file paths - CDArt Not Downloaded]           
             if ( pDialog.iscanceled() ):
-                pass
+                pDialog.close()
             
         except:
             #print "another error"
@@ -317,7 +329,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print_exc()
         #conn.commit()
         #c.close()
-        pDialog.close()
         return message, download_success  # returns one of the messages built based on success or lack of
 
     #Automatically downloads non existing cdarts and refreshes addon's db
@@ -346,7 +357,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     print "#            ALBUM MATCH FOUND"
                     if album["cdart"] == "FALSE" :
                         #print "test_album[0]: %s" % test_album[0]
-                        message, d_sucess = self.download_cdart( test_album[0] , album )
+                        message, d_success = self.download_cdart( test_album[0] , album )
                         if d_success == 1:
                             download_count = download_count + 1
                             album["cdart"] = "TRUE"
@@ -392,7 +403,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 match = re.search('album="(.*?)">', i )
                 #search for album title match, if found, store in album["title"], if not found store empty space
                 if match:
-                    album["title"] = (match.group(1).replace("&amp;", "&"))               
+                    album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
                     
                 else:
                     album["title"] = ""
@@ -546,11 +557,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         db=c.fetchall()
         for item in db:
             album = {}
-            album["cdart"] = translate_string( item[0].encode("utf-8"))
-            album["path"] = (repr(item[1]).replace('"','')).encode("utf-8")
-            album["artist_id"] = repr(item[2])
-            album["title"] = translate_string( item[3].encode("utf-8"))
-            album["artist"] = translate_string( item[4].encode("utf-8"))
+            album["cdart"] = translate_string( item[0].encode("utf-8")).strip("'u")
+            album["path"] = (repr(item[1]).replace('"','')).encode("utf-8").strip("'u")
+            album["artist_id"] = repr(item[2]).strip("'u")
+            album["title"] = translate_string( item[3].encode("utf-8")).strip("'u")
+            album["artist"] = translate_string( item[4].encode("utf-8")).strip("'u")
             local_album_list.append(album)
             c.close
         return local_album_list
@@ -590,7 +601,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 pass
             
-            
         else :
             #If file does not exist and some how the program got here, create new database
             self.local_album_count, self.local_artist_count, self.local_cdart_count = self.database_setup()
@@ -601,14 +611,35 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
     # copy cdarts from music folder to temporary location
     # first step to copy to skin folder
-    #def cdart_copy( self )
-    #   albums = get_local_db()
-    #   for item in albums:
-    #   if item["cdart"] == "TRUE":
-    #       source=os.path.join(item["path"], "cdart.png")
-    #
-    #
-    
+    def cdart_copy( self ):
+        destination = ""
+        percent = 0
+        count = 0
+        albums = self.get_local_db()
+        #print albums
+        pDialog.create( "Saving CDArts..." )
+        for item in albums:
+            #print item
+            if item["cdart"] == "TRUE":
+                source=os.path.join(item["path"].replace("\\\\" , "\\"), "cdart.png")
+                destination=os.path.join(addon_work_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
+                #print "source: %s" % source
+                #print "destination: %s" % destination
+                if not os.path.exists(destination):
+                    #pass
+                    os.makedirs(destination)
+                else:
+                    pass
+                fn = os.path.join(destination, (((item["artist"].replace("/", "")) + " - " + (item["title"].replace("/","")) + ".png").lower()))
+                #print "filename: %s" % fn
+                shutil.copy(source, fn)
+                count = count + 1
+                percent = int(count/float(self.local_cdart_count)*100)
+                pDialog.update( percent , ("CDArts Copied: %s" % count))
+            else:
+                pass
+        pDialog.close()
+        xbmcgui.Dialog().ok("Finished Copying cdart" ,("CDArts Located at: %s" % destination), ("%s CDArts Copied" % count))
 
     # setup self. strings and initial local counts
     def setup_all( self ):
@@ -714,6 +745,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if not url =="" : # If it is a recognized Album...
                 message, d_success = self.download_cdart( url, cdart_path )
                 xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+                pDialog.close()
             else : # If it is not a recognized Album...
                 for elem in self.cdart_url:
                     album["search_name"] = elem["title"]
@@ -726,12 +758,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     cdart_url = album_selection[select]
                     message, d_success = self.download_cdart( cdart_url, cdart_path )
                     xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+                    pDialog.close()
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu
             xbmc.executebuiltin( "UpdateLibrary(music)")
         if controlId == 130 : #Save Local CDArt List selected from Advanced Menu
-            pass
+            self.cdart_copy()
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             self.refresh_db()
         if controlId == 104 : #Settings
