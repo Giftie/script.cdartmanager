@@ -1,3 +1,6 @@
+0.8.8 - fixed artist/album matching.  now more local artists/albums are matched to those on XBMCSTUFF.com
+      - added cdart copy - copies to the addon_data folder using the artist - album.png naming
+
 0.8.7 - fixed database building
 
 0.8.6 - found problem with file names(double quotes)
