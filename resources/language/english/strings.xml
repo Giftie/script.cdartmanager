@@ -26,7 +26,7 @@
   <string id="32022">Choose Available CDart</string>
   <string id="32023">Download Successful!</string>
   <string id="32024">CDart Downloaded!</string>
-  <string id="32025">Check file paths - CDArt Not Downloaded</string>
+  <string id="32025">Check file paths-CDArt Not Downloaded</string>
   <string id="32026">Download Error!</string>
   <string id="32027">CDart Not Download!</string>
   <string id="32028">Download aborded!</string>
@@ -43,14 +43,14 @@
   <string id="32039">Album: </string>
   <string id="32040">Completed</string>
   <string id="32041">New CDarts downloaded</string>
-  <string id="32042">CDArt Manager"</string>
+  <string id="32042">CDArt Manager</string>
   <string id="32043">Local Artists:</string>  <!-- string insert for local artist -->
   <string id="32044">Local CDArts:</string>  <!-- string insert for local CDArts -->
   <string id="32045">Local Albums:</string>  <!-- string insert for local albums -->
   <string id="32046">Automatically Downloading CDArts</string>
   <string id="32047">Downloading.....</string>
-  <string id="32048">Retrieving Recognized Artist List...."</string>
-  <string id="32049">Artists Matched: "</string>
+  <string id="32048">Retrieving Recognized Artist List....</string>
+  <string id="32049">Artists Matched: %s</string>
   <string id="32050">Database setup aborted...</string>
   <string id="32051">Addon Database is crucial to script!</string>
   <string id="32052">Please go to the Advanced Menu and</string>
