@@ -20,6 +20,9 @@ import xbmcgui
 import xbmcaddon
 import xbmc
 
+KEY_BUTTON_BACK = 275
+KEY_KEYBOARD_ESC = 61467
+
 # pull information from default.py
 _              = sys.modules[ "__main__" ].__language__
 __scriptname__ = sys.modules[ "__main__" ].__scriptname__
@@ -732,6 +735,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             image=addon_img
         self.getControl( 210 ).setImage( image )
+        buttonCode =  action.getButtonCode()
+        actionID   =  action.getId()
+        print "onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode)
+        if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
+            self.close()
+
+
             
         #if action == 10:
         #    print "Closing"
