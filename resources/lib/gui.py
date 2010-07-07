@@ -445,7 +445,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         label1 = "%s - %s     ***Local only CDArt Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
-                        listitem.setLabel( self.coloring( label1 , "red" , label1 ) )
+                        listitem.setLabel( self.coloring( label1 , "orange" , label1 ) )
                         listitem.setLabel2( label2 )
                         listitem.setThumbnailImage( cdart_img )
                     else:
