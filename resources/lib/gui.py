@@ -717,6 +717,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # setup self. strings and initial local counts
     def setup_all( self ):
         self.menu_mode = 0
+        self.artist_menu = {}
         self.recognized_artists = []
         self.all_artists = []
         self.cdart_url = []
@@ -772,18 +773,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #    self.setFocusId( 200 )    
         if controlId == 120 : #Retrieving information from Artists List
             if self.menu_mode == 1: #information pulled from recognized list
-                artist_menu = {}
-                artist_menu["local_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
-                artist_menu["name"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
-                artist_menu["distant_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
+                self.artist_menu = {}
+                self.artist_menu["local_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
+                self.artist_menu["name"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
+                self.artist_menu["distant_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
             elif self.menu_mode == 2: #information pulled from All Artist List
-                artist_menu = {}
-                artist_menu["local_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
-                artist_menu["name"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
-                artist_menu["distant_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
-            print "# %s" % artist_menu
+                self.artist_menu = {}
+                self.artist_menu["local_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
+                self.artist_menu["name"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
+                self.artist_menu["distant_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
+            print "# %s" % self.artist_menu
             #print artist_menu
-            self.populate_album_list( artist_menu )
+            self.populate_album_list( self.artist_menu )
         if controlId == 122 : #Retrieving information from Album List
             select = None
             local = ""
@@ -821,7 +822,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     message, d_success = self.download_cdart( cdart_url, cdart_path )
                     xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
                     pDialog.close()
-            self.populate_album_list( artist_menu )
+            self.populate_album_list( self.artist_menu )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu
@@ -865,10 +866,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode)
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
-        #if action == 10:
-        #    print "Closing"
-        #    pDialog.close()
-        #    self.close()
+        if actionID == 10:
+            print "Closing"
+            pDialog.close()
+            self.close()
    
 def onAction( self, action ):
     print action

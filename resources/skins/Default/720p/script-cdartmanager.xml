@@ -259,14 +259,11 @@
         <control type="group" id="9001">
             <posx>25</posx>
 			<posy>240</posy>
-            <!--
             <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9001).HasFocus + !Control.HasFocus(100)">conditional</animation>
-            -->
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
-			<animation effect="fade" start="100" end="0" time="0" condition="(Control.HasFocus(100) | ControlGroup(9001).HasFocus) + (!Control.HasFocus(120) | !ControlGroup(9003).HasFocus)">WindowClose</animation>
-			<animation effect="slide" end="220,0" time="2000" tween="quadratic" easing="out" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
-            <animation effect="slide" end="220,0" time="2000" tween="quadratic" easing="in" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
-            <visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106) | Control.HasFocus(120) | Control.HasFocus(122)</visible>
+			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">WindowClose</animation>
+			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
+            <visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106)</visible>
             <!--
             <control type="button">
 					<description>Fake button for mouse control</description>
@@ -669,7 +666,7 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
-            <visible>Control.HasFocus(120)</visible>
+            <visible>Control.HasFocus(120) | Control.HasFocus(121)</visible>
             <control type="image" id ="220">
                 <posx>-10</posx>
                 <posy>0</posy>
