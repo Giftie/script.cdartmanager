@@ -123,19 +123,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "# !!Unable to open page %s" % url
             return ""
         
-    #not sure this is even being used
-    def save_xml( self , data ):
-        file( xmlfile , "w" ).write( repr( data ) )
-        
-    #not sure this is even being used    
-    def load_data( self , file_path ):
-        try:
-            temp_data = eval( file( file_path, "r" ).read() )
-        except:
-            print_exc()
-            print "# !!Unable to open file: %s" % xmlfile
-            temp_data = ""
-        return temp_data
+#    #not sure this is even being used
+#    def save_xml( self , data ):
+#        file( xmlfile , "w" ).write( repr( data ) )
+#        
+#    #not sure this is even being used    
+#    def load_data( self , file_path ):
+#        try:
+#            temp_data = eval( file( file_path, "r" ).read() )
+#        except:
+#            print_exc()
+#            print "# !!Unable to open file: %s" % xmlfile
+#            temp_data = ""
+#        return temp_data
     
     #retrieve local artist list from xbmc's music db
     def get_local_artist( self ):
@@ -372,12 +372,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #c.close()
         return message, download_success  # returns one of the messages built based on success or lack of
 
-    #Automatically downloads non existing cdarts and refreshes addon's db
+    #Automatic download of non existing cdarts and refreshes addon's db
     def auto_download( self ):
         print "#  Autodownload"
         print "# "
         pDialog.create( _(32046) )
-        #Onscreen Dialog - Automatically Downloading CDArt
+        #Onscreen Dialog - Automatic Downloading of CDArt
         count_artist_local = len(local_artist)
         artist_count = 0
         download_count = 0
@@ -428,6 +428,69 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             xbmcgui.Dialog().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
         return
+
+    #Local vs. XBMCSTUFF.COM cdART list maker
+    def local_vs_distant( self ):
+        print "#  Local vs. XBMCSTUFF.COM cdART list maker"
+        print "# "
+        pDialog.create( "Comparing Local cdARTs to those on XBMCSTUFF.com" )
+        #Onscreen Dialog - Comparing Local cdARTs to those on XBMCSTUFF.com
+        count_artist_local = len(local_artist)
+        local_count = 0
+        distant_count = 0
+        cdart_difference = 0
+        album_count = 0
+        artist_count = 0
+        temp_album = {}
+        cdart_lvd = []
+        for artist in local_artist:
+            artist_count = artist_count + 1
+            percent = int((artist_count / float(count_artist_local)) * 100)
+            print "#    Artist: %s     Local ID: %s" % (artist["name"], artist["local_id"])
+            local_album_list = self.get_local_album( artist["local_id"] )
+            for album in local_album_list:
+                album_count = album_count + 1
+                temp_album["artist"] = artist["name"]
+                temp_album["title"] = album["title"]
+                temp_album["path"] = album["path"]
+                pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
+                test_album = self.find_cdart2(album)
+                print "#        %s" % album["title"]
+                if not test_album == [] : 
+                    print "#            ALBUM MATCH FOUND"
+                    temp_album["distant"] = "TRUE"
+                    distant_count = distant_count + 1
+                    if album["cdart"] == "TRUE" :
+                        temp_album["local"] = "TRUE"
+                        local_count = local_count + 1
+                        print "#                Local & Distant cdART image exists..."
+                    else:
+                        temp_album["local"] = "FALSE"
+                        print "#                No local cdART image exists"
+                else :
+                    print "#            ALBUM MATCH NOT FOUND"
+                    temp_album["distant"] = "FALSE"
+                    if album["cdart"] == "TRUE" :
+                        local_count = local_count + 1
+                        temp_album["local"] = "TRUE"
+                        print "#                Local cdART image exists..."
+                    else:
+                        temp_album["local"] = "FALSE"
+                        print "#                No local cdART image exists"
+                cdart_lvd.append(temp_album)
+                if ( pDialog.iscanceled() ):
+                    break
+            if ( pDialog.iscanceled() ):
+                    break    
+        pDialog.close()
+        difference = local_count - distant_count
+        if (local_count - distant_count) > 0:
+            xbmcgui.Dialog().ok( "There are %s cdARTs that only exist locally" % (local_count - distant_count), "Local cdARTs: %s" % local_count, "Distant cdARTs: %s" % distant_count )
+            difference = 1
+        else:
+            xbmcgui.Dialog().ok( "There are %s new cdARTs on XBMCSTUFF.COM" % (distant_count - local_count), "Local cdARTs: %s" % local_count, "Distant cdARTs: %s" % distant_count )
+            differnece = 0
+        return cdart_lvd, difference
 
     #creates the album list on the skin
     def populate_album_list(self, artist_menu):
@@ -663,6 +726,42 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 109 ).setLabel( _(32007) % self.local_artist_count)
         self.getControl( 110 ).setLabel( _(32010) % self.local_album_count)
         self.getControl( 112 ).setLabel( _(32008) % self.local_cdart_count)
+
+    def unique_cdart_copy( self, unique ):
+        count = 0
+        destination = ""
+        fn_format = int(__settings__.getSetting("folder"))
+        unique_folder = __settings__.getSetting("unique_path")
+        if unique_folder =="":
+            __settings__.openSettings()
+            unique_folder = __settings__.getSetting("unique_path")
+        pDialog.create( _(32060) )
+        for album in unique:
+            if album["local"] == "TRUE" and album["distant"] == "FALSE":
+                source=os.path.join(item["album"].replace("\\\\" , "\\"), "cdart.png")
+                if fn_format == 0:
+                    destination=os.path.join(unique_folder, "unique", album["artist"].replace("/","")) #to fix AC/DC
+                    fn = os.path.join(destination, ( (unique["title"].replace("/","")) + ".png"))
+                elif fn_format == 1:
+                    destination=os.path.join(unique_folder, "unique" ) #to fix AC/DC
+                    fn = os.path.join(destination, (((unquie["artist"].replace("/", "")) + " - " + (unique["title"].replace("/","")) + ".png").lower()))
+                #print "source: %s" % source
+                #print "destination: %s" % destination
+                if not os.path.exists(destination):
+                    #pass
+                    os.makedirs(destination)
+                else:
+                    pass
+                    
+                #print "filename: %s" % fn
+                shutil.copy(source, fn)
+                count=count + 1
+                pDialog.update( percent , "Unique cdARTS folder: %s" % unique_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+            else:
+                pass
+        pDialog.close()
+        xbmcgui.Dialog().ok( "%s - Unique Local cdARTs copied" % count)
+
         
     # copy cdarts from music folder to temporary location
     # first step to copy to skin folder
@@ -829,6 +928,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "UpdateLibrary(music)")
         if controlId == 130 : #Back up cdART selected from Advanced Menu
             self.cdart_copy()
+        if controlId == 134 : #Copy Unique Local cdART selected from Advanced Menu
+            unique, difference = self.local_vs_distant()
+            if not difference == 0:
+                self.unique_cdart_copy()
+            else:
+                xbmcgui.Dialog().ok( "There are no unique local cdARTs")
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             self.refresh_db()
         if controlId == 104 : #Settings

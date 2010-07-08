@@ -461,7 +461,7 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
-            <visible>Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133)</visible>
+            <visible>Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133) | Control.HasFocus(134) </visible>
             
             <!--
             <control type="button">
@@ -481,7 +481,7 @@
                 <posx>-5</posx>
                 <posy>5</posy>
                 <width>260</width>
-                <height>230</height>
+                <height>270</height>
                 <texture border="40">default-panel.png</texture>
             </control>
             
@@ -501,7 +501,7 @@
 				<pulseonselect>false</pulseonselect>
                 <onleft>9000</onleft>
 				<onright>9005</onright>
-				<onup>133</onup>
+				<onup>134</onup>
 				<ondown>130</ondown>
 			</control>
             
@@ -582,6 +582,26 @@
                 <onleft>9000</onleft>
 				<onright>9005</onright>
 				<onup>132</onup>
+				<ondown>134</ondown>
+			</control>
+            
+            <control type="button" id="134">
+				<description>Copy Unique Local cdARTs</description>
+				<posx>10</posx>
+				<posy>210</posy>
+				<height>40</height>
+				<width>230</width>
+				<textoffsetx>10</textoffsetx>
+				<textwidth>220</textwidth>
+				<aligny>center</aligny>
+				<font>font16</font>
+                <label>$ADDON[script.cdartmanager 32063]</label>
+				<texturefocus border="5">button-focus.png</texturefocus>
+				<texturenofocus>-</texturenofocus>
+				<pulseonselect>false</pulseonselect>
+                <onleft>9000</onleft>
+				<onright>9005</onright>
+				<onup>133</onup>
 				<ondown>129</ondown>
 			</control>
             
