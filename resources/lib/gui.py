@@ -156,11 +156,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return artist_list, count
     
     #retrieve local albums based on artist's name from xbmc's db
-    def get_local_album( self , artist_name):
+    def get_local_album( self , local_id):
         local_album_list = []    
         conn_b = sqlite3.connect(db_path)
         d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where strArtist LIKE "%s" AND strAlbum != ''""" % artist_name )
+        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist LIKE "%s" AND strAlbum != ''""" % local_id )
         for item in d:
             album = {}
             album["artist"] = translate_string( repr(item[0]).strip("'u") )
@@ -211,7 +211,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #search xbmcstuff.com for similar artists if an artist match is not made
     #between local artist and distant artist
-    def search( self , name):
+    def search( self , name, local_id):
+        print "#    Search Artist based on name: %s" % name
         error = 0
         artist_album_list = []
         search_list = []
@@ -230,7 +231,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #self.save_xml(search_xml)
                 match = re.search('<message>(.*?)</message>', search_xml )    
                 if match:
-                    print "# not found on xbmcstuff.com"
+                    print "#          Artist(part name): %s  not found on xbmcstuff.com" % part
                 elif len(part) == 1 or part in ["the","le","de"]:
                     pass
                 else: 
@@ -238,9 +239,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     for i in raw:
                         album = {}
                         album["local_name"] = name
+                        album["artistl_id"] = local_id
                         match = re.search( "<artist>(.*?)</artist>", i )
                         if match:
                             album["artist"] = set_entity_or_charref((match.group(1).replace("&amp;", "&")).replace("'",""))
+                            print "#               Artist Matched: %s" % album["artist"]
                         else:
                             album["artist"] = ""
                         if not album["artist"] in search_dialog:
@@ -251,20 +254,23 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")
                         else:
                             album["title"] = ""
-                    
+
+                        print "#                         Album Title: %s" % album["title"]
                         match = re.search( "<thumb>(.*?)</thumb>", i )
                         if match:
                             album["thumb"] = (match.group(1))
                         else:
                             album["thumb"] = ""
-                    
+                        print "#                         Album Thumb: %s" % album["thumb"]
+                        
                         match = re.search( "<picture>(.*?)</picture>", i )
                         if match:
                             album["picture"] = (match.group(1))
                         else:
                             album["picture"] = ""
                     
-                        print album["artist"]
+                        print "#                         Album cdART: %s" % album["picture"]
+                        
                         search_list.append(album)
             
             if search_dialog: 
@@ -276,15 +282,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 for item in search_list : 
                     if item["artist"] == search_list[select]["artist"]:
                         artist_album_list.append(item)
-        
+                return artist_album_list
+    
             else:
                 if error == 1:
                     xbmcgui.Dialog().ok("Error connecting to XBMCSTUFF.COM, Socket Timed out")
                 else:
                     xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
                     #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No CDArt found for 
-                return artist_album_list
-    
+                
     # finds the cdart for the album list    
     def find_cdart( self , album , artist_album_list):
         match = None
@@ -292,6 +298,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         # the .replace("'". "") is to get rid of all the apostrophes
         # the .replace("/", "") gets rid of the forward slash(ie AC/DC)
+        print "# xml: %s" % xml
         if not xml == "":
             match = re.findall( "<picture>(.*?)</picture>", xml )
         else:
@@ -365,6 +372,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     #Automatically downloads non existing cdarts and refreshes addon's db
     def auto_download( self ):
+        print "#  Autodownload"
+        print "# "
         pDialog.create( _(32046) )
         #Onscreen Dialog - Automatically Downloading CDArt
         count_artist_local = len(local_artist)
@@ -378,8 +387,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
-            print "#    Artist: %s" % artist["name"] 
-            local_album_list = self.get_local_album( artist["name"] )
+            print "#    Artist: %s     Local ID: %s     Distant ID: %s" % (artist["name"], artist["local_id"], artist["distant_id"])
+            local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 album_count = album_count + 1
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
@@ -427,53 +436,64 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #If there is something in artist_menu["distant_id"] build cdart_url
         #print "# distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
+            print "#    Local artist matched on XBMCSTUFF.COM"
+            print "#        Artist: %s     Local ID: %s     Distant ID: %s" % (artist_menu["name"] , artist_menu["local_id"] , artist_menu["distant_id"])
             artist_xml = self.get_html_source( album_url + "&id_artist=%s" % artist_menu["distant_id"] )
-            if not artist_xml == "":
-                raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
-                for i in raw:
-                    album = {}            
-                    album["local_name"] = album["artist"] = artist_menu["name"]
-                    match = re.search('album="(.*?)">', i )
-                    #search for album title match, if found, store in album["title"], if not found store empty space
-                    if match:
-                        album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
-                    
-                    else:
-                        album["title"] = ""
-                    #search for album thumb match, if found, store in album["thumb"], if not found store empty space
-                    match = re.search( "<thumb>(.*?)</thumb>", i )
-                    if match:
-                        album["thumb"] = (match.group(1))
+            #if not artist_xml == "":
+            raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
+            for i in raw:
+                album = {}
+                album["artistl_id"] = artist_menu["local_id"]
+                album["artistd_id"] = artist_menu["distant_id"]
+                album["local_name"] = album["artist"] = artist_menu["name"]
+                match = re.search('album="(.*?)">', i )
+                #search for album title match, if found, store in album["title"], if not found store empty space
+                if match:
+                    album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
+                    print "#               Distant Album: %s" % album["title"]
+                else:
+                    album["title"] = ""
+                #search for album thumb match, if found, store in album["thumb"], if not found store empty space
+                match = re.search( "<thumb>(.*?)</thumb>", i )
+                if match:
+                    album["thumb"] = (match.group(1))
                 
-                    else:
-                        album["thumb"] = ""
-                    match = re.search( "<picture>(.*?)</picture>", i )
-                    #search for album cdart match, if found, store in album["picture"], if not found store empty space
-                    if match:
-                        album["picture"] = (match.group(1))
+                else:
+                    album["thumb"] = ""
+                print "#                    cdART Thumb: %s" % album["thumb"]
+                match = re.search( "<picture>(.*?)</picture>", i )
+                #search for album cdart match, if found, store in album["picture"], if not found store empty space
+                if match:
+                    album["picture"] = (match.group(1))
                 
-                    else:
-                        album["picture"] = ""
-                    cdart_url.append(album)
+                else:
+                    album["picture"] = ""
+                print "#                    cdART picture: %s" % album["picture"]
+                cdart_url.append(album)
                 #print "cdart_url: %s " % cdart_url
         #If artist_menu["distant_id"] is empty, search for name match
         else :
-            cdart_url = self.search( artist_menu["name"] )
+            cdart_url = self.search( artist_menu["name"], artist_menu( ["local_id"] ))
             
         if not cdart_url:
             #no cdart found
             xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
             #Onscreen Dialog - Not Found on XBMCSTUFF.COM, Please contribute! Upload your CDArts, On www.xbmcstuff.com
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-            return
+            #return
         else:
-            local_album_list = self.get_local_album(cdart_url[0]["local_name"])
+            print "# "
+            print "#  Building album list based on:"
+            print "#        artist: %s     local_id: %s" % (cdart_url[0]["local_name"], cdart_url[0]["artistl_id"] )
+            local_album_list = self.get_local_album(cdart_url[0]["artistl_id"])
             cdart_img = ""
             label1 = ""
             label2 = ""
             album_list= {}
+            #print local_album_list
             for album in local_album_list:
                 cdart = self.find_cdart(album, cdart_url)
+                #print cdart
                 #check to see if there is a thumb
                 if len(cdart) == 1: 
                     label1 = "%s - %s" % (album["artist"] , album["title"])
@@ -560,7 +580,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             c.execute("insert into lalist(local_id, name) values (?, ?)", (artist["local_id"], artist["name"]))
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100) 
-            local_album_list = self.get_local_album( artist["name"] )
+            local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 pDialog.update( percent, _(32016), "" , "%s - %s" % ( artist["name"] , album["title"] ) )
                 album_count = album_count + 1               

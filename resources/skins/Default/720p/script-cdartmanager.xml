@@ -481,11 +481,11 @@
                 <posx>-5</posx>
                 <posy>5</posy>
                 <width>260</width>
-                <height>190</height>
+                <height>230</height>
                 <texture border="40">default-panel.png</texture>
             </control>
             
-            <control type="button" id="130">
+            <control type="button" id="129">
 				<description>Save Local CDArt List</description>
 				<posx>10</posx>
 				<posy>10</posy>
@@ -502,13 +502,33 @@
                 <onleft>9000</onleft>
 				<onright>9005</onright>
 				<onup>133</onup>
+				<ondown>130</ondown>
+			</control>
+            
+            <control type="button" id="130">
+				<description>Backup Local CDArt</description>
+				<posx>10</posx>
+				<posy>50</posy>
+				<height>40</height>
+				<width>230</width>
+				<textoffsetx>10</textoffsetx>
+				<textwidth>220</textwidth>
+				<aligny>center</aligny>
+				<font>font16</font>
+                <label>$ADDON[script.cdartmanager 32061]</label>
+				<texturefocus border="5">button-focus.png</texturefocus>
+				<texturenofocus>-</texturenofocus>
+				<pulseonselect>false</pulseonselect>
+                <onleft>9000</onleft>
+				<onright>9005</onright>
+				<onup>129</onup>
 				<ondown>131</ondown>
 			</control>
             
             <control type="button" id="131">
 				<description>Refresh Local Database</description>
 				<posx>10</posx>
-				<posy>50</posy>
+				<posy>90</posy>
 				<height>40</height>
 				<width>230</width>
 				<textoffsetx>10</textoffsetx>
@@ -528,7 +548,7 @@
             <control type="button" id="132">
 				<description>Clean Music Database</description>
 				<posx>10</posx>
-				<posy>90</posy>
+				<posy>130</posy>
 				<height>40</height>
 				<width>230</width>
 				<textoffsetx>10</textoffsetx>
@@ -548,7 +568,7 @@
             <control type="button" id="133">
 				<description>Update Music Database</description>
 				<posx>10</posx>
-				<posy>130</posy>
+				<posy>170</posy>
 				<height>40</height>
 				<width>230</width>
 				<textoffsetx>10</textoffsetx>
@@ -562,7 +582,7 @@
                 <onleft>9000</onleft>
 				<onright>9005</onright>
 				<onup>132</onup>
-				<ondown>130</ondown>
+				<ondown>129</ondown>
 			</control>
             
         </control>

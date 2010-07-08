@@ -59,7 +59,8 @@
   <string id="32055">/artist - album.png</string>
   <string id="32056">cdARTs Copied</string>
   <string id="32057">Finished Copying cdARTs</string>
-  <string id="32058">cdARTs Stored in:</string>
+  <string id="32058">cdARTs Stored in</string>
   <string id="32059"> cdARTs Copied</string>
-  <string id="32060">Saving cdARTs...</string>
+  <string id="32060">Copying cdARTs...</string>
+  <string id="32061">Back Up cdARTs</string>
 </strings>
