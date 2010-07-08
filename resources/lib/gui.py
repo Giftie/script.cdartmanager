@@ -269,13 +269,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def find_cdart( self , album , artist_album_list):
         xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus((album["title"].replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((artist_album_list[0]["artist"].replace("&", "&amp;")).replace("/",""))))
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
+        # the .replace("'". "") is to get rid of all the apostrophes
+        # the .replace("/", "") gets rid of the forward slash(ie AC/DC)
         match = re.findall( "<picture>(.*?)</picture>", xml )
         return match
     
     #finds the cdart for auto download
     def find_cdart2(self , album):
         xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(((album["title"].replace(",","")).replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((album["artist"].replace("&", "&amp;")).replace("/",""))))
-        # the .replace("&", "&amp;") is in place to correctly match the albums containing '&'
+        # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
+        # the .replace("'". "") is to get rid of all the apostrophes
+        # the .replace("/", "") gets rid of the forward slash(ie AC/DC)
         match = re.findall( "<picture>(.*?)</picture>", xml )
         return match
         

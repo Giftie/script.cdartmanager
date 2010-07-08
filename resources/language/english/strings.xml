@@ -18,9 +18,9 @@
   <string id="32014">Update Music Database</string>
   <string id="32015">Delete Local Database?</string>
   <string id="32016">Please Wait....</string>
-  <string id="32017">CDarts folder</string>
-  <string id="32018">Skin/.../artist-album.png</string>
-  <string id="32019">Album folder/cdart.png</string>
+  <string id="32017">Local cdART List saving folder</string>
+  <string id="32018">cdART  Backup folder</string>
+  <string id="32019">Backup saving format: </string>
   <string id="32020">Retrieving Music Database</string>
   <string id="32021">Creating Addon Database</string>
   <string id="32022">Choose Available CDart</string>
@@ -55,5 +55,6 @@
   <string id="32051">Addon Database is crucial to script!</string>
   <string id="32052">Please go to the Advanced Menu and</string>
   <string id="32053">Refresh Addon Database</string>
-  
+  <string id="32054">/artist/album.png</string>
+  <string id="32054">/artist - album.png</string>
 </strings>
