@@ -1,6 +1,6 @@
 #to do:
 # -  add skin folder storage.  right now only albumfolder storage is working
-# -  add comments showing what local strings are being displayed   _(32002) = Search Artist
+# -  *add comments showing what local strings are being displayed   _(32002) = Search Artist
 # -  add log printing
 # -  insure mouse use works properly - at the moment it seems to break everything!
 # -  add save local cdart list, showing which album have or don't have cdarts
@@ -9,6 +9,18 @@
 #        many need to read local database(l_cdart - lalist) to find local id #'s
 #        then write to l_cdart - alblist with the important information
 #
+#   
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
 import platform
 import urllib
 import sys
@@ -619,6 +631,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         destination = ""
         percent = 0
         count = 0
+        fn_format = int(__settings__.getSetting("folder"))
+        bkup_folder = __settings__.getSetting("backup_path")
+        cdart_list_folder = __settings__.getSetting("cdart_path")
         albums = self.get_local_db()
         #print albums
         pDialog.create( "Saving CDArts..." )
@@ -658,19 +673,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.local_artist_count = 0
         self.local_album_count = 0
         self.local_cdart_count = 0
-        #check settings to see if storage location has been set, open settings if not.
-        #try:
-        #    storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
-        #except:
-        #    __settings__.openSettings()
-        #    storage=( "skin", "albumfolder" )[ int( __settings__.getSetting("folder") ) ]
-        #if skin storage has been selected, check to see if cdart directory exists
-        #if not, create one.
-        #if storage == "skin":
-        #    cdart_path = os.path.join(xbmc.translatePath("special://skin\media"),"backdrops","artist_fanart","cd")
-        #    if not os.path.exists(cdart_path):
-        #        os.makedirs(cdart_path)
-            
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)

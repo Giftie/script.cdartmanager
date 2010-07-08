@@ -56,5 +56,10 @@
   <string id="32052">Please go to the Advanced Menu and</string>
   <string id="32053">Refresh Addon Database</string>
   <string id="32054">/artist/album.png</string>
-  <string id="32054">/artist - album.png</string>
+  <string id="32055">/artist - album.png</string>
+  <string id="32056">cdARTs Copied: %s</string>
+  <string id="32057">Finished Copying cdARTs</string>
+  <string id="32058">cdARTs Stored at: %s</string>
+  <string id="32059">%s cdARTs Copied</string>
+  <string id="32060">Saving cdARTs...</string>
 </strings>
