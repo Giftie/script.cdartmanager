@@ -33,8 +33,8 @@ import xbmcaddon
 import xbmc
 import socket
 import shutil
-#time socket out at 2 mins.
-socket.setdefaulttimeout(120)
+#time socket out at 1 mins.
+socket.setdefaulttimeout(60)
 
 KEY_BUTTON_BACK = 275
 KEY_KEYBOARD_ESC = 61467
@@ -214,6 +214,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def search( self , name, local_id):
         print "#    Search Artist based on name: %s" % name
         error = 0
+        select = None
         artist_album_list = []
         search_list = []
         search_dialog = []
@@ -274,7 +275,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         search_list.append(album)
             
             if search_dialog: 
-                select = None
                 select = xbmcgui.Dialog().select( _(32032), search_dialog)
                 #Onscreen Select Menu
                 print select
@@ -303,6 +303,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             match = re.findall( "<picture>(.*?)</picture>", xml )
         else:
             print "# Error, xml= %s" % xml
+            match = []
         return match
     
     #finds the cdart for auto download
@@ -316,6 +317,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             match = re.findall( "<picture>(.*?)</picture>", xml )
         else:
             print "# Error, xml= %s" % xml
+            match = []
         return match
         
     # downloads the cdart.  used from album list selections
@@ -387,7 +389,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
-            print "#    Artist: %s     Local ID: %s     Distant ID: %s" % (artist["name"], artist["local_id"], artist["distant_id"])
+            print "#    Artist: %s     Local ID: %s" % (artist["name"], artist["local_id"])
             local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 album_count = album_count + 1
@@ -473,7 +475,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #print "cdart_url: %s " % cdart_url
         #If artist_menu["distant_id"] is empty, search for name match
         else :
-            cdart_url = self.search( artist_menu["name"], artist_menu( ["local_id"] ))
+            cdart_url = self.search( artist_menu["name"], artist_menu["local_id"])
             
         if not cdart_url:
             #no cdart found
@@ -671,6 +673,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         fn_format = int(__settings__.getSetting("folder"))
         bkup_folder = __settings__.getSetting("backup_path")
         cdart_list_folder = __settings__.getSetting("cdart_path")
+        if bkup_folder =="":
+            __settings__.openSettings()
+            bkup_folder = __settings__.getSetting("backup_path")
+            cdart_list_folder = __settings__.getSetting("cdart_path")
+        if cdart_list_folder =="":
+            __settings__.openSettings()
+            cdart_list_folder = __settings__.getSetting("cdart_path")
         print "# fn_format: %s" % fn_format
         print "# bkup_folder: %s" % bkup_folder
         print "# cdart_list_folder: %s" % cdart_list_folder
@@ -681,7 +690,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print item
             if item["cdart"] == "TRUE":
                 source=os.path.join(item["path"].replace("\\\\" , "\\"), "cdart.png")
-                if fn_format == 0
+                if fn_format == 0:
                     destination=os.path.join(bkup_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
                     fn = os.path.join(destination, ( (item["title"].replace("/","")) + ".png"))
                 elif fn_format == 1:
@@ -699,7 +708,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 shutil.copy(source, fn)
                 count = count + 1
                 percent = int(count/float(self.local_cdart_count)*100)
-                pDialog.update( percent , "%s: %s" % ( _(32056) , count ) )
+                pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
             else:
                 pass
         pDialog.close()
@@ -744,7 +753,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.getControl( 110 ).setLabel( _(32010) % self.local_album_count)
             self.getControl( 112 ).setLabel( _(32008) % self.local_cdart_count)
         if controlId == 103 : #Advanced
-            self.setFocusId( 130 )
+            self.setFocusId( 129 )
         if controlId in [105, 106]: #Get Artists List
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
@@ -812,6 +821,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     message, d_success = self.download_cdart( cdart_url, cdart_path )
                     xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
                     pDialog.close()
+            self.populate_album_list( artist_menu )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu

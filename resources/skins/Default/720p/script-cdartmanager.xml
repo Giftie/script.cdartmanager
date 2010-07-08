@@ -210,7 +210,7 @@
 				<textureradioon>HomeHasSub.png</textureradioon>
 				<textureradiooff>HomeHasSub.png</textureradiooff>
                 <onleft>9000</onleft>
-				<onright>130</onright>
+				<onright>129</onright>
 				<onup>102</onup>
 				<ondown>104</ondown>
             </control>
@@ -259,11 +259,14 @@
         <control type="group" id="9001">
             <posx>25</posx>
 			<posy>240</posy>
+            <!--
             <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9001).HasFocus + !Control.HasFocus(100)">conditional</animation>
+            -->
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
-			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">WindowClose</animation>
-			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
-            <visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106)</visible>
+			<animation effect="fade" start="100" end="0" time="0" condition="(Control.HasFocus(100) | ControlGroup(9001).HasFocus) + (!Control.HasFocus(120) | !ControlGroup(9003).HasFocus)">WindowClose</animation>
+			<animation effect="slide" end="220,0" time="2000" tween="quadratic" easing="out" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
+            <animation effect="slide" end="220,0" time="2000" tween="quadratic" easing="in" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
+            <visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106) | Control.HasFocus(120) | Control.HasFocus(122)</visible>
             <!--
             <control type="button">
 					<description>Fake button for mouse control</description>
@@ -461,7 +464,7 @@
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus">conditional</animation>
-            <visible>Control.HasFocus(103) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133)</visible>
+            <visible>Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133)</visible>
             
             <!--
             <control type="button">
