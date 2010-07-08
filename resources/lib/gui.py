@@ -681,7 +681,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print item
             if item["cdart"] == "TRUE":
                 source=os.path.join(item["path"].replace("\\\\" , "\\"), "cdart.png")
-                destination=os.path.join(addon_work_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
+                if fn_format == 0
+                    destination=os.path.join(bkup_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
+                    fn = os.path.join(destination, ( (item["title"].replace("/","")) + ".png"))
+                elif fn_format == 1:
+                    destination=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
+                    fn = os.path.join(destination, (((item["artist"].replace("/", "")) + " - " + (item["title"].replace("/","")) + ".png").lower()))
                 #print "source: %s" % source
                 #print "destination: %s" % destination
                 if not os.path.exists(destination):
@@ -689,7 +694,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     os.makedirs(destination)
                 else:
                     pass
-                fn = os.path.join(destination, (((item["artist"].replace("/", "")) + " - " + (item["title"].replace("/","")) + ".png").lower()))
+                    
                 #print "filename: %s" % fn
                 shutil.copy(source, fn)
                 count = count + 1
@@ -811,7 +816,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu
             xbmc.executebuiltin( "UpdateLibrary(music)")
-        if controlId == 130 : #Save Local CDArt List selected from Advanced Menu
+        if controlId == 130 : #Back up cdART selected from Advanced Menu
             self.cdart_copy()
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             self.refresh_db()
