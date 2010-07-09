@@ -443,6 +443,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_count = 0
         temp_album = {}
         cdart_lvd = []
+        #conn = sqlite3.connect(addon_db)
+        #c = conn.cursor()
+        #c.execute('''create table lvdlist(lcdart, dcdart, path, title, artist)''')
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
@@ -738,13 +741,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.create( _(32060) )
         for album in unique:
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
-                source=os.path.join(item["album"].replace("\\\\" , "\\"), "cdart.png")
+                source=os.path.join(album["title"].replace("\\\\" , "\\"), "cdart.png")
                 if fn_format == 0:
                     destination=os.path.join(unique_folder, "unique", album["artist"].replace("/","")) #to fix AC/DC
-                    fn = os.path.join(destination, ( (unique["title"].replace("/","")) + ".png"))
+                    fn = os.path.join(destination, ( (album["title"].replace("/","")) + ".png"))
                 elif fn_format == 1:
                     destination=os.path.join(unique_folder, "unique" ) #to fix AC/DC
-                    fn = os.path.join(destination, (((unquie["artist"].replace("/", "")) + " - " + (unique["title"].replace("/","")) + ".png").lower()))
+                    fn = os.path.join(destination, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
                 #print "source: %s" % source
                 #print "destination: %s" % destination
                 if not os.path.exists(destination):
@@ -930,8 +933,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.cdart_copy()
         if controlId == 134 : #Copy Unique Local cdART selected from Advanced Menu
             unique, difference = self.local_vs_distant()
-            if not difference == 0:
-                self.unique_cdart_copy()
+            if difference == 1:
+                self.unique_cdart_copy( unique )
             else:
                 xbmcgui.Dialog().ok( "There are no unique local cdARTs")
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
