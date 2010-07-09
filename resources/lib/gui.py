@@ -754,7 +754,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 pass
         pDialog.close()
-        xbmcgui.Dialog().ok( "%s - Unique Local cdARTs copied" % count)
+        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), destination), "%s %s" % ( count , _(32059)))
 
         
     # copy cdarts from music folder to temporary location
