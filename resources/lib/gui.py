@@ -1,5 +1,5 @@
 #to do:
-# -  add skin folder storage.  right now only albumfolder storage is working
+# -  
 # -  *add comments showing what local strings are being displayed   _(32002) = Search Artist
 # -  add log printing
 # -  insure mouse use works properly - at the moment it seems to break everything!
@@ -122,21 +122,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print_exc()
             print "# !!Unable to open page %s" % url
             return ""
-        
-#    #not sure this is even being used
-#    def save_xml( self , data ):
-#        file( xmlfile , "w" ).write( repr( data ) )
-#        
-#    #not sure this is even being used    
-#    def load_data( self , file_path ):
-#        try:
-#            temp_data = eval( file( file_path, "r" ).read() )
-#        except:
-#            print_exc()
-#            print "# !!Unable to open file: %s" % xmlfile
-#            temp_data = ""
-#        return temp_data
-    
+
     #retrieve local artist list from xbmc's music db
     def get_local_artist( self ):
         conn_b = sqlite3.connect(db_path)
@@ -286,7 +272,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
             else:
                 if error == 1:
-                    xbmcgui.Dialog().ok("Error connecting to XBMCSTUFF.COM, Socket Timed out")
+                    xbmcgui.Dialog().ok( _(32066) )
+                    #Onscreen Dialog - Error connecting to XBMCSTUFF.COM, Socket Timed out
                 else:
                     xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
                     #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No CDArt found for 
@@ -433,8 +420,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def local_vs_distant( self ):
         print "#  Local vs. XBMCSTUFF.COM cdART list maker"
         print "# "
-        pDialog.create( "Comparing Local cdARTs to those on XBMCSTUFF.com" )
-        #Onscreen Dialog - Comparing Local cdARTs to those on XBMCSTUFF.com
+        pDialog.create( _(32065) )
+        #Onscreen Dialog - Comparing Local and Online cdARTs...
         count_artist_local = len(local_artist)
         local_count = 0
         distant_count = 0
@@ -730,6 +717,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 110 ).setLabel( _(32010) % self.local_album_count)
         self.getControl( 112 ).setLabel( _(32008) % self.local_cdart_count)
 
+    # Copy's all the local unique cdARTs to a folder specified bye the user
     def unique_cdart_copy( self, unique ):
         count = 0
         destination = ""
@@ -741,25 +729,27 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.create( _(32060) )
         for album in unique:
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
-                source=os.path.join(album["title"].replace("\\\\" , "\\"), "cdart.png")
-                if fn_format == 0:
-                    destination=os.path.join(unique_folder, "unique", album["artist"].replace("/","")) #to fix AC/DC
-                    fn = os.path.join(destination, ( (album["title"].replace("/","")) + ".png"))
-                elif fn_format == 1:
-                    destination=os.path.join(unique_folder, "unique" ) #to fix AC/DC
-                    fn = os.path.join(destination, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
-                #print "source: %s" % source
-                #print "destination: %s" % destination
-                if not os.path.exists(destination):
-                    #pass
-                    os.makedirs(destination)
+                source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
+                if os.path.isfile(source):
+                    if fn_format == 0:
+                        destination=os.path.join(unique_folder, "unique", album["artist"].replace("/","")) #to fix AC/DC
+                        fn = os.path.join(destination, ( (album["title"].replace("/","")) + ".png"))
+                    elif fn_format == 1:
+                        destination=os.path.join(unique_folder, "unique" ) #to fix AC/DC
+                        fn = os.path.join(destination, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
+                    #print "source: %s" % source
+                    #print "destination: %s" % destination
+                    if not os.path.exists(destination):
+                        #pass
+                        os.makedirs(destination)
+                    else:
+                        pass
+                    #print "filename: %s" % fn
+                    shutil.copy(source, fn)
+                    count=count + 1
+                    pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                 else:
-                    pass
-                    
-                #print "filename: %s" % fn
-                shutil.copy(source, fn)
-                count=count + 1
-                pDialog.update( percent , "Unique cdARTS folder: %s" % unique_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+                    print "#   Error: cdART file does not exist..  Please check..."
             else:
                 pass
         pDialog.close()
@@ -792,29 +782,30 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print item
             if item["cdart"] == "TRUE":
                 source=os.path.join(item["path"].replace("\\\\" , "\\"), "cdart.png")
-                if fn_format == 0:
-                    destination=os.path.join(bkup_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
-                    fn = os.path.join(destination, ( (item["title"].replace("/","")) + ".png"))
-                elif fn_format == 1:
-                    destination=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
-                    fn = os.path.join(destination, (((item["artist"].replace("/", "")) + " - " + (item["title"].replace("/","")) + ".png").lower()))
-                #print "source: %s" % source
-                #print "destination: %s" % destination
-                if not os.path.exists(destination):
-                    #pass
-                    os.makedirs(destination)
+                if os.path.isfile(source):
+                    if fn_format == 0:
+                        destination=os.path.join(bkup_folder, "cdart", item["artist"].replace("/","")) #to fix AC/DC
+                        fn = os.path.join(destination, ( (item["title"].replace("/","")) + ".png"))
+                    elif fn_format == 1:
+                        destination=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
+                        fn = os.path.join(destination, (((item["artist"].replace("/", "")) + " - " + (item["title"].replace("/","")) + ".png").lower()))
+                    #print "source: %s" % source
+                    #print "destination: %s" % destination
+                    if not os.path.exists(destination):
+                        #pass
+                        os.makedirs(destination)
+                    else:
+                        pass
+                    
+                    #print "filename: %s" % fn
+                    shutil.copy(source, fn)
+                    count = count + 1
+                    percent = int(count/float(self.local_cdart_count)*100)
+                    pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                 else:
                     pass
-                    
-                #print "filename: %s" % fn
-                shutil.copy(source, fn)
-                count = count + 1
-                percent = int(count/float(self.local_cdart_count)*100)
-                pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
-            else:
-                pass
-        pDialog.close()
-        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), destination), "%s %s" % ( count , _(32059)))
+            pDialog.close()
+            xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), destination), "%s %s" % ( count , _(32059)))
 
     # setup self. strings and initial local counts
     def setup_all( self ):

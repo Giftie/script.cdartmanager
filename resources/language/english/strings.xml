@@ -65,4 +65,7 @@
   <string id="32061">Back Up cdARTs</string>
   <string id="32062">Unique Local cdART Folder</string>
   <string id="32063">Copy Unique Local cdARTs</string>
+  <string id="32064">Unique cdARTS folder: %s</string>
+  <string id="32065">Comparing Local and Online cdARTs...</string>
+  <string id="32066">Error connecting to XBMCSTUFF.COM, Socket Timed out</string>
 </strings>
