@@ -101,6 +101,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         colored_text = text.replace( colorword , "[COLOR=%s]%s[/COLOR]" % ( color , colorword ) )
         return colored_text
 
+
     def get_html_source( self , url ):
         """ fetch the html source """
         error = 0

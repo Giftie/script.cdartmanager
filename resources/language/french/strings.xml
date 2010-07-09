@@ -49,9 +49,9 @@
   <string id="32045">Local Albums:</string>  <!-- string insert for local albums --><!--Translation needed -->
   <string id="32046">Automatic Downloading cdARTs</string><!--Translation needed -->
   <string id="32047">Downloading.....</string><!--Translation needed -->
-  <string id="32048">Retrieving Recognized Artist List....</string><!--Translation needed -->
+  <string id="32048">Recherchant la liste identifiée d'artiste….</string><!--Translation needed -->
   <string id="32049">Artists Matched: %s</string><!--Translation needed -->
-  <string id="32050">Database setup aborted...</string><!--Translation needed -->
+  <string id="32050">L'installation de données a avorté... </string><!--Translation needed -->
   <string id="32051">Addon Database is crucial to script!</string><!--Translation needed -->
   <string id="32052">Please go to the Advanced Menu and</string><!--Translation needed -->
   <string id="32053">Refresh Addon Database</string><!--Translation needed -->
@@ -66,6 +66,6 @@
   <string id="32062">Unique Local cdART Folder</string><!--Translation needed -->
   <string id="32063">Copy Unique Local cdARTs</string><!--Translation needed -->
   <string id="32064">Unique cdARTS folder: %s</string><!--Translation needed -->
-  <string id="32065">Comparing Local and Online cdARTs...</string><!--Translation needed -->
-  <string id="32066">Error connecting to XBMCSTUFF.COM, Socket Timed out</string><!--Translation needed -->
+  <string id="32065">Comparaison des locaux et en ligne cdARTs... </string><!--Translation needed -->
+  <string id="32066">Erreur de connexion au XBMCSTUFF.COM, Socket Timed out</string><!--Translation needed -->
 </strings>
