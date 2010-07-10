@@ -771,35 +771,43 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "### Restoring cdARTs from backup folder"
         pDialog.create( "Restoring cdARTs from backup..." )
         destination = ""
-        album = {}
-        albums = []
+        rbalbum = {}
+        rbalbums = []
         count = 0
+        total_albums = 0 
+        total_count
         fn_format = int(__settings__.getSetting("folder"))
         bkup_folder = __settings__.getSetting("backup_path")
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
+        else:
+            pass
         print "#    fn_format: %s" % fn_format
         print "#    bkup_folder: %s" % bkup_folder
-        albums = self.get_local_db()
-        print "#    albums: %s" % albums
-        for album in albums:
-            print "#    album: %s" % album
+        rbalbums = self.get_local_db()
+        total_albums=len(rbalbums)
+        print "#    albums: %s" % rbalbums
+        for rbalbum in rbalbums:
+            print "#    album: %s" % rbalbum
+            percent = int((total_count/float(total_albums))*100)
             if fn_format == 0:
-                source=os.path.join(bkup_folder, "cdart", album["artist"].replace("/","")) #to fix AC/DC and other artists with a / in the name
-                fn = os.path.join(source, ( (album["title"].replace("/","")) + ".png"))
+                source=os.path.join(bkup_folder, "cdart", rbalbum["artist"].replace("/","")) #to fix AC/DC and other artists with a / in the name
+                fn = os.path.join(source, ( (rbalbum["title"].replace("/","")) + ".png"))
             else:
                 source=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
-                fn = os.path.join(source, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
+                fn = os.path.join(source, (((rbalbum["artist"].replace("/", "")) + " - " + (rbalbum["title"].replace("/","")) + ".png").lower()))
             print "#    source: %s" % source
             print "#    fn: %s" % fn
             if os.path.isfile(fn):
-                destination = os.path.join(album["path"], "cdart.png")
+                destination = os.path.join(rbalbum["path"], "cdart.png")
                 print "#    destination: %s" % destination
                 shutil.copy(source, destination)
                 count = count + 1
             else:
                 pass
+            pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+            total_count = total_count + 1
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057),  "%s %s" % ( count , " cdARTs Restored from backup folder")) 
         return        
@@ -959,11 +967,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local = ((self.getControl( 122 ).getSelectedItem().getLabel()).replace("choose for ", "")).replace("     ***CDArt Exists***", "")
             cdart_path["artist"]=local.split(" - ")[0]
             cdart_path["title"]=local.split(" - ")[1]
-            print self.getControl( 122 ).getSelectedItem().getLabel2()
-            print "#   artist: %s" % cdart_path["artist"]
-            print "#   album title: %s" % cdart_path["title"]
-            print "#   cdart_path: %s" % cdart_path["path"]
-            print "#   url: %s" % url
+            #print self.getControl( 122 ).getSelectedItem().getLabel2()
+            #print "#   artist: %s" % cdart_path["artist"]
+            #print "#   album title: %s" % cdart_path["title"]
+            #print "#   cdart_path: %s" % cdart_path["path"]
+            #print "#   url: %s" % url
             if not url =="" : # If it is a recognized Album...
                 message, d_success = self.download_cdart( url, cdart_path )
                 xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
