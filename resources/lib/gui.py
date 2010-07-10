@@ -740,16 +740,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print album
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
-                print "source: %s" % source
+                print "#    source: %s" % source
                 if os.path.isfile(source):
                     if fn_format == 0:
-                        destination=os.path.join(unique_folder, "unique", album["artist"].replace("/","")) #to fix AC/DC
-                        fn = os.path.join(destination, ( (album["title"].replace("/","")) + ".png"))
+                        destination=os.path.join(unique_folder, (album["artist"].replace("/","")).replace("'","")) #to fix AC/DC
+                        fn = os.path.join(destination, ( ((album["title"].replace("/","")).replace("'","")) + ".png"))
                     else:
-                        destination=os.path.join(unique_folder, "unique" ) #to fix AC/DC
-                        fn = os.path.join(destination, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
-                    #print "source: %s" % source
-                    #print "destination: %s" % destination
+                        destination=unique_folder
+                        fn = os.path.join(destination, ((((album["artist"].replace("/", "")).replace("'","")) + " - " + ((album["title"].replace("/","")).replace("'","")) + ".png").lower()))
+                    print "#    destination: %s" % destination
                     if not os.path.exists(destination):
                         #pass
                         os.makedirs(destination)
@@ -764,18 +763,21 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 pass
         pDialog.close()
-        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), destination), "%s %s" % ( count , _(32059)))
+        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
         return
 
     def restore_from_backup( self ):
         print "### Restoring cdARTs from backup folder"
         pDialog.create( "Restoring cdARTs from backup..." )
         destination = ""
-        rbalbum = {}
-        rbalbums = []
+        source = ""
+        fn = ""
+        part = {}
+        local_db = []
+        percent = 0
         count = 0
         total_albums = 0 
-        total_count
+        total_count = 0
         fn_format = int(__settings__.getSetting("folder"))
         bkup_folder = __settings__.getSetting("backup_path")
         if bkup_folder =="":
@@ -785,24 +787,25 @@ class GUI( xbmcgui.WindowXMLDialog ):
             pass
         print "#    fn_format: %s" % fn_format
         print "#    bkup_folder: %s" % bkup_folder
-        rbalbums = self.get_local_db()
-        total_albums=len(rbalbums)
-        print "#    albums: %s" % rbalbums
-        for rbalbum in rbalbums:
-            print "#    album: %s" % rbalbum
-            percent = int((total_count/float(total_albums))*100)
+        local_db = self.get_local_db()
+        total_albums=len(local_db)
+        print "#    total albums: %s" % total_albums
+        #print "#    albums: %s" % albums
+        for part in local_db:
+            #print "#    album: %s" % part
+            percent = int(total_count/float(total_albums))*100
             if fn_format == 0:
-                source=os.path.join(bkup_folder, "cdart", rbalbum["artist"].replace("/","")) #to fix AC/DC and other artists with a / in the name
-                fn = os.path.join(source, ( (rbalbum["title"].replace("/","")) + ".png"))
+                source=os.path.join( bkup_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
+                fn = os.path.join(source, ( ( part["title"].replace("/","").replace("'","") ) + ".png") )
             else:
-                source=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
-                fn = os.path.join(source, (((rbalbum["artist"].replace("/", "")) + " - " + (rbalbum["title"].replace("/","")) + ".png").lower()))
-            print "#    source: %s" % source
+                source=os.path.join( bkup_folder ) #to fix AC/DC
+                fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
+            print "#    source folder: %s" % source
             print "#    fn: %s" % fn
             if os.path.isfile(fn):
-                destination = os.path.join(rbalbum["path"], "cdart.png")
+                destination = os.path.join(part["path"], "cdart.png")
                 print "#    destination: %s" % destination
-                shutil.copy(source, destination)
+                shutil.copy(fn, destination)
                 count = count + 1
             else:
                 pass
@@ -843,15 +846,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print album
             if album["cdart"] == "TRUE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
-                #print "source: %s" % source
+                print "#    source: %s" % source
                 if os.path.isfile(source):
                     if fn_format == 0:
-                        destination=os.path.join(bkup_folder, "cdart", album["artist"].replace("/","")) #to fix AC/DC
-                        fn = os.path.join(destination, ( (album["title"].replace("/","")) + ".png"))
+                        destination=os.path.join( bkup_folder, ( album["artist"].replace("/","").replace("'","") ) ) #to fix AC/DC
+                        fn = os.path.join( destination, ( ( album["title"].replace("/","").replace("'","") ) + ".png") )
                     elif fn_format == 1:
-                        destination=os.path.join(bkup_folder, "cdart" ) #to fix AC/DC
-                        fn = os.path.join(destination, (((album["artist"].replace("/", "")) + " - " + (album["title"].replace("/","")) + ".png").lower()))
-                    print "destination: %s" % destination
+                        destination=os.path.join( bkup_folder ) #to fix AC/DC
+                        fn = os.path.join( destination, (  ( album["artist"].replace("/", "").replace("'","") ) + " - " + ( album["title"].replace("/","").replace("'","") ) + ".png").lower())
+                    print "#    destination: %s" % destination
                     if not os.path.exists(destination):
                         #pass
                         os.makedirs(destination)
