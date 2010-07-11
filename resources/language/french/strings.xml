@@ -69,7 +69,7 @@
   <string id="32065">Comparaison des locaux et en ligne cdARTs... </string>
   <string id="32066">Erreur de connexion au XBMCSTUFF.COM, Socket Timed out</string>
   <string id="32067">Backup cdART Files</string><!--Translation needed -->
-  <string id="32068">Restore From Backup Folder</string><!--Translation needed -->
+  <string id="32068">Restore From Backup</string><!--Translation needed -->
   <string id="32069">Restoring cdARTs from backup...</string><!--Translation needed -->
   <string id="32070">cdARTs Restored from backup folder</string><!--Translation needed -->
 </strings>

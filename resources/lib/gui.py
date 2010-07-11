@@ -3,7 +3,7 @@
 # -  *add comments showing what local strings are being displayed   _(32002) = Search Artist
 # -  add log printing
 # -  insure mouse use works properly - at the moment it seems to break everything!
-# -  add save local cdart list, showing which album have or don't have cdarts
+# -  add save local cdART list, showing which album have or don't have cdARTs
 # -  add user input(ie keyboard) to get more advanced searches
 # -  add database update for any downloads
 #        many need to read local database(l_cdart - lalist) to find local id #'s
@@ -270,7 +270,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     #Onscreen Dialog - Error connecting to XBMCSTUFF.COM, Socket Timed out
                 else:
                     xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
-                    #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No CDArt found for 
+                    #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No cdART found for 
         return
     
     # finds the cdart for the album list    
@@ -340,13 +340,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 #print "path does not exist"
                 message = [ _(32026),  _(32025) , "File: %s" % album["path"] , "Url: %s" % url_cdart]
-                #message = Download Problem, Check file paths - CDArt Not Downloaded]           
+                #message = Download Problem, Check file paths - cdART Not Downloaded]           
             if ( pDialog.iscanceled() ):
                 pDialog.close()
             
         except:
             message = [ _(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
-            #message = [Download Problem, Check file paths - CDArt Not Downloaded]           
+            #message = [Download Problem, Check file paths - cdART Not Downloaded]           
             print_exc()
         #conn.commit()
         #c.close()
@@ -357,7 +357,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Autodownload"
         print "# "
         pDialog.create( _(32046) )
-        #Onscreen Dialog - Automatic Downloading of CDArt
+        #Onscreen Dialog - Automatic Downloading of cdART
         count_artist_local = len(local_artist)
         artist_count = 0
         download_count = 0
@@ -392,7 +392,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             d_error = 1
                     elif album["cdart"] == "TRUE" :
                         cdart_existing = cdart_existing + 1
-                        print "#            CDArt file already exists, skipped..."
+                        print "#            cdART file already exists, skipped..."
                 else :
                     print "#            ALBUM MATCH NOT FOUND"
 
@@ -528,7 +528,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not cdart_url:
             #no cdart found
             xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
-            #Onscreen Dialog - Not Found on XBMCSTUFF.COM, Please contribute! Upload your CDArts, On www.xbmcstuff.com
+            #Onscreen Dialog - Not Found on XBMCSTUFF.COM, Please contribute! Upload your cdARTs, On www.xbmcstuff.com
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             #return
         else:
@@ -554,7 +554,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     label2 = "%s&&%s" % (album["path"], cdart_img)
                     if album["cdart"] == "TRUE":
                         cdart_img = os.path.join(album["path"], "cdart.png")
-                        label1 = "%s - %s     ***Local & xbmcstuff.com CDArt Exists***" % (album["artist"] , album["title"])
+                        label1 = "%s - %s     ***Local & xbmcstuff.com cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , "yellow" , label1 ) )
@@ -570,7 +570,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     if album["cdart"] == "TRUE":
                         cdart_img = os.path.join(album["path"], "cdart.png")
                         label2 = "%s&&%s" % (album["path"], cdart_img)
-                        label1 = "%s - %s     ***Local only CDArt Exists***" % (album["artist"] , album["title"])
+                        label1 = "%s - %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , "orange" , label1 ) )
@@ -673,7 +673,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #retrieves counts for local album, artist and cdarts
     def new_local_count( self ):
-        print "#  Counting Local Artists, Albums and CDArts"
+        print "#  Counting Local Artists, Albums and cdARTs"
         pDialog.create( _(32020), _(32016) )
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         global local_artist
@@ -967,7 +967,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             select=0
             url = (self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
             cdart_path["path"] = (self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[0]
-            local = ((self.getControl( 122 ).getSelectedItem().getLabel()).replace("choose for ", "")).replace("     ***CDArt Exists***", "")
+            local = (self.getControl( 122 ).getSelectedItem().getLabel()).replace("choose for ", "")
             cdart_path["artist"]=local.split(" - ")[0]
             cdart_path["title"]=local.split(" - ")[1]
             #print self.getControl( 122 ).getSelectedItem().getLabel2()
