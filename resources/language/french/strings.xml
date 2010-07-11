@@ -51,7 +51,7 @@
   <string id="32047">Downloading.....</string><!--Translation needed -->
   <string id="32048">Recherchant la liste identifiée d'artiste….</string><!--Translation needed -->
   <string id="32049">Artists Matched: %s</string><!--Translation needed -->
-  <string id="32050">L'installation de données a avorté... </string><!--Translation needed -->
+  <string id="32050">L'installation de données a avorté... </string>
   <string id="32051">Addon Database is crucial to script!</string><!--Translation needed -->
   <string id="32052">Please go to the Advanced Menu and</string><!--Translation needed -->
   <string id="32053">Refresh Addon Database</string><!--Translation needed -->
@@ -66,6 +66,10 @@
   <string id="32062">Unique Local cdART Folder</string><!--Translation needed -->
   <string id="32063">Copy Unique Local cdARTs</string><!--Translation needed -->
   <string id="32064">Unique cdARTS folder: %s</string><!--Translation needed -->
-  <string id="32065">Comparaison des locaux et en ligne cdARTs... </string><!--Translation needed -->
-  <string id="32066">Erreur de connexion au XBMCSTUFF.COM, Socket Timed out</string><!--Translation needed -->
+  <string id="32065">Comparaison des locaux et en ligne cdARTs... </string>
+  <string id="32066">Erreur de connexion au XBMCSTUFF.COM, Socket Timed out</string>
+  <string id="32067">Backup cdART Files</string><!--Translation needed -->
+  <string id="32068">Restore From Backup Folder</string><!--Translation needed -->
+  <string id="32069">Restoring cdARTs from backup...</string><!--Translation needed -->
+  <string id="32070">cdARTs Restored from backup folder</string><!--Translation needed -->
 </strings>

@@ -128,7 +128,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def get_local_artist( self ):
         conn_b = sqlite3.connect(db_path)
         d = conn_b.cursor()
-        d.execute('SELECT strArtist , idArtist FROM artist ')
+        d.execute('SELECT DISTINCT strArtist , idArtist FROM artist ')
         count = 1
         artist_list = []
         for item in d:
@@ -312,7 +312,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # downloads the cdart.  used from album list selections
     def download_cdart( self, url_cdart , album ):
         #print album["path"].replace('"','')
-        destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png")    #.replace('/"/cdart.png','/cdart.png"')
+        destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png") 
         download_success = 0
 	#print url_cdart
         print destination
@@ -322,7 +322,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #conn = sqlite3.connect(addon_db)
         #c = conn.cursor()
         try:
-            #print "try"
             #this give the ability to use the progress bar by retrieving the downloading information
             #and calculating the percentage
             def _report_hook( count, blocksize, totalsize ):
@@ -353,7 +352,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 pDialog.close()
             
         except:
-            #print "another error"
             message = [ _(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
             #message = [Download Problem, Check file paths - CDArt Not Downloaded]           
             print_exc()
@@ -755,9 +753,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         pass
                     #print "filename: %s" % fn
-                    shutil.copy(source, fn)
-                    count=count + 1
-                    pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+                    try:
+                        shutil.copy(source, fn)
+                        count=count + 1
+                        pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+                    except:
+                        pass
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
@@ -768,7 +769,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def restore_from_backup( self ):
         print "### Restoring cdARTs from backup folder"
-        pDialog.create( "Restoring cdARTs from backup..." )
+        pDialog.create( _(32069) )
+        #Onscreen Dialog - Restoring cdARTs from backup...
         destination = ""
         source = ""
         fn = ""
@@ -804,15 +806,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "#    fn: %s" % fn
             if os.path.isfile(fn):
                 destination = os.path.join(part["path"], "cdart.png")
-                print "#    destination: %s" % destination
-                shutil.copy(fn, destination)
-                count = count + 1
+                try:
+                    print "#    destination: %s" % destination
+                    shutil.copy(fn, destination)
+                    count = count + 1
+                except:
+                    pass
             else:
                 pass
             pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
             total_count = total_count + 1
         pDialog.close()
-        xbmcgui.Dialog().ok( _(32057),  "%s %s" % ( count , " cdARTs Restored from backup folder")) 
+        xbmcgui.Dialog().ok( _(32057),  "%s %s" % ( count , _(32070) ) ) 
         return        
         
     # copy cdarts from music folder to temporary location
@@ -862,10 +867,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         pass
                     
                     #print "filename: %s" % fn
-                    shutil.copy(source, fn)
-                    count = count + 1
-                    pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
-            
+                    try:
+                        shutil.copy(source, fn)
+                        count = count + 1
+                        pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+                    except:
+                        pass
                 else:
                     pass
             else:

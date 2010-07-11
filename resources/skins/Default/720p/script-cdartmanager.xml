@@ -19,7 +19,20 @@
         <texture border="40">default-panel.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
-     
+        
+        <control type="button">
+			<description>Fake button for mouse control</description>
+			<posx>-50</posx>
+			<posy>-50</posy>
+			<width>1190</width>
+			<height>700</height>
+			<label>-</label>
+			<font>-</font>
+			<texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+			<visible>true</visible>
+		</control>
+        
         <control type="image" id="200">  <!-- script Icon -->
             <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=Control.HasFocus(122)>conditional</animation> -->
             <description>page header tab icon</description>
@@ -43,7 +56,7 @@
 
         <control type="group" id="9006"> <!-- cdART Backup Menu -->
             <posx>315</posx>
-			<posy>355</posy>
+			<posy>320</posy>
             <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9006).HasFocus + !Control.HasFocus(130)">conditional</animation>
             <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">conditional</animation>
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">WindowClose</animation>
@@ -51,17 +64,17 @@
             <visible>Control.HasFocus(135) | Control.HasFocus(130) | Control.HasFocus(136)</visible>
             
             <control type="button">
-					<description>Fake button for mouse control</description>
-					<posx>-200</posx>
-					<posy>-10</posy>
-					<width>500</width>
-					<height>200</height>
-					<label>-</label>
-					<font>-</font>
-					<texturenofocus>-</texturenofocus>
-					<texturefocus>-</texturefocus>
-					<visible>true</visible>
-			</control>
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
             
             <control type="image"> <!-- Box image -->
                 <posx>-5</posx>
@@ -123,28 +136,28 @@
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">conditional</animation>
             <visible>Control.HasFocus(135) | Control.HasFocus(136) | Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133) | Control.HasFocus(134) </visible>
             
-            <control type="button"> <!-- Fake Button for mouse Control -->
-					<description>Fake button for mouse control</description>
-					<posx>-300</posx>
-					<posy>-100</posy>
-					<width>600</width>
-					<height>350</height>
-					<label>-</label>
-					<font>-</font>
-					<texturenofocus>-</texturenofocus>
-					<texturefocus>-</texturefocus>
-					<visible>true</visible>
-			</control>
+            <control type="button">
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
             
             <control type="image"> <!-- menu box -->
                 <posx>-5</posx>
                 <posy>5</posy>
                 <width>300</width>
-                <height>270</height>
+                <height>230</height>
                 <texture border="40">default-panel.png</texture>
             </control>
-            
-            <control type="button" id="129"> <!-- Save Local cdART List -->
+            <!--
+            <control type="button" id="129"> <!-- Save Local cdART List
 				<description>Save Local CDArt List</description>
 				<posx>10</posx>
 				<posy>10</posy>
@@ -163,11 +176,11 @@
 				<onup>134</onup>
 				<ondown>130</ondown>
 			</control>
-            
+            -->
             <control type="radiobutton" id="130"> <!-- cdART Backup -->
 				<description>cdART Backup</description>
 				<posx>10</posx>
-				<posy>50</posy>
+				<posy>10</posy>
 				<height>40</height>
 				<width>280</width>
 				<textoffsetx>10</textoffsetx>
@@ -186,14 +199,14 @@
 				<textureradiooff>HomeHasSub.png</textureradiooff>
                 <onleft>9000</onleft>
 				<onright>135</onright>
-				<onup>129</onup>
+				<onup>134</onup>
 				<ondown>131</ondown>
 			</control>
                         
             <control type="button" id="131"> <!-- Refresh Local Database -->
 				<description>Refresh Local Database</description>
 				<posx>10</posx>
-				<posy>90</posy>
+				<posy>50</posy>
 				<height>40</height>
 				<width>280</width>
 				<textoffsetx>10</textoffsetx>
@@ -213,7 +226,7 @@
             <control type="button" id="132"> <!-- Clean Music Database -->
 				<description>Clean Music Database</description>
 				<posx>10</posx>
-				<posy>130</posy>
+				<posy>90</posy>
 				<height>40</height>
 				<width>280</width>
 				<textoffsetx>10</textoffsetx>
@@ -233,7 +246,7 @@
             <control type="button" id="133"> <!-- Update Music Database -->
 				<description>Update Music Database</description>
 				<posx>10</posx>
-				<posy>170</posy>
+				<posy>130</posy>
 				<height>40</height>
 				<width>280</width>
 				<textoffsetx>10</textoffsetx>
@@ -253,7 +266,7 @@
             <control type="button" id="134"> <!-- Copy Unique To Local cdARTs -->
 				<description>Copy Unique Local cdARTs</description>
 				<posx>10</posx>
-				<posy>210</posy>
+				<posy>170</posy>
 				<height>40</height>
 				<width>280</width>
 				<textoffsetx>10</textoffsetx>
@@ -267,7 +280,7 @@
                 <onleft>9000</onleft>
 				<onright>9005</onright>
 				<onup>133</onup>
-				<ondown>129</ondown>
+				<ondown>130</ondown>
 			</control>
             
         </control>
@@ -331,17 +344,17 @@
             <visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106)</visible>
             
             <control type="button">
-					<description>Fake button for mouse control</description>
-					<posx>-200</posx>
-					<posy>-10</posy>
-					<width>500</width>
-					<height>200</height>
-					<label>-</label>
-					<font>-</font>
-					<texturenofocus>-</texturenofocus>
-					<texturefocus>-</texturefocus>
-					<visible>true</visible>
-			</control>
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
             
             <control type="image"> <!-- Box image -->
                 <posx>-5</posx>
@@ -397,18 +410,18 @@
             <posx>12</posx>
 			<posy>250</posy>
             
-            <control type="button"> <!-- Fake Button for mouse control -->
-					<description>Fake button for mouse control</description>
-					<posx>-20</posx>
-					<posy>-20</posy>
-					<width>260</width>
-					<height>400</height>
-					<label>-</label>
-					<font>-</font>
-					<texturenofocus>-</texturenofocus>
-					<texturefocus>-</texturefocus>
-					<visible>true</visible>
-			</control>
+            <control type="button">
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
             
             <control type="image">  <!-- Menu Panel -->
                 <description>Menu panel</description>
@@ -514,7 +527,7 @@
 				<textureradioon>HomeHasSub.png</textureradioon>
 				<textureradiooff>HomeHasSub.png</textureradiooff>
                 <onleft>9000</onleft>
-				<onright>129</onright>
+				<onright>130</onright>
 				<onup>102</onup>
 				<ondown>104</ondown>
             </control>
@@ -642,6 +655,20 @@
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
             <visible>Control.HasFocus(120) | Control.HasFocus(121)</visible>
+            
+            <control type="button">
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
+            
             <control type="image" id ="220">
                 <posx>-10</posx>
                 <posy>0</posy>
@@ -771,6 +798,20 @@
 			<animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">WindowClose</animation>
 			<animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
             <visible>Control.HasFocus(122)</visible>
+            
+            <control type="button">
+                <description>Fake button for mouse control</description>
+                <posx>-50</posx>
+                <posy>-50</posy>
+                <width>1190</width>
+                <height>700</height>
+                <label>-</label>
+                <font>-</font>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <visible>true</visible>
+            </control>
+            
             <control type="image" id = 201>
                 <posx>-10</posx>
                 <posy>0</posy>
