@@ -9,17 +9,6 @@
 #        many need to read local database(l_cdart - lalist) to find local id #'s
 #        then write to l_cdart - alblist with the important information
 #
-#   
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 
 import platform
 import urllib
@@ -51,8 +40,6 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' 
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-import MyFont  # Thanks ppic...
-
 # Find the proper platforms and append to our path, xbox is the same as win32
 env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
 
@@ -69,9 +56,7 @@ from convert import set_entity_or_charref
 from convert import translate_string
 
 #variables
-OK = True
-db_path = os.path.join(xbmc.translatePath( "special://profile/Database/" ), "MyMusic7.db")
-xmlfile = os.path.join( BASE_RESOURCE_PATH , "temp.xml" )
+musicdb_path = os.path.join(xbmc.translatePath( "special://profile/Database/" ), "MyMusic7.db")
 artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=artists"
 album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cdarts"
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cross"
@@ -128,7 +113,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     #retrieve local artist list from xbmc's music db
     def get_local_artist( self ):
-        conn_b = sqlite3.connect(db_path)
+        print "#  Retrieving Local Artist from XBMC's Music DB"
+        conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
         d.execute('SELECT DISTINCT strArtist , idArtist FROM artist ')
         count = 1
@@ -146,8 +132,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #retrieve local albums based on artist's name from xbmc's db
     def get_local_album( self , local_id):
+        print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
         local_album_list = []    
-        conn_b = sqlite3.connect(db_path)
+        conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
         d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist LIKE "%s" AND strAlbum != ''""" % local_id )
         for item in d:
@@ -165,14 +152,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return local_album_list
     
     #match artists on xbmcstuff.com with local database    
-    def get_recognized( self , distant_artist , l_artist  ):
+    def get_recognized( self , distant_artist , l_artist ):
+        print "#  Retrieving Recognized Artists from XBMCSTUFF.COM"
         true = 0
+        count = 0
         artist_list = []
         recognized = []
         pDialog.create( _(32048) )
         #Onscreen dialog - Retrieving Recognized Artist List....
         for artist in l_artist:
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(artist["name"]) ), distant_artist )
+            percent = int((float(count)/len(l_artist))*100)
             if match: 
                 true = true + 1
                 artist["distant_id"] = match.group(1)
@@ -188,13 +178,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:    
                     artist["distant_id"] = ""
                     artist_list.append(artist)
-            pDialog.update(true, (_(32049) % true))
+            pDialog.update(percent, (_(32049) % true))
             #Onscreen Dialog - Artists Matched: %
+            count=count+1
             if ( pDialog.iscanceled() ):
                 break
-        print "# Total Artists Matched: %s" % true
+        print "#  Total Artists Matched: %s" % true
         if true == 0:
-            print "# No Matches found.  Compare Artist and Album names with xbmcstuff.com"
+            print "#  No Matches found.  Compare Artist and Album names with xbmcstuff.com"
         pDialog.close()
         return recognized, artist_list
     
@@ -910,7 +901,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.label_1 = ""
         self.label_2 = addon_img
         self.cdartimg = ""
-        MyFont.addFont( "cdmanager-1" , "miso-regular" , "20", style="bold" , aspect="0.75" )
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)

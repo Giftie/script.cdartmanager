@@ -1,16 +1,18 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "0.8.9"
+__version__       = "0.9.0"
 __XBMC_Revision__ = "30001"
-__date__          = "09-07-10"
+__date__          = "11-07-10"
 import sys
 import os
 import xbmcaddon
 import xbmc
 
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'lib' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 
 sys.path.append (BASE_RESOURCE_PATH)
 
@@ -19,7 +21,13 @@ print BASE_RESOURCE_PATH
 __settings__ = xbmcaddon.Addon(__scriptID__)
 __language__ = __settings__.getLocalizedString
 
-if ( __name__ == "__main__" ):          
+if ( __name__ == "__main__" ):
+    print "########################################"
+    print "#    %-30s    #" % __scriptname__
+    print "#    %-30s    #" % __scriptID__
+    print "#    %-30s    #" % __author__
+    print "#    %-30s    #" % __version__
+    print "########################################"
     import gui
     ui = gui.GUI( "script-cdartmanager.xml" , os.getcwd(), "Default")
     ui.doModal()
