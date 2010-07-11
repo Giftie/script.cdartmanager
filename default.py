@@ -1,7 +1,7 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "0.9.0"
+__version__       = "0.9.1"
 __credits__       = "Ppic"
 __XBMC_Revision__ = "30001"
 __date__          = "11-07-10"
