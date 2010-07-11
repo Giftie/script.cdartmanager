@@ -612,8 +612,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #create the addon's database
     def database_setup( self ):
-        print "#  Setting Up Database"
         global local_artist
+        print "#  Setting Up Database"
+        if not os.path.exists(addon_work_path):
+            xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
+            print "# Settings not set, aborting database creation"
+            return
         local_artist, count_artist_local = self.get_local_artist()
         artist_count = 0
         download_count = 0
@@ -696,6 +700,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #user call from Advanced menu to refresh the addon's database
     def refresh_db( self ):
         print "#  Refreshing Local Database"
+        
         if os.path.isfile((addon_db).replace("\\\\" , "\\").encode("utf-8")):
             #File exists needs to be deleted
             db_delete = xbmcgui.Dialog().yesno( _(32042) , _(32015) )

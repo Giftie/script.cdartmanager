@@ -72,4 +72,7 @@
   <string id="32068">Restore From Backup</string><!--Translation needed -->
   <string id="32069">Restoring cdARTs from backup...</string><!--Translation needed -->
   <string id="32070">cdARTs Restored from backup folder</string><!--Translation needed -->
+  <string id="32071">Settings have not been setup!</string>
+  <string id="32072">Please go to Settings menu...</string>
+  <string id="32073">Then Choose: Refresh Addon Database from the Advanced Menu</string>
 </strings>
