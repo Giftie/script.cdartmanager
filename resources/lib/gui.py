@@ -614,6 +614,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def database_setup( self ):
         global local_artist
         print "#  Setting Up Database"
+        print "#    addon_work_path: %s" % addon_work_path
         if not os.path.exists(addon_work_path):
             xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
             print "# Settings not set, aborting database creation"
