@@ -198,7 +198,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_album_list = []
         search_list = []
         search_dialog = []
-        search_name = str.lower(name)
+        name = str.lower(name)
+        search_name = name.replace("!@#$%^&*()_{}[]/","")
         if re.search("/", search_name):
             search_name=search_name.replace("/", "")
         for part in search_name.split(" "):
@@ -613,18 +614,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #create the addon's database
     def database_setup( self ):
         global local_artist
-        print "#  Setting Up Database"
-        print "#    addon_work_path: %s" % addon_work_folder
-        if not os.path.exists(addon_work_folder):
-            xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
-            print "# Settings not set, aborting database creation"
-            return
-        local_artist, count_artist_local = self.get_local_artist()
         artist_count = 0
         download_count = 0
         cdart_existing = 0
         album_count = 0
         percent=0
+        print "#  Setting Up Database"
+        print "#    addon_work_path: %s" % addon_work_folder
+        if not os.path.exists(addon_work_folder):
+            xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
+            print "# Settings not set, aborting database creation"
+            return album_count, artist_count, cdart_existing
+        local_artist, count_artist_local = self.get_local_artist()
         pDialog.create( _(32021), _(32016) )
         #Onscreen Dialog - Creating Addon Database
         #                      Please Wait....
