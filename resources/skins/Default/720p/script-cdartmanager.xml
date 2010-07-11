@@ -904,6 +904,28 @@
       
                 </focusedlayout>
             </control>
+            <control type="group">
+                <posx>790</posx>
+                <posy>20</posy>
+                <control type="scrollbar" id="123">
+                    <description>scroll bar indicator for lists</description>
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>12</width>
+                    <height>540</height>
+                    <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
+                    <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
+                    <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
+                    <textureslidernib>-</textureslidernib>
+                    <textureslidernibfocus>-</textureslidernibfocus>
+                    <onleft>122</onleft>
+                    <onright>122</onright>
+                    <orientation>vertical</orientation>
+                    <showonepage>false</showonepage>
+                    <visible>Control.IsVisible(122)</visible>
+                </control>
+            </control>
+            <!--
             <control type="spincontrol" id="123">
                 <description>Next page button</description>
                 <posx>790</posx>
@@ -926,6 +948,7 @@
                 <showonepage>false</showonepage>
                 <visible>Control.IsVisible(120)</visible>
             </control>
+            -->
         </control>
     </control>
   </controls>

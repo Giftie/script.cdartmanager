@@ -51,6 +51,8 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' 
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
+import MyFont  # Thanks ppic...
+
 # Find the proper platforms and append to our path, xbox is the same as win32
 env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
 
@@ -908,6 +910,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.label_1 = ""
         self.label_2 = addon_img
         self.cdartimg = ""
+        MyFont.addFont( "cdmanager-1" , "miso-regular" , "20", style="bold" , aspect="0.75" )
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)
