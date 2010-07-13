@@ -35,40 +35,34 @@ __scriptID__   = sys.modules[ "__main__" ].__scriptID__
 __version__    = sys.modules[ "__main__" ].__version__
 __settings__   = sys.modules[ "__main__" ].__settings__
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
-__baseresource_path__ = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
-print "#    Base Resource Path: %s" % __baseresource_path__
-#BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
 
-#sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
 
-try:
-    from pysqlite2 import dbapi2 as sqlite3
-    print "# XMBC pysqlite2 module imported"
-except ImportError:
-    print "# importing script pysqlite2 module
-    # Find the proper platforms and append to our path, xbox is the same as win32
-    env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-    # Check to see if using a 64bit version of Linux
-    env2 = platform.machine()
-    if re.match("Linux", env) and env2 == "x86_64" :
-        env = "Linux_x86_64"
+# Find the proper platforms and append to our path, xbox is the same as win32
+env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
+
+# Check to see if using a 64bit version of Linux
+env2 = platform.machine()
+if re.match("Linux", env) and env2 == "x86_64" :
+   env = "Linux_x86_64"
   
-    sys.path.append( os.path.join( __baseresourcepath__, "lib" , "platform_libraries", env ) )
-    #import platform's librairies
-    from pysqlite2 import dbapi2 as sqlite3
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
+#import platform's librairies
+from pysqlite2 import dbapi2 as sqlite3
 from convert import set_entity_or_charref
 from convert import translate_string
 
 #variables
 musicdb_path = os.path.join(xbmc.translatePath( "special://profile/Database/" ), "MyMusic7.db")
-artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=artists"
-album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cdarts"
-cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cross"
+artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=artists"
+album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cdarts"
+cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cross"
 addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
-addon_image_path = os.path.join( __baseresource_path__, "skins", "Default", "media")
+addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 #nDialog = xbmcgui.Dialog()

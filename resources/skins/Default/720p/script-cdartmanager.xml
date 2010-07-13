@@ -42,6 +42,9 @@
                 <visible>Control.HasFocus(122) | Control.HasFocus(140)</visible>
             </control>
             
+
+                
+            
             <control type="group" id="9003"> <!-- Artist List -->
                 <posx>30</posx>
                 <posy>0</posy>
@@ -1112,6 +1115,37 @@
             
         </control>
         -->
+            <control type="group" id="9010">
+                <posx>600</posx>
+                <posy>100</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9010).HasFocus + !Control.HasFocus(105)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(105) | ControlGroup(9010).HasFocus">conditional</animation>
+                <visible>false</visible>
+                <control type="image" id ="230">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>330</width>
+                    <height>330</height>
+                    <texture border="40">default-panel.png</texture>
+                </control>
+                
+                <control type="label">
+                    <posx>20</posx>
+                    <posy>10</posy>
+                     <width min="29" max="300">auto</width>
+                    <height>300</height>
+                    <font>font13</font>
+                    <aligny>top</aligny>
+                    <alignx>center</alignx>
+                    <wrapmultiline>true</wrapmultiline>
+                    <label>This will be a popup box displaying helpful infomation about the control that is in focus.  Soon I will put proper information in this box instead of this gibber</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <selectedcolor>green</selectedcolor>
+                    <align>left</align>
+                    
+                </control>
+            </control>
             
         </control>
     </controls>
