@@ -12,7 +12,6 @@ import xbmc
 
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 
 sys.path.append (BASE_RESOURCE_PATH)

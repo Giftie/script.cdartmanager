@@ -35,23 +35,29 @@ __scriptID__   = sys.modules[ "__main__" ].__scriptID__
 __version__    = sys.modules[ "__main__" ].__version__
 __settings__   = sys.modules[ "__main__" ].__settings__
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+__baseresource_path__ = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+print "#    Base Resource Path: %s" % __baseresource_path__
+#BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' ) )
+#sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+try:
+    from pysqlite2 import dbapi2 as sqlite3
+    print "# XMBC pysqlite2 module imported"
+except ImportError:
+    print "# importing script pysqlite2 module
+    # Find the proper platforms and append to our path, xbox is the same as win32
+    env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
 
-# Find the proper platforms and append to our path, xbox is the same as win32
-env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
-
-# Check to see if using a 64bit version of Linux
-env2 = platform.machine()
-if re.match("Linux", env) and env2 == "x86_64" :
-   env = "Linux_x86_64"
+    # Check to see if using a 64bit version of Linux
+    env2 = platform.machine()
+    if re.match("Linux", env) and env2 == "x86_64" :
+        env = "Linux_x86_64"
   
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
+    sys.path.append( os.path.join( __baseresourcepath__, "lib" , "platform_libraries", env ) )
+    #import platform's librairies
+    from pysqlite2 import dbapi2 as sqlite3
 
-#import platform's librairies
-from pysqlite2 import dbapi2 as sqlite3
 from convert import set_entity_or_charref
 from convert import translate_string
 
@@ -62,7 +68,7 @@ album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCe
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=OIBNYbNUYBCezub&t=cross"
 addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
-addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
+addon_image_path = os.path.join( __baseresource_path__, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 #nDialog = xbmcgui.Dialog()
@@ -895,7 +901,31 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 109 ).setLabel( _(32007) % local_artist_count)
         self.getControl( 110 ).setLabel( _(32010) % local_album_count)
         self.getControl( 112 ).setLabel( _(32008) % local_cdart_count)
-        
+
+    def populate_local_cdarts( self ):
+        label2= ""
+        work_temp = []
+        l_artist = self.get_local_db()
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        self.getControl( 140 ).reset()
+        for album in l_artist:
+            if album["cdart"] == "TRUE":
+                label2 = os.path.join(album["path"], "cdart.png")
+                label1 = "%s - %s" % (album["artist"] , album["title"])
+                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=label2 )
+                self.getControl( 140 ).addItem( listitem )
+                listitem.setLabel( self.coloring( label1 , "green" , label1 ) )
+                listitem.setLabel2( label2 )
+                work_temp.append(album)
+                print label2
+            else:
+                pass
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        self.setFocus( self.getControl( 140 ) )
+        self.getControl( 140 ).selectItem( 0 )
+        return work_temp
+   
+            
     # setup self. strings and initial local counts
     def setup_all( self ):
         self.menu_mode = 0
@@ -1017,6 +1047,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setFocusId( 135 )
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
+        #if controlId == 137 : #Local cdART List
+            #self.populate_local_cdarts()
+        #if controlId == 140 : #Local cdART selection
+            #print controlId
+            #self.setFocusId( 142 )
         if controlId == 104 : #Settings
             self.menu_mode = 5
             __settings__.openSettings()
@@ -1026,12 +1061,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             	
 
     def onFocus( self, controlId ):
-        if controlId == 122 :
+        if controlId == 122 or controlId == 140:
             try:
-                if re.search("&&", self.getControl( 122 ).getSelectedItem().getLabel2()):
-                    image=(self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
+                if re.search("&&", self.getControl( controlId ).getSelectedItem().getLabel2()):
+                    image=(self.getControl( controlId ).getSelectedItem().getLabel2()).split("&&")[1]
                 else:
-                    image=addon_img
+                    print(self.getControl( 140 ).getSelectedItem().getLabel2())
+                    image=(self.getControl( 140 ).getSelectedItem().getLabel2())
             except:
                 image=addon_img
             self.getControl( 210 ).setImage( image )
@@ -1042,7 +1078,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if re.search("&&", self.getControl( 122 ).getSelectedItem().getLabel2()):
                 image=(self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&")[1]
             else:
-                image=addon_img
+                print(self.getControl( 140 ).getSelectedItem().getLabel2())
+                image=(self.getControl( 140 ).getSelectedItem().getLabel2())
         except:
             image=addon_img
         self.getControl( 210 ).setImage( image )
