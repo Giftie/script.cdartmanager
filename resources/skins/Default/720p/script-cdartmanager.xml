@@ -174,7 +174,7 @@
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(122) | Control.HasFocus(122)</visible>
+                <visible>Control.HasFocus(122) | Control.HasFocus(122) | Control.HasFocus(123)</visible>
             
                 <control type="button">
                     <description>Fake button for mouse control</description>
@@ -505,7 +505,7 @@
 
             <control type="group" id="9006">  <!-- cdART Backup Menu -->
                 <posx>315</posx>
-                <posy>360</posy>
+                <posy>320</posy>
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9006).HasFocus + !Control.HasFocus(130)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">WindowClose</animation>
