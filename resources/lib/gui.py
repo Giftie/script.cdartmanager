@@ -22,8 +22,8 @@ import xbmcaddon
 import xbmc
 import socket
 import shutil
-#time socket out at 1 mins.
-socket.setdefaulttimeout(60)
+#time socket out at 30 seconds
+socket.setdefaulttimeout(30)
 
 KEY_BUTTON_BACK = 275
 KEY_KEYBOARD_ESC = 61467
@@ -132,7 +132,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #retrieve local albums based on artist's name from xbmc's db
     def get_local_album( self , local_id):
-        print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
+        #print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
         local_album_list = []    
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
@@ -281,7 +281,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         # the .replace("'". "") is to get rid of all the apostrophes
         # the .replace("/", "") gets rid of the forward slash(ie AC/DC)
-        print "# xml: %s" % xml
+        #print "# xml: %s" % xml
         if not xml == "":
             match = re.findall( "<picture>(.*?)</picture>", xml )
         else:
@@ -487,8 +487,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #If there is something in artist_menu["distant_id"] build cdart_url
         #print "# distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
-            print "#    Local artist matched on XBMCSTUFF.COM"
-            print "#        Artist: %s     Local ID: %s     Distant ID: %s" % (artist_menu["name"] , artist_menu["local_id"] , artist_menu["distant_id"])
+            #print "#    Local artist matched on XBMCSTUFF.COM"
+            #print "#        Artist: %s     Local ID: %s     Distant ID: %s" % (artist_menu["name"] , artist_menu["local_id"] , artist_menu["distant_id"])
             artist_xml = self.get_html_source( album_url + "&id_artist=%s" % artist_menu["distant_id"] )
             #if not artist_xml == "":
             raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
@@ -501,7 +501,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #search for album title match, if found, store in album["title"], if not found store empty space
                 if match:
                     album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
-                    print "#               Distant Album: %s" % album["title"]
+                    #print "#               Distant Album: %s" % album["title"]
                 else:
                     album["title"] = ""
                 #search for album thumb match, if found, store in album["thumb"], if not found store empty space
@@ -511,7 +511,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 
                 else:
                     album["thumb"] = ""
-                print "#                    cdART Thumb: %s" % album["thumb"]
+                #print "#                    cdART Thumb: %s" % album["thumb"]
                 match = re.search( "<picture>(.*?)</picture>", i )
                 #search for album cdart match, if found, store in album["picture"], if not found store empty space
                 if match:
@@ -519,7 +519,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 
                 else:
                     album["picture"] = ""
-                print "#                    cdART picture: %s" % album["picture"]
+                #print "#                    cdART picture: %s" % album["picture"]
                 cdart_url.append(album)
                 #print "cdart_url: %s " % cdart_url
         #If artist_menu["distant_id"] is empty, search for name match
@@ -533,9 +533,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             #return
         else:
-            print "# "
-            print "#  Building album list based on:"
-            print "#        artist: %s     local_id: %s" % (cdart_url[0]["local_name"], cdart_url[0]["artistl_id"] )
+            #print "# "
+            #print "#  Building album list based on:"
+            #print "#        artist: %s     local_id: %s" % (cdart_url[0]["local_name"], cdart_url[0]["artistl_id"] )
             local_album_list = self.get_local_album(cdart_url[0]["artistl_id"])
             cdart_img = ""
             label1 = ""
@@ -623,7 +623,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#    addon_work_path: %s" % addon_work_folder
         if not os.path.exists(addon_work_folder):
             xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
-            print "# Settings not set, aborting database creation"
+            print "#  Settings not set, aborting database creation"
             return album_count, artist_count, cdart_existing
         local_artist, count_artist_local = self.get_local_artist()
         pDialog.create( _(32021), _(32016) )
