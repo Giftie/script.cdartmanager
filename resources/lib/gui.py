@@ -136,7 +136,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_album_list = []    
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist LIKE "%s" AND strAlbum != ''""" % local_id )
+        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist="%s" AND strAlbum != ''""" % local_id )
         for item in d:
             album = {}
             album["artist"] = translate_string( repr(item[0]).strip("'u") )
@@ -304,7 +304,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #finds the cdart for auto download
     def find_cdart2(self , album):
         match = None
-        s_name = str.lower(((artist_album_list[0]["artist"]).split(" "))[0])
+        s_name = str.lower(((album["artist"]).split(" "))[0])
         if s_name == "the":
             name = (((album["artist"]).lower()).lstrip("the "))
         else:
@@ -919,20 +919,23 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def populate_local_cdarts( self ):
         label2= ""
+        cdart_img=""
+        url = ""
         work_temp = []
         l_artist = self.get_local_db()
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         self.getControl( 140 ).reset()
         for album in l_artist:
             if album["cdart"] == "TRUE":
-                label2 = os.path.join(album["path"], "cdart.png")
+                cdart_img = os.path.join(album["path"], "cdart.png")
+                label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
                 label1 = "%s - %s" % (album["artist"] , album["title"])
-                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=label2 )
+                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                 self.getControl( 140 ).addItem( listitem )
-                listitem.setLabel( self.coloring( label1 , "green" , label1 ) )
+                listitem.setLabel( self.coloring( label1 , "orange" , label1 ) )
                 listitem.setLabel2( label2 )
                 work_temp.append(album)
-                print label2
+                #print label2
             else:
                 pass
         xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -961,9 +964,29 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:
                     image =""
                     #image = addon_img
+        
         except:
-            image =""
-            #image=addon_img
+            try:
+                local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
+                url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
+                cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+                print "#   cdart_path: %s" % cdart_path["path"]
+                print "#   url: %s" % url
+                print "#   local_cdart: %s" % local_cdart
+                if not local_cdart == "": #Test to see if there is a path in local_cdart
+                    image = local_cdart
+                    self.getControl( 210 ).setImage( image )
+                else:
+                    if not cdart_path["path"] =="": #Test to see if there is an url in cdart_path["path"]
+                        image = cdart_path["path"]
+                        self.getControl( 210 ).setImage( image )
+                    else:
+                        image =""
+                        #image = addon_img
+            
+            except:
+                image =""
+                #image=addon_img
         self.getControl( 210 ).setImage( image )
             
     # setup self. strings and initial local counts
@@ -1090,8 +1113,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setFocusId( 135 )
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
-        #if controlId == 137 : #Local cdART List
-            #self.populate_local_cdarts()
+        if controlId == 137 : #Local cdART List
+            self.populate_local_cdarts()
         #if controlId == 140 : #Local cdART selection
             #print controlId
             #self.setFocusId( 142 )
