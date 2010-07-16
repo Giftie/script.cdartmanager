@@ -313,7 +313,7 @@
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(140)</visible>
+                <visible>Control.HasFocus(140) | Control.HasFocus(141)</visible>
             
                 <control type="button">
                     <description>Fake button for mouse control</description>
@@ -587,7 +587,7 @@
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(135) | Control.HasFocus(136) | Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133) | Control.HasFocus(134) | Control.HasFocus(137) </visible>
+                <visible>Control.HasFocus(135) | Control.HasFocus(136) | Control.HasFocus(103) | Control.HasFocus(129) | Control.HasFocus(130) | Control.HasFocus(131) | Control.HasFocus(132) | Control.HasFocus(133) | Control.HasFocus(134) | Control.HasFocus(137) | Control.IsVisible(140) </visible>
             
                 <control type="button">
                     <description>Fake button for mouse control</description>
@@ -606,7 +606,7 @@
                     <posx>-5</posx>
                     <posy>5</posy>
                     <width>300</width>
-                    <height>230</height>
+                    <height>270</height>
                     <texture border="40">default-panel.png</texture>
                 </control>
                 <!--
@@ -630,25 +630,6 @@
                     <ondown>130</ondown>
                 </control>
                 
-                <control type="button" id="137"> <!-- Local cdART List 
-                    <description>Local cdART List</description>
-                    <posx>10</posx>
-                    <posy>10</posy>
-                    <height>40</height>
-                    <width>280</width>
-                    <textoffsetx>10</textoffsetx>
-                    <textwidth>260</textwidth>
-                    <aligny>center</aligny>
-                    <font>font13</font>
-                    <label>$ADDON[script.cdartmanager 32005]</label>
-                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
-                    <texturenofocus>-</texturenofocus>
-                    <pulseonselect>false</pulseonselect>
-                    <onleft>9000</onleft>
-                    <onright>9005</onright>
-                    <onup>134</onup>
-                    <ondown>130</ondown>
-                </control>
                 -->
                 <control type="radiobutton" id="130"> <!-- cdART Backup -->
                     <description>cdART Backup</description>
@@ -674,7 +655,7 @@
                     <textureradiooff>HomeHasSub.png</textureradiooff>
                     <onleft>9000</onleft>
                     <onright>135</onright>
-                    <onup>134</onup>
+                    <onup>137</onup>
                     <ondown>131</ondown>
                 </control>
                         
@@ -741,7 +722,7 @@
                     <onleft>9000</onleft>
                     <onright>9005</onright>
                     <onup>132</onup>
-                    <ondown>130</ondown>
+                    <ondown>134</ondown>
                 </control>
             
                 <control type="button" id="134"> <!-- Copy Unique To Local cdARTs -->
@@ -763,6 +744,29 @@
                     <onleft>9000</onleft>
                     <onright>9005</onright>
                     <onup>133</onup>
+                    <ondown>137</ondown>
+                </control>
+                
+                <control type="button" id="137"> <!-- Local cdART List -->
+                    <description>Local cdART List</description>
+                    <posx>10</posx>
+                    <posy>210</posy>
+                    <height>40</height>
+                    <width>280</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>260</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <label>Local cdART List</label>
+                    <!--
+                    <label>$ADDON[script.cdartmanager 32005]</label>
+                    -->
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9000</onleft>
+                    <onright>9005</onright>
+                    <onup>134</onup>
                     <ondown>130</ondown>
                 </control>
             </control>
