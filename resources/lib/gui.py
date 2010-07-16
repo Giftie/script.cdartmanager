@@ -116,15 +116,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Retrieving Local Artist from XBMC's Music DB"
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute('SELECT DISTINCT strArtist, idArtist FROM albumview')
+        d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview ')
         count = 1
         artist_list = []
         for item in d:
             artist = {}
             artist["name"]= translate_string( item[0].encode("utf-8") )
             artist["local_id"]= item[1]
-            #artist["album"]= translate_string( item[2].encode("utf-8") )
-            #artist["albumid"] = item[3]
             artist_list.append(artist)
             count = count + 1
         d.close
@@ -133,30 +131,24 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return artist_list, count
     
     #retrieve local albums based on artist's name from xbmc's db
-    def get_local_album( self , artist):
+    def get_local_album( self , local_id):
         #print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
         local_album_list = []    
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strPath, strAlbum FROM songview Where idArtist LIKE "%s" AND strAlbum != ''""" % artist["local_id"] )
+        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist LIKE "%s" AND strAlbum != ''""" % local_id )
         for item in d:
             album = {}
-            album["artist"] = artist["name"]
-            album["artist_id"] = artist["local_id"]
-            #album["artist"] = translate_string( repr(item[0]).strip("'u") )
-            #album["artist_id"] = repr(item[1]).strip("'u")
-            album["path"] = (repr(item[0]).strip("'u")).replace('"','')
-            album["title"] = translate_string( repr(item[1]).strip("'u").strip('"') )
+            album["artist"] = translate_string( repr(item[0]).strip("'u") )
+            album["artist_id"] = repr(item[1]).strip("'u")
+            album["path"] = (repr(item[2]).strip("'u")).replace('"','')
+            album["title"] = translate_string( repr(item[3]).strip("'u").strip('"') )
             if os.path.isfile(os.path.join( album["path"] , "cdart.png").replace("\\\\" , "\\").encode("utf-8")):
                 album["cdart"] = "TRUE"
             else :
                 album["cdart"] = "FALSE"
             local_album_list.append(album)
             d.close
-            print "#  Artist: %s      ID: %s" % album["artist"], album["local_id"]
-            print "#  Album: %s" % album["title"]
-            print "#  Path: %s" % album["path"]
-            print "#  CDart: %s" % album["cdart"]
         return local_album_list
     
     #match artists on xbmcstuff.com with local database    
@@ -396,7 +388,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %s     Local ID: %s" % (artist["name"], artist["local_id"])
-            local_album_list = self.get_local_album( artist )
+            local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 album_count = album_count + 1
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
@@ -456,7 +448,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %s     Local ID: %s" % (artist["name"], artist["local_id"])
-            local_album_list = self.get_local_album( artist )
+            local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 temp_album = {}
                 album_count = album_count + 1
@@ -561,7 +553,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print "# "
             #print "#  Building album list based on:"
             #print "#        artist: %s     local_id: %s" % (cdart_url[0]["local_name"], cdart_url[0]["artistl_id"] )
-            local_album_list = self.get_local_album(cdart_url[0])
+            local_album_list = self.get_local_album(cdart_url[0]["artistl_id"])
             cdart_img = ""
             label1 = ""
             label2 = ""
@@ -667,7 +659,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             c.execute("insert into lalist(local_id, name) values (?, ?)", (artist["local_id"], artist["name"]))
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100) 
-            local_album_list = self.get_local_album( artist )
+            local_album_list = self.get_local_album( artist["local_id"] )
             for album in local_album_list:
                 pDialog.update( percent, _(32016), "" , "%s - %s" % ( artist["name"] , album["title"] ) )
                 album_count = album_count + 1               
