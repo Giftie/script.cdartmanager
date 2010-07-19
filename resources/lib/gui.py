@@ -54,8 +54,12 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 from pysqlite2 import dbapi2 as sqlite3
 from convert import set_entity_or_charref
 from convert import translate_string
+from string import maketrans
 
 #variables
+intab = ""
+outtab = ""
+transtab = maketrans(intab, outtab)
 musicdb_path = os.path.join(xbmc.translatePath( "special://profile/Database/" ), "MyMusic7.db")
 artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=artists"
 album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cdarts"
@@ -74,6 +78,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def onInit( self ):    	
 	self.setup_all()
+
+
+    def remove_special( self, temp ):
+        return temp.translate(transtab, "!@#$^*()?[]{}<>',.")
     
     # sets the colours for the lists
     def coloring( self , text , color , colorword ):
@@ -162,11 +170,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.create( _(32048) )
         #Onscreen dialog - Retrieving Recognized Artist List....
         for artist in l_artist:
-            s_name = str.lower((artist["name"].split(" "))[0])
-            if s_name == "the":
-                name = (artist["name"].lower()).lstrip("the ")
-            else:
-                name = str.lower(artist["name"])
+            name = str.lower(artist["name"])
             print "#  Artist Name: %s" % name
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(name) ), distant_artist )
             percent = int((float(count)/len(l_artist))*100)
@@ -176,16 +180,39 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 print "#  Distant ID: %s" % artist["distant_id"]
                 recognized.append(artist)
                 artist_list.append(artist)
-            else: # give it one more try, but changing special characters
-                match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape((name.replace("/","")).replace("&","&amp;") ) ), distant_artist )
+            else:
+                #if (name.split(" ")[0]) == "the":
+                s_name = name.lstrip("the ") # Try removing 'the ' from the name
+                #else:
+                #    s_name = (name.replace("/","")).replace("&","&amp;") ) # give it a try, but changing some special characters
+                match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
                 if match: 
                     true = true + 1
                     artist["distant_id"] = match.group(1)
                     recognized.append(artist)
                     artist_list.append(artist)
-                else:    
-                    artist["distant_id"] = ""
-                    artist_list.append(artist)
+                else:
+                    #if (name.split(" ")[0]) == "the":
+                    s_name = ((name.lstrip("the ")).replace("/","")).replace("&","&amp;") # Try removing 'the ', / and change & to &amp; from the name
+                    #else:
+                    #    s_name = (self.remove_special( name )).replace("&","&amp;") ) # give it a try, but changing some special characters
+                    match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
+                    if match: 
+                        true = true + 1
+                        artist["distant_id"] = match.group(1)
+                        recognized.append(artist)
+                        artist_list.append(artist)
+                    else:
+                        s_name = self.remove_special( name.lstrip("the ") ).replace("&","&amp;") # Try removing 'the ', / and change & to &amp; from the name
+                        match = re.search('<artist id="(.*?)">%s</artist>' % re.escape(s_name), distant_artist )
+                        if match: 
+                            true = true + 1
+                            artist["distant_id"] = match.group(1)
+                            recognized.append(artist)
+                            artist_list.append(artist)
+                        else:    
+                            artist["distant_id"] = ""
+                            artist_list.append(artist)
             pDialog.update(percent, (_(32049) % true))
             #Onscreen Dialog - Artists Matched: %
             count=count+1
@@ -280,15 +307,53 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
                     #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No cdART found for 
         return
+
+    def remote_cdarts( self, artist ):
+            artist_xml = self.get_html_source( album_url + "&id_artist=%s" % artist["distant_id"] )
+            #if not artist_xml == "":
+            raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
+            for i in raw:
+                album = {}
+                album["artistl_id"] = artist_menu["local_id"]
+                album["artistd_id"] = artist_menu["distant_id"]
+                album["local_name"] = album["artist"] = artist_menu["name"]
+                match = re.search('album="(.*?)">', i )
+                #search for album title match, if found, store in album["title"], if not found store empty space
+                if match:
+                    album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
+                    #print "#               Distant Album: %s" % album["title"]
+                else:
+                    album["title"] = ""
+                #search for album thumb match, if found, store in album["thumb"], if not found store empty space
+                match = re.search( "<thumb>(.*?)</thumb>", i )
+                if match:
+                    album["thumb"] = (match.group(1))
+                
+                else:
+                    album["thumb"] = ""
+                #print "#                    cdART Thumb: %s" % album["thumb"]
+                match = re.search( "<picture>(.*?)</picture>", i )
+                #search for album cdart match, if found, store in album["picture"], if not found store empty space
+                if match:
+                    album["picture"] = (match.group(1))
+                
+                else:
+                    album["picture"] = ""
+                #print "#                    cdART picture: %s" % album["picture"]
+                cdart_url.append(album)
+                #print "cdart_url: %s " % cdart_url
+        
+
+
     
     # finds the cdart for the album list    
     def find_cdart( self , album , artist_album_list):
         match = None
-        s_name = str.lower(((artist_album_list[0]["artist"]).split(" "))[0])
-        if s_name == "the":
-            name = (((artist_album_list[0]["artist"]).lower()).lstrip("the "))
-        else:
-            name = str.lower(artist_album_list[0]["artist"])
+        #s_name = str.lower(((artist_album_list[0]["artist"]).split(" "))[0])
+        #if s_name == "the":
+        #    name = (((artist_album_list[0]["artist"]).lower()).lstrip("the "))
+        #else:
+        name = str.lower(artist_album_list[0]["artist"])
         xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus((album["title"].replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((name.replace("&", "&amp;")).replace("/",""))))
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         # the .replace("'". "") is to get rid of all the apostrophes
@@ -304,11 +369,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #finds the cdart for auto download
     def find_cdart2(self , album):
         match = None
-        s_name = str.lower(((album["artist"]).split(" "))[0])
-        if s_name == "the":
-            name = (((album["artist"]).lower()).lstrip("the "))
-        else:
-            name = str.lower(album["artist"])
+        #s_name = str.lower(((album["artist"]).split(" "))[0])
+        #if s_name == "the":
+        #    name = (((album["artist"]).lower()).lstrip("the "))
+        #else:
+        name = str.lower(album["artist"])
         xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(((album["title"].replace(",","")).replace("&", "&amp;")).replace("'","")) , urllib.quote_plus((name.replace("&", "&amp;")).replace("/",""))))
         # the .replace("&", "&amp;") is in place to correctly match the albums with & in them
         # the .replace("'". "") is to get rid of all the apostrophes
@@ -422,9 +487,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         c.close()
         pDialog.close()
         if d_error == 1:
-            xbmcgui.Dialog().ok( _(32026), "%s: %s" % (_(32041), download_count) )
+            xbmcgui.Dialog().ok( _(32026), "%s: %s" % ( _(32041), download_count ) )
         else:
-            xbmcgui.Dialog().ok( _(32040), "%s: %s" % (_(32041) , download_count ) )
+            xbmcgui.Dialog().ok( _(32040), "%s: %s" % ( _(32041), download_count ) )
         return
 
     #Local vs. XBMCSTUFF.COM cdART list maker
