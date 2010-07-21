@@ -81,7 +81,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
 
     def remove_special( self, temp ):
-        return temp.translate(transtab, "!@#$^*()?[]{}<>',.")
+        return temp.translate(transtab, "!@#$^*()?[]{}<>',./")
     
     # sets the colours for the lists
     def coloring( self , text , color , colorword ):
@@ -164,7 +164,114 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_album_list.append(album)
             d.close
         return local_album_list
-    
+
+    # Need to clean this up once working!!!!!
+    def new_get_recognized( self , distant_artist , l_artist ):
+        print "#  Retrieving Recognized Artisr from XBMCSTUFF.COM, New way of sorting"
+        true = 0
+        count = 0
+        name = ""
+        artist_list = []
+        recognized = []
+        distant = []
+        d_artist = {}
+        pDialog.create( _(32048) )
+        #Onscreen dialog - Retrieving Recognized Artist List....
+        d_temp = re.compile("<artist id=(.*?)</artist>", re.DOTALL).findall(distant_artist)
+        for item in d_temp:
+            d_artist["id"] = (item.split(">")[0]).replace('"','')
+            d_artist["artist"] = (item.split(">")[1]).replace("&amp;", "&")
+            distant.append(d_artist)
+            print d_artist["id"]
+            print d_artist["artist"]
+            for artist in l_artist:
+                name = str.lower(artist["name"])
+                print "#  Artist Name: %s" % name
+                percent = int((float(count)/len(l_artist))*100)
+                if name==d_artist["artist"]: 
+                    true = true + 1
+                    artist["distant_id"] = d_artist["id"]
+                    print "#  Distant ID: %s" % artist["distant_id"]
+                    recognized.append(artist)
+                    artist_list.append(artist)
+                else:
+                    s_name = name.lstrip("the ") # Try removing 'the ' from the name
+                    if s_name==d_artist["artist"]: 
+                        true = true + 1
+                        artist["distant_id"] = d_artist["id"]
+                        print "#  Distant ID: %s" % artist["distant_id"]
+                        recognized.append(artist)
+                        artist_list.append(artist)
+                    else:
+                        s_name = self.remove_special(name.lstrip("the ")) # Try removing 'the ', / and change & to &amp; from the name
+                        if s_name==d_artist["artist"]: 
+                            true = true + 1
+                            artist["distant_id"] = d_artist["id"]
+                            print "#  Distant ID: %s" % artist["distant_id"]
+                            recognized.append(artist)
+                            artist_list.append(artist)
+                        else:
+                            d_name = d_artist["artist"].lstrip("the ")
+                            if name==d_name: 
+                                true = true + 1
+                                artist["distant_id"] = d_artist["id"]
+                                print "#  Distant ID: %s" % artist["distant_id"]
+                                recognized.append(artist)
+                                artist_list.append(artist)
+                            else:
+                                s_name = name.lstrip("the ") # Try removing 'the ' from the name
+                                if s_name==d_name: 
+                                    true = true + 1
+                                    artist["distant_id"] = d_artist["id"]
+                                    print "#  Distant ID: %s" % artist["distant_id"]
+                                    recognized.append(artist)
+                                    artist_list.append(artist)
+                                else:
+                                    s_name = self.remove_special(name.lstrip("the ")) # Try removing 'the ', / and change & to &amp; from the name
+                                    if s_name==d_name: 
+                                        true = true + 1
+                                        artist["distant_id"] = d_artist["id"]
+                                        print "#  Distant ID: %s" % artist["distant_id"]
+                                        recognized.append(artist)
+                                        artist_list.append(artist)
+                                    else:
+                                        d_name = d_artist["artist"].lstrip("the ")
+                                        if name==d_name: 
+                                            true = true + 1
+                                            artist["distant_id"] = d_artist["id"]
+                                            print "#  Distant ID: %s" % artist["distant_id"]
+                                            recognized.append(artist)
+                                            artist_list.append(artist)
+                                        else:
+                                            s_name = name.lstrip("the ") # Try removing 'the ' from the name
+                                            if s_name==d_name: 
+                                                true = true + 1
+                                                artist["distant_id"] = d_artist["id"]
+                                                print "#  Distant ID: %s" % artist["distant_id"]
+                                                recognized.append(artist)
+                                                artist_list.append(artist)
+                                            else:
+                                                s_name = self.remove_special(name.lstrip("the ")) # Try removing 'the ', / and change & to &amp; from the name
+                                                if s_name==d_name: 
+                                                    true = true + 1
+                                                    artist["distant_id"] = d_artist["id"]
+                                                    print "#  Distant ID: %s" % artist["distant_id"]
+                                                    recognized.append(artist)
+                                                    artist_list.append(artist)
+                                                else:    
+                                                    artist["distant_id"] = ""
+                                                    artist_list.append(artist)
+            pDialog.update(percent, (_(32049) % true))
+            #Onscreen Dialog - Artists Matched: %
+            count=count+1
+            if ( pDialog.iscanceled() ):
+                break
+        print "#  Total Artists Matched: %s" % true
+        if true == 0:
+            print "#  No Matches found.  Compare Artist and Album names with xbmcstuff.com"
+        pDialog.close()
+        return recognized, artist_list
+            
     #match artists on xbmcstuff.com with local database    
     def get_recognized( self , distant_artist , l_artist ):
         print "#  Retrieving Recognized Artists from XBMCSTUFF.COM"
@@ -295,7 +402,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             album["picture"] = ""
                     
                         print "#                         Album cdART: %s" % album["picture"]
-                        
                         search_list.append(album)
             
             if search_dialog: 
