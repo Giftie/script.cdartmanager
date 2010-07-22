@@ -314,6 +314,35 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No cdART found for 
         return
 
+
+    def cdart_search( self, cdart_url, title ):
+        print "#  Searching for matching remote albums & cdARTs"
+        s_title = ""
+        rms_title = ""
+        s_title = self.remove_special( title )
+        #print "#   title: %s" % title
+        cdart_find = {}
+        for album in cdart_url:
+            print album
+            r_title1 = str.lower( album["title"] )
+            r_title2 = str.lower( album["title"].split(" (")[0] )
+            r_title3 = str.lower(self.remove_special( album["title"] ))
+            r_title4 = str.lower(self.remove_special( album["title"].split(" (")[0] ))
+            if title == r_title1 or title == r_title2 or title == r_title3 or title == r_title4 or s_title == r_title1 or s_title == r_title2 or s_title == r_title3 or s_title == r_title4:
+                cdart_find = album
+                break
+            else:
+                cdart_find["picture"]=""
+                cdart_find["thumb"]=""
+                cdart_find["title"]=""
+                cdart_find["artistd_id"]=""
+                cdart_find["artistl_id"]=""
+                cdart_find["local_name"]=""
+                cdart_find["artist_name"]=""
+        return cdart_find
+            
+            
+        
     
     # finds the cdart for the album list    
     def find_cdart( self , aname , atitle ):
@@ -366,18 +395,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 pDialog.update( percent, _(32035) )
                 #Onscreen Dialog - *DOWNLOADING CDART*
                 if ( pDialog.iscanceled() ):
-                    pass
-                
+                    pass  
             if os.path.exists(album["path"]):
                 #print "Path exists"                
                 fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
-                print fp, h
+                #print fp, h
                 message = [_(32023), _(32024), "File: %s" % album["path"] , "Url: %s" % url_cdart]
                 #message = ["Download Sucessful!"]
-                #
-                album["cdart"] = "TRUE"  #for storage in the database update
-                #album["artist_id"] = output from l_cdart database artist id
-                c.execute("""UPDATE alblist SET cdart="TRUE" WHERE path="%s""" % album["path"])
+                c.execute("""UPDATE alblist SET cdart="TRUE" WHERE title='%s'""" % album["title"])
                 download_success = 1
             else:
                 #print "path does not exist"
@@ -410,8 +435,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             recognized_artists, local_artists = self.get_recognized( distant_artist , local_artist )
         pDialog.create( _(32046) )
         count_artist_local = len(recognized_artists)
-        #conn = sqlite3.connect(addon_db)
-        #c = conn.cursor()
         for artist in recognized_artists:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
@@ -432,8 +455,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         if d_success == 1:
                             download_count = download_count + 1
                             album["cdart"] = "TRUE"
-                            # store update database
-                            #c.execute("insert into alblist(cdart, path, artist_id, title, artist) values (?, ?, ?, ?, ?)", (album["cdart"], album["path"], album["artist_id"], album["title"], album["artist"]))
                         else:
                             print "#  Download Error...  Check Path."
                             print "#      Path: %s" % album["path"]
@@ -447,8 +468,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     break
             if ( pDialog.iscanceled() ):
                     break    
-        #conn.commit()
-        #c.close()
         pDialog.close()
         if d_error == 1:
             xbmcgui.Dialog().ok( _(32026), "%s: %s" % ( _(32041), download_count ) )
@@ -470,9 +489,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_count = 0
         temp_album = {}
         cdart_lvd = []
-        #conn = sqlite3.connect(addon_db)
-        #c = conn.cursor()
-        #c.execute('''create table lvdlist(lcdart, dcdart, path, title, artist)''')
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
@@ -529,12 +545,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def remote_cdart_list( self, artist_menu ):
         cdart_url = []
         #If there is something in artist_menu["distant_id"] build cdart_url
-        print "# distant id: %s" % artist_menu["distant_id"]
+        #print "# distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
             #print "#    Local artist matched on XBMCSTUFF.COM"
             #print "#        Artist: %s     Local ID: %s     Distant ID: %s" % (artist_menu["name"] , artist_menu["local_id"] , artist_menu["distant_id"])
             artist_xml = self.get_html_source( album_url + "&id_artist=%s" % artist_menu["distant_id"] )
-            #if not artist_xml == "":
             raw = re.compile( "<cdart (.*?)</cdart>", re.DOTALL ).findall(artist_xml)
             for i in raw:
                 album = {}
@@ -544,7 +559,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 match = re.search('album="(.*?)">', i )
                 #search for album title match, if found, store in album["title"], if not found store empty space
                 if match:
-                    album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")               
+                    album["title"] = (match.group(1).replace("&amp;", "&"))              
                     #print "#               Distant Album: %s" % album["title"]
                 else:
                     album["title"] = ""
@@ -569,6 +584,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #If artist_menu["distant_id"] is empty, search for name match
         else :
             cdart_url = self.search( artist_menu["name"], artist_menu["local_id"])
+            #print cdart_url
         return cdart_url
 
     #creates the album list on the skin
@@ -594,13 +610,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print local_album_list
             for album in local_album_list:
                 name = cdart_url[0]["artist"]
-                title = album["title"]
-                cdart = self.find_cdart( name, title )
-                #print cdart
+                title = str.lower(album["title"])
+                cdart = self.cdart_search( cdart_url, title )
+                #print album
                 #check to see if there is a thumb
-                if len(cdart) == 1: 
+                if not cdart["title"]=="": 
                     label1 = "%s - %s" % (album["artist"] , album["title"])
-                    url = cdart[0]
+                    url = cdart["picture"]
                     #check to see if cdart already exists
                     #colour the label yellow if found
                     #colour the label green if not
@@ -1109,7 +1125,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
             local = (self.getControl( 122 ).getSelectedItem().getLabel()).replace("choose for ", "")
             cdart_path["artist"]=local.split(" - ")[0]
-            cdart_path["title"]=local.split(" - ")[1]
+            cdart_path["title"]=(((local.split(" - ")[1]).replace("     ***Local & xbmcstuff.com cdART Exists***","")).replace("     ***Local only cdART Exists***","")).replace("[/COLOR]","")
             #print self.getControl( 122 ).getSelectedItem().getLabel2()
             #print "#   artist: %s" % cdart_path["artist"]
             #print "#   album title: %s" % cdart_path["title"]
