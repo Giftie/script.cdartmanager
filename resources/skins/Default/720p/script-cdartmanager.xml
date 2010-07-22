@@ -7,10 +7,18 @@
     </coordinates>
     <animation effect="fade" time="250">WindowOpen</animation>
     <animation effect="fade" time="250">WindowClose</animation>
+    
     <controls>
         <control type="group">
             <posx>100</posx>
             <posy>50</posy>
+            <control type="image">  <!-- Main window -->
+                <posx>-100</posx>
+                <posy>-50</posy>
+                <width>1280</width>
+                <height>720</height>
+                <texture border="0">cdman_background.png</texture>
+            </control>
             <control type="image">  <!-- Main window -->
                 <posx>0</posx>
                 <posy>0</posy>
@@ -47,8 +55,7 @@
             
             <control type="group" id="9003"> <!-- Artist List -->
                 <posx>30</posx>
-                <posy>0</posy>
-            
+                <posy>0</posy>            
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9003).HasFocus + !Control.HasFocus(120)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
