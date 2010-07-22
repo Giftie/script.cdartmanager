@@ -40,15 +40,16 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources' 
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-# Find the proper platforms and append to our path, xbox is the same as win32
-env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
-
-# Check to see if using a 64bit version of Linux
-env2 = platform.machine()
-if re.match("Linux", env) and env2 == "x86_64" :
-   env = "Linux_x86_64"
-  
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
+## Find the proper platforms and append to our path, xbox is the same as win32
+##env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
+#
+## Check to see if using a 64bit version of Linux
+#env2 = platform.machine()
+#if re.match("Linux", env) and env2 == "x86_64" :
+#   env = "Linux_x86_64"
+#  
+#sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
+#
 
 #import platform's librairies
 from pysqlite2 import dbapi2 as sqlite3
@@ -323,7 +324,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #print "#   title: %s" % title
         cdart_find = {}
         for album in cdart_url:
-            print album
+            #print album
             r_title1 = str.lower( album["title"] )
             r_title2 = str.lower( album["title"].split(" (")[0] )
             r_title3 = str.lower(self.remove_special( album["title"] ))

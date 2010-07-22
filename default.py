@@ -2,9 +2,9 @@ __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
 __version__       = "0.9.4"
-__credits__       = "Ppic"
+__credits__       = "Ppic, Reaven, Imaginos"
 __XBMC_Revision__ = "30001"
-__date__          = "18-07-10"
+__date__          = "22-07-10"
 import sys
 import os
 import xbmcaddon
