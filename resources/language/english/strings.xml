@@ -75,4 +75,7 @@
   <string id="32071">Settings have not been setup!</string>
   <string id="32072">Please go to Settings menu...</string>
   <string id="32073">Then Advanced: Refresh Addon Database</string>
+  <string id="32074">Copy cdART to Backup Folder</string>
+  <string id="32075">Delete cdART</string>
+  <string id="32076">Copy To Unique Folder For Upload</string>
 </strings>

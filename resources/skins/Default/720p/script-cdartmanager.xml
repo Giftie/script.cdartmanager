@@ -52,9 +52,6 @@
                 <visible>Control.HasFocus(122) | Control.HasFocus(140) | ControlGroup(9011).HasFocus</visible>
             </control>
             
-
-                
-            
             <control type="group" id="9003"> <!-- Artist List -->
                 <posx>30</posx>
                 <posy>0</posy>            
@@ -482,6 +479,7 @@
                             <focusedcolor>FFFFFFFF</focusedcolor>
                             <selectedcolor>green</selectedcolor>
                             <label>Album Title Goes Here</label>
+                            <scroll>true</scroll>
                             <align>center</align>
                     </control>
                     
@@ -496,7 +494,7 @@
                         <font>font13</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <focusedcolor>FFFFFFFF</focusedcolor>
-                        <label>Copy cdART to Backup Folder</label>
+                        <label>$ADDON[script.cdartmanager 32074]</label>
                         <align>center</align>
                         <aligny>center</aligny>
                         <texturefocus border="5">cdman-button-focus.png</texturefocus>
@@ -521,7 +519,7 @@
                         <font>font13</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <focusedcolor>FFFFFFFF</focusedcolor>
-                        <label>Delete cdART</label>
+                        <label>$ADDON[script.cdartmanager 32075]</label>
                         <texturefocus border="5">cdman-button-focus.png</texturefocus>
                         <texturenofocus>-</texturenofocus>
                         <pulseonselect>false</pulseonselect>
@@ -544,7 +542,7 @@
                         <font>font13</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <focusedcolor>FFFFFFFF</focusedcolor>
-                        <label>Copy To Unique Folder For Upload</label>
+                        <label>$ADDON[script.cdartmanager 32076]</label>
                         <texturefocus border="5">cdman-button-focus.png</texturefocus>
                         <texturenofocus>-</texturenofocus>
                         <pulseonselect>false</pulseonselect>
@@ -1005,7 +1003,7 @@
                     <onup>111</onup>
                     <ondown>102</ondown>
                 </control>
-            <control type="button" id="102">  <!-- Automatic Download -->
+                <control type="button" id="102">  <!-- Automatic Download -->
                     <description>Automatic Download</description>
                     <posx>0</posx>
                     <posy>35</posy>
