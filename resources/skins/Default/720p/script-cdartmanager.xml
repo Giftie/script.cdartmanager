@@ -322,7 +322,7 @@
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(140) | Control.HasFocus(141)</visible>
+                <visible>Control.HasFocus(140) | Control.HasFocus(141) | ControlGroup(9010).HasFocus</visible>
             
                 <control type="button">
                     <description>Fake button for mouse control</description>
@@ -453,7 +453,7 @@
                     </control>
                 </control>
                 
-                <control type="group" id="145">
+                <control type="group" id="9010">
                     <posx>500</posx>
                     <posy>50</posy>
                     <control type="image"> <!-- Box image -->

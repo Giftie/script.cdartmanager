@@ -70,7 +70,6 @@ addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
-#nDialog = xbmcgui.Dialog()
 
 class GUI( xbmcgui.WindowXMLDialog ):
     def __init__( self, *args, **kwargs ):    	
@@ -252,7 +251,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 #print cross_url + cross_url + "&artist=%s" % part 
                 #print search_xml
-                #self.save_xml(search_xml)
                 match = re.search('<message>(.*?)</message>', search_xml )    
                 if match:
                     print "#          Artist(part name): %s  not found on xbmcstuff.com" % part
@@ -818,7 +816,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         destination=unique_folder
                         fn = os.path.join(destination, ((((album["artist"].replace("/", "")).replace("'","")) + " - " + ((album["title"].replace("/","")).replace("'","")) + ".png").lower()))
-                    print "#    destination: %s" % destination
+                    #print "#    destination: %s" % destination
                     if not os.path.exists(destination):
                         #pass
                         os.makedirs(destination)
@@ -875,7 +873,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 source=os.path.join( bkup_folder ) #to fix AC/DC
                 fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
             print "#    source folder: %s" % source
-            print "#    fn: %s" % fn
+            print "#    filename: %s" % fn
             if os.path.isfile(fn):
                 destination = os.path.join(part["path"], "cdart.png")
                 try:
@@ -912,9 +910,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if cdart_list_folder =="":
             __settings__.openSettings()
             cdart_list_folder = __settings__.getSetting("cdart_path")
-        print "#    fn_format: %s" % fn_format
-        print "#    bkup_folder: %s" % bkup_folder
-        print "#    cdart_list_folder: %s" % cdart_list_folder
+        #print "#    fn_format: %s" % fn_format
+        #print "#    bkup_folder: %s" % bkup_folder
+        #print "#    cdart_list_folder: %s" % cdart_list_folder
         albums = self.get_local_db()
         #print albums
         #print len(albums)
@@ -931,14 +929,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     elif fn_format == 1:
                         destination=os.path.join( bkup_folder ) #to fix AC/DC
                         fn = os.path.join( destination, (  ( album["artist"].replace("/", "").replace("'","") ) + " - " + ( album["title"].replace("/","").replace("'","") ) + ".png").lower())
-                    print "#    destination: %s" % destination
+                    #print "#    destination: %s" % destination
                     if not os.path.exists(destination):
                         #pass
                         os.makedirs(destination)
                     else:
                         pass
                     
-                    #print "filename: %s" % fn
+                    print "filename: %s" % fn
                     try:
                         shutil.copy(source, fn)
                         count = count + 1
@@ -1022,9 +1020,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
                 url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
                 cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
-                print "#   cdart_path: %s" % cdart_path["path"]
-                print "#   url: %s" % url
-                print "#   local_cdart: %s" % local_cdart
+                #print "#   cdart_path: %s" % cdart_path["path"]
+                #print "#   url: %s" % url
+                #print "#   local_cdart: %s" % local_cdart
                 if not local_cdart == "": #Test to see if there is a path in local_cdart
                     image = local_cdart
                     self.getControl( 210 ).setImage( image )
@@ -1172,9 +1170,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 137 : #Local cdART List
             self.getControl( 122 ).reset()
             self.populate_local_cdarts()
-        #if controlId == 140 : #Local cdART selection
+        if controlId == 140 : #Local cdART selection
             #print controlId
-            #self.setFocusId( 142 )
+            self.setFocusId( 142 )
         if controlId == 104 : #Settings
             self.menu_mode = 5
             __settings__.openSettings()
@@ -1191,7 +1189,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.cdart_icon()
         buttonCode =  action.getButtonCode()
         actionID   =  action.getId()
-        print "onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode)
+        #print "onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode)
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
         if actionID == 10:
@@ -1200,7 +1198,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.close()
    
 def onAction( self, action ):
-    print action
+    #print action
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
     if ( action.getButtonCode() in CANCEL_DIALOG ):
