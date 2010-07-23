@@ -380,7 +380,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #print fp, h
                 message = [_(32023), _(32024), "File: %s" % album["path"] , "Url: %s" % url_cdart]
                 #message = ["Download Sucessful!"]
-                c.execute("""UPDATE alblist SET cdart="TRUE" WHERE title='%s'""" % album["title"])
+                c.execute('''UPDATE alblist SET cdart="TRUE" WHERE title="%s"''' % album["title"])
                 download_success = 1
             else:
                 #print "path does not exist"
@@ -1159,8 +1159,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 122 : #Retrieving information from Album List
             print "#  Setting up Album List"
-            local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
-            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             self.getControl( 140 ).reset()
             select = None
             local = ""
@@ -1200,6 +1198,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     message, d_success = self.download_cdart( cdart_url, cdart_path )
                     xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
                     pDialog.close()
+            local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.executebuiltin( "CleanLibrary(music)") 
