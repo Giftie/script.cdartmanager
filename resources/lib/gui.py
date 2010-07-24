@@ -1239,15 +1239,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setFocusId( 142 )
             artist = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[0]).replace("[COLOR=FFFF4500]","")
             album_title = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[1]).replace("[/COLOR]","")
-            print "# Album: %s" % album_title
-            print "# Artist: %s" % artist
+            #print "# Album: %s" % album_title
+            #print "# Artist: %s" % artist
             self.getControl( 300 ).setLabel( self.getControl(140).getSelectedItem().getLabel() )
         if controlId == 143 : #Delete cdART
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
             artist = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[0]).replace("[COLOR=FFFF4500]","")
             album_title = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[1]).replace("[/COLOR]","")
             #print "# Path: %s" % path
-            print "# Album: %s" % album_title
+            #print "# Album: %s" % album_title
             self.single_cdart_delete( path, album_title )
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
@@ -1257,20 +1257,20 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[0]).replace("[COLOR=FFFF4500]","")
             album_title = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[1]).replace("[/COLOR]","")
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
-            print "# Album: %s" % album_title
-            print "# Artist: %s" % artist
+            #print "# Album: %s" % album_title
+            #print "# Artist: %s" % artist
             self.single_backup_copy( artist, album_title, path )
         if controlId == 144 : #Copy to Unique folder
             artist = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[0]).replace("[COLOR=FFFF4500]","")
             album_title = ((self.getControl(140).getSelectedItem().getLabel()).split(" - ")[1]).replace("[/COLOR]","")
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
-            print "# Album: %s" % album_title
-            print "# Artist: %s" % artist
+            #print "# Album: %s" % album_title
+            #print "# Artist: %s" % artist
             self.single_unique_copy( artist, album_title, path )
         if controlId == 100 : #Search Artist
             self.setFocusId( 105 )
         if controlId == 103 : #Advanced
-            self.setFocusId( 129 )
+            self.setFocusId( 130 )
             	
 
     def onFocus( self, controlId ):
