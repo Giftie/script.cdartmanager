@@ -130,16 +130,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return artist_list, count
     
     #retrieve local albums based on artist's name from xbmc's db
-    def get_local_album( self , local_id):
-        #print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
+    def get_local_album( self , artist, local_id):
+        print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
         local_album_list = []    
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview Where idArtist="%s" AND strAlbum != ''""" % local_id )
+        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview WHERE idArtist="%s" AND strAlbum != ''""" % local_id )
         for item in d:
             album = {}
-            album["artist"] = translate_string( repr(item[0]).strip("'u") )
-            album["artist_id"] = repr(item[1]).strip("'u")
+            album["artist"] = artist
+            album["artist_id"] = local_id
             album["path"] = (repr(item[2]).strip("'u")).replace('"','')
             album["title"] = translate_string( repr(item[3]).strip("'u").strip('"') )
             if os.path.isfile(os.path.join( album["path"] , "cdart.png").replace("\\\\" , "\\").encode("utf-8")):
@@ -163,43 +163,37 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #Onscreen dialog - Retrieving Recognized Artist List....
         for artist in l_artist:
             name = str.lower(artist["name"])
-            #print "#  Artist Name: %s" % name
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(name) ), distant_artist )
             percent = int((float(count)/len(l_artist))*100)
             if match: 
                 true = true + 1
                 artist["distant_id"] = match.group(1)
-                #print "#  Distant ID: %s" % artist["distant_id"]
                 recognized.append(artist)
                 artist_list.append(artist)
             else:
-                s_name = name.lstrip("the ") # Try removing 'the ' from the name
+                s_name = name
+                if (s_name.split(" ")[0]) == "the":
+                    s_name = s_name.replace("the ", "") # Try removing 'the ' from the name
                 match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
                 if match: 
                     true = true + 1
                     artist["distant_id"] = match.group(1)
-                    #print "#  Distant ID: %s" % artist["distant_id"]
                     recognized.append(artist)
                     artist_list.append(artist)
                 else:
-                    #if (name.split(" ")[0]) == "the":
-                    s_name = ((name.lstrip("the ")).replace("/","")).replace("&","&amp;") # Try removing 'the ', / and change & to &amp; from the name
-                    #else:
-                    #    s_name = (self.remove_special( name )).replace("&","&amp;") ) # give it a try, but changing some special characters
+                    s_name = s_name.replace("&","&amp;") #Change any '&' to '&amp;' - matches xbmcstuff.com's format
                     match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
                     if match: 
                         true = true + 1
                         artist["distant_id"] = match.group(1)
-                        #print "#  Distant ID: %s" % artist["distant_id"]
                         recognized.append(artist)
                         artist_list.append(artist)
                     else:
-                        s_name = self.remove_special( name.lstrip("the ") ).replace("&","&amp;") # Try removing 'the ', / and change & to &amp; from the name
+                        s_name = self.remove_special( s_name ) #remove punctuation and other special characters
                         match = re.search('<artist id="(.*?)">%s</artist>' % re.escape(s_name), distant_artist )
                         if match: 
                             true = true + 1
                             artist["distant_id"] = match.group(1)
-                            #print "#  Distant ID: %s" % artist["distant_id"]
                             recognized.append(artist)
                             artist_list.append(artist)
                         else:    
@@ -250,7 +244,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         match = re.search( "<artist>(.*?)</artist>", i )
                         if match:
                             album["artist"] = set_entity_or_charref((match.group(1).replace("&amp;", "&")).replace("'",""))
-                            print "#               Artist Matched: %s" % album["artist"]
+                            #print "#               Artist Matched: %s" % album["artist"]
                         else:
                             album["artist"] = ""
                         if not album["artist"] in search_dialog:
@@ -260,19 +254,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             album["title"] = (match.group(1).replace("&amp;", "&")).replace("'","")
                         else:
                             album["title"] = ""
-                        print "#                         Album Title: %s" % album["title"]
+                        #print "#                         Album Title: %s" % album["title"]
                         match = re.search( "<thumb>(.*?)</thumb>", i )
                         if match:
                             album["thumb"] = (match.group(1))
                         else:
                             album["thumb"] = ""
-                        print "#                         Album Thumb: %s" % album["thumb"]                        
+                        #print "#                         Album Thumb: %s" % album["thumb"]                        
                         match = re.search( "<picture>(.*?)</picture>", i )
                         if match:
                             album["picture"] = (match.group(1))
                         else:
                             album["picture"] = ""                    
-                        print "#                         Album cdART: %s" % album["picture"]
+                        #print "#                         Album cdART: %s" % album["picture"]
                         search_list.append(album)            
             if search_dialog: 
                 select = xbmcgui.Dialog().select( _(32032), search_dialog)
@@ -298,10 +292,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         s_title = ""
         rms_title = ""
         s_title = self.remove_special( title )
-        #print "#   title: %s" % title
         cdart_find = {}
         for album in cdart_url:
-            #print album
             r_title1 = str.lower( album["title"] )
             r_title2 = str.lower( album["title"].split(" (")[0] )
             r_title3 = str.lower(self.remove_special( album["title"] ))
@@ -317,28 +309,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 cdart_find["artistl_id"]=""
                 cdart_find["local_name"]=""
                 cdart_find["artist_name"]=""
-        return cdart_find
-            
-            
-        
+        return cdart_find        
     
     # finds the cdart for the album list    
     def find_cdart( self , aname , atitle ):
         match = None
         name = str.lower( aname )
         title = str.lower( atitle )
-        #print "#  name: %s" % name
-        #print "#  title: %s" % title
         xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(title.replace("&", "&amp;")) , urllib.quote_plus(name.replace("&", "&amp;"))))
-        #print "# xml: %s" % xml
         match = re.search("<no_result", xml)
         if match:
             s_name = self.remove_special( name )
             s_title = self.remove_special( title )
-            #print "#  s_name: %s" % s_name
-            #print "#  S_title: %s" % s_title        
             xml = self.get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(s_title.replace("&", "&amp;")) , urllib.quote_plus(s_name.replace("&", "&amp;"))))
-            #print "# xml: %s" % xml
             if not xml == "":
                 match = re.findall( "<picture>(.*?)</picture>", xml )
             else:
@@ -356,8 +339,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def download_cdart( self, url_cdart , album ):
         destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png") 
         download_success = 0
-	#print url_cdart
-        #print destination
         pDialog.create( _(32047) )
         #Onscreen Dialog - "Downloading...."
         #
@@ -369,21 +350,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
             def _report_hook( count, blocksize, totalsize ):
                 percent = int( float( count * blocksize * 100 ) / totalsize )
                 strProgressBar = str( percent )
-                #print "percent: %s:" % percent
                 pDialog.update( percent, _(32035) )
                 #Onscreen Dialog - *DOWNLOADING CDART*
                 if ( pDialog.iscanceled() ):
                     pass  
             if os.path.exists(album["path"]):
-                #print "Path exists"                
                 fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
-                #print fp, h
                 message = [_(32023), _(32024), "File: %s" % album["path"] , "Url: %s" % url_cdart]
                 #message = ["Download Sucessful!"]
                 c.execute('''UPDATE alblist SET cdart="TRUE" WHERE title="%s"''' % album["title"])
                 download_success = 1
             else:
-                #print "path does not exist"
                 message = [ _(32026),  _(32025) , "File: %s" % album["path"] , "Url: %s" % url_cdart]
                 #message = Download Problem, Check file paths - cdART Not Downloaded]           
             if ( pDialog.iscanceled() ):
@@ -418,7 +395,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %s     Local ID: %s   Distant ID: %s" % (artist["name"], artist["local_id"], artist["distant_id"])
-            local_album_list = self.get_local_album( artist["local_id"] )
+            local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
             for album in local_album_list:
                 album_count = album_count + 1
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
@@ -472,7 +449,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %s     Local ID: %s" % (artist["name"], artist["local_id"])
-            local_album_list = self.get_local_album( artist["local_id"] )
+            local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
             for album in local_album_list:
                 temp_album = {}
                 album_count = album_count + 1
@@ -523,6 +500,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def remote_cdart_list( self, artist_menu ):
         cdart_url = []
+        print "#  Finding Remote cdARTs"
         #If there is something in artist_menu["distant_id"] build cdart_url
         #print "# distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
@@ -578,7 +556,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print "# "
             #print "#  Building album list based on:"
             #print "#        artist: %s     local_id: %s" % (cdart_url[0]["local_name"], cdart_url[0]["artistl_id"] )
-            local_album_list = self.get_local_album(cdart_url[0]["artistl_id"])
+            local_album_list = self.get_local_album(cdart_url[0]["local_name"], cdart_url[0]["artistl_id"])
             cdart_img = ""
             label1 = ""
             label2 = ""
@@ -684,7 +662,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             c.execute("insert into lalist(local_id, name) values (?, ?)", (artist["local_id"], artist["name"]))
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100) 
-            local_album_list = self.get_local_album( artist["local_id"] )
+            local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
             for album in local_album_list:
                 pDialog.update( percent, _(32016), "" , "%s - %s" % ( artist["name"] , album["title"] ) )
                 album_count = album_count + 1               
@@ -1158,7 +1136,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print artist_menu
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 122 : #Retrieving information from Album List
-            print "#  Setting up Album List"
+            #print "#  Setting up Album List"
             self.getControl( 140 ).reset()
             select = None
             local = ""
