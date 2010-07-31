@@ -4,7 +4,7 @@ __author__        = "Giftie"
 __version__       = "0.9.9"
 __credits__       = "Ppic, Reaven, Imaginos"
 __XBMC_Revision__ = "32000"
-__date__          = "28-07-10"
+__date__          = "31-07-10"
 import sys
 import os
 import xbmcaddon

@@ -230,15 +230,24 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album = {}
             album["artist"] = artist
             album["artist_id"] = local_id
-            #path = item[2]   #.translate(unaccented_map())
-            #album["path"] = ((repr(path).lstrip("'u")).rstrip("'")).strip('"')
-            #print "#     Album Path: %s" % album["path"]
-            #print "#     Item[3]: %s" % repr(item[3])
-            #title = item[3] #.translate(unaccented_map())
-            #album["title"] = ((repr(title).lstrip("'u")).rstrip("'")).strip('"')
-            #print "#     Album Title: %s" % album["title"]
             album["path"] = (repr(item[2]).lstrip("'u").rstrip("'")).replace('"','')
-            album["title"] = translate_string( repr(item[3]).lstrip("'u").strip('"').rstrip("'") )
+            #print "#     Album Path: %s" % album["path"]
+            title = translate_string( repr(item[3]).lstrip("'u").strip('"').rstrip("'") )
+            #print "#     Title: %s" % title
+            path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)." , album["path"], re.I)
+            title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)" , title, re.I)
+            if title_match:
+                print "#     Title has CD count"
+                album["title"] = title
+            else:
+                if path_match:
+                    print "#     Path has CD count"
+                    print "#        %s" % path_match.group(1)
+                    album["title"] = "%s - %s" % (title, path_match.group(1))
+                    print "#     New Album Title: %s" % album["title"]
+                else:
+                    album["title"] = title
+                
             if os.path.isfile(os.path.join( album["path"] , "cdart.png").replace("\\\\" , "\\").encode("utf-8")):
                 album["cdart"] = "TRUE"
             else :
@@ -928,6 +937,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "### Copying Unique cdARTs..."
         percent = 0
         count = 0
+        duplicates = 0
         destination = ""
         album = {}
         fn_format = int(__settings__.getSetting("folder"))
@@ -959,12 +969,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         pass
                     #print "filename: %s" % fn
-                    try:
-                        shutil.copy(source, fn)
-                        count=count + 1
-                        pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
-                    except:
-                        print "#  Copying error, check path and file permissions"
+                    if os.path.isfile(fn):
+                        print "################## cdART Not being copied, File exists: %s" % fn
+                        duplicates = duplicates + 1
+                    else:
+                        try:
+                            shutil.copy(source, fn)
+                            count=count + 1
+                            pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ), "%s Duplicates Found" % duplicates )
+                        except:
+                            print "#  Copying error, check path and file permissions"
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
@@ -1010,9 +1024,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if fn_format == 0:
                 source=os.path.join( bkup_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
                 fn = os.path.join(source, ( ( part["title"].replace("/","").replace("'","") ) + ".png") )
+                if not os.path.isfile(fn):
+                    source=os.path.join( bkup_folder ) #to fix AC/DC
+                    fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
             else:
                 source=os.path.join( bkup_folder ) #to fix AC/DC
                 fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
+                if not os.path.isfile(fn):
+                    source=os.path.join( bkup_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
+                    fn = os.path.join(source, ( ( part["title"].replace("/","").replace("'","") ) + ".png") )
             print "#        Source folder: %s" % source
             print "#        Source filename: %s" % fn
             if os.path.isfile(fn):
@@ -1101,7 +1121,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             total = total + 1        
         pDialog.close()
         print "#     Duplicate cdARTs: %s" % duplicates
-        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), bkup_folder), "%s %s" % ( count , _(32059)))
+        xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), bkup_folder), "%s %s" % ( count , _(32059)), "%s Duplicates Found" % duplicates)
         return
     
          
