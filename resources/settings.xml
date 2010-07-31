@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="Settings">
-        <setting label="32017" type="folder" id="cdart_path" default="" source="auto" option="writeable" />
+        <setting type="sep" />
+        <setting label="32095" type="lsep" />
         <setting label="32018" type="folder" id="backup_path" default="" source="auto" option="writeable" />
         <setting label="32062" type="folder" id="unique_path" default="" source="auto" option="writeable" />
         <setting id="folder" type="enum" label="32019" lvalues="32054|32055" default="0"/>
+        <setting label="" type="lsep" />
+        <setting type="sep" />
+        <setting label="32077" type="lsep" />
+        <setting label="32094" type="bool" id="enablecustom" default="false" />
+        <setting label="32087" type="labelenum" id="recognized"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32078" />
+        <setting label="32088" type="labelenum" id="unrecognized" lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32083" />
+        <setting label="32089" type="labelenum" id="remote"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32080" />
+        <setting label="32090" type="labelenum" id="local"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32082" />
+        <setting label="32091" type="labelenum" id="remotelocal"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32080" /> 
+        <setting label="32092" type="labelenum" id="unmatched"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32084" />
+        <setting label="32093" type="labelenum" id="localcdart"  lvalues="32078|32079|32080|32081|32082|32083|32084|32085|32086" default="32083" />
+        <setting type="sep" />
     </category>
 </settings>
