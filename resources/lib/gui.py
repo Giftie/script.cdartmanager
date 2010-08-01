@@ -10,7 +10,6 @@
 #        then write to l_cdart - alblist with the important information
 #
 
-import platform
 import urllib
 import sys
 import os
