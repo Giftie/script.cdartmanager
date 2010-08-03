@@ -202,7 +202,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Retrieving Local Artist from XBMC's Music DB"
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview ')
+        d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""')
         count = 1
         artist_list = []
         for item in d:
