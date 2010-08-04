@@ -217,43 +217,98 @@ class GUI( xbmcgui.WindowXMLDialog ):
         count = count - 1
         print "# Total Local Artists: %s" % count
         return artist_list, count
+
+    def get_albums(self, local_id):
+        print "get_albums"
+        path =""
+        search_title = ""
+        album_songview = []
+        conn_b = sqlite3.connect(musicdb_path)
+        d = conn_b.cursor()
+        d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
+        #print d
+        print "hello"
+        for l in d:
+            album = {}
+            album["title"]=(translate_string( repr(l[0]).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+            #print "album %s" % album["title"]
+            album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
+            #print album["path"]
+            album_songview.append(album)
+        print len(album_songview)
+        if len(album_songview)==0:
+            album = {}
+            album["title"]=""
+            album["path"]=""
+            album_songview.append(album)
+        print album_songview
+        print "bye"
+        d.close
+        return album_songview
+        
     
     #retrieve local albums based on artist's name from xbmc's db
     def get_local_album( self , artist, local_id):
         print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
-        local_album_list = []    
+        local_album_list = []
+        album_albumview = []
+        temp_albums = []
+        album_songview = []
         conn_b = sqlite3.connect(musicdb_path)
         d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strArtist , idArtist, strPath, strAlbum FROM songview WHERE idArtist="%s" AND strAlbum != ''""" % local_id )
+        d.execute("""SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id)
+        #print d
         for item in d:
+            albums = {}
+            albums["title"] = (translate_string( repr(item[0]).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+            album_albumview.append(albums)
+        print album_albumview
+        d.close
+        album_songview = self.get_albums( local_id )
+        print album_songview
+        print len(album_songview)
+        if album_songview[0]["title"]=="":
             album = {}
-            album["artist"] = artist
-            album["artist_id"] = local_id
-            album["path"] = (repr(item[2]).lstrip("'u").rstrip("'")).replace('"','')
-            #print "#     Album Path: %s" % album["path"]
-            title = translate_string( repr(item[3]).lstrip("'u").strip('"').rstrip("'") )
-            #print "#     Title: %s" % title
-            path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)." , album["path"], re.I)
-            title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)" , title, re.I)
-            if title_match:
-                print "#     Title has CD count"
-                album["title"] = title
-            else:
-                if path_match:
-                    print "#     Path has CD count"
-                    print "#        %s" % path_match.group(1)
-                    album["title"] = "%s - %s" % (title, path_match.group(1))
-                    print "#     New Album Title: %s" % album["title"]
-                else:
-                    album["title"] = title
+            print "Hi"
+            album["artist"] = ""
+            album["artist_id"] = ""
+            album["path"] = ""
+            album["title"] = ""
+            album["cdart"] = ""
+            local_album_list.append(album)            
+            return local_album_list
+        else:    
+            for item in album_albumview:
+                title = item["title"]
+                print title
+                for songview in album_songview:
+                    if songview["title"] == title:
+                        album = {}
+                        album["artist"] = artist
+                        album["artist_id"] = local_id
+                        album["path"] = songview["path"]
+                        print album["artist"]
+                        print album["path"]
+                        path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)." , album["path"], re.I)
+                        title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)" , title, re.I)
+                        if title_match:
+                            print "#     Title has CD count"
+                            album["title"] = title
+                        else:
+                            if path_match:
+                                print "#     Path has CD count"
+                                print "#        %s" % path_match.group(1)
+                                album["title"] = "%s - %s" % (title, path_match.group(1))
+                                print "#     New Album Title: %s" % album["title"]
+                            else:
+                                album["title"] = title
                 
-            if os.path.isfile(os.path.join( album["path"] , "cdart.png").replace("\\\\" , "\\").encode("utf-8")):
-                album["cdart"] = "TRUE"
-            else :
-                album["cdart"] = "FALSE"
-            local_album_list.append(album)
-            d.close
-        return local_album_list
+                        if os.path.isfile(os.path.join( album["path"] , "cdart.png").replace("\\\\" , "\\").encode("utf-8")):
+                            album["cdart"] = "TRUE"
+                        else :
+                            album["cdart"] = "FALSE"
+                        local_album_list.append(album)
+            return local_album_list
 
             
     #match artists on xbmcstuff.com with local database    
