@@ -16,6 +16,8 @@
     <platform>all</platform>
     <minversion>31702</minversion>
     <summary>CDArt Manager</summary>
+    <summary lang="hu">CD-kép kezelő</summary>
     <description>With this script you are able to manage your cdARTs.  You can download cdARTs from XBMCSTUFF.COM, Backup your cdARTs, View and even delete your local cdARTs </description>
+    <description lang="hu">A programmal könnyen kezelheted a CD lemez képeidet (CDArts). Letöltheted vele őket az XBMCSTUFF.COM-ról, biztonsági másolatot készíthetsz róluk, megnézheted és még törölheted is a gépeden lévő lemezképeket.</description>
   </extension>
 </addon>

@@ -1,6 +1,7 @@
 1.0.1 - added script.module.pil use
              - Resizing of unique cdARTS for uploading to XBMCSTUFF.com
       - reduced internet access for finding matching cdARTs
+      - Added Hungarian language - Thanks alanww1
       
 1.0.0 - Changed testing of Artists, Albums and Album paths are handled.  Improved Album Artist sorting
 
