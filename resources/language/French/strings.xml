@@ -98,5 +98,6 @@
   <string id="32093">   Local cdART List Color</string>
   <string id="32094">Enable custom colors for labels</string> 
   <string id="32095">File Folders</string>
-  <string id="32096">Duplicates Found</string>  
+  <string id="32096">Duplicates Found</string>
+  <string id="32097">    Resize Unique cdARTs?</string>  
 </strings>

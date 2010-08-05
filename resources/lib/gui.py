@@ -22,6 +22,7 @@ import xbmc
 import socket
 import shutil
 from pysqlite2 import dbapi2 as sqlite3
+from PIL import Image
 from string import maketrans
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
@@ -219,7 +220,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return artist_list, count
 
     def get_albums(self, local_id):
-        print "get_albums"
+        #print "get_albums"
         path =""
         search_title = ""
         album_songview = []
@@ -227,7 +228,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         d = conn_b.cursor()
         d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
         #print d
-        print "hello"
         for l in d:
             album = {}
             album["title"]=(translate_string( repr(l[0]).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
@@ -235,14 +235,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
             #print album["path"]
             album_songview.append(album)
-        print len(album_songview)
         if len(album_songview)==0:
             album = {}
             album["title"]=""
             album["path"]=""
             album_songview.append(album)
-        print album_songview
-        print "bye"
         d.close
         return album_songview
         
@@ -262,14 +259,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             albums = {}
             albums["title"] = (translate_string( repr(item[0]).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
             album_albumview.append(albums)
-        print album_albumview
         d.close
         album_songview = self.get_albums( local_id )
-        print album_songview
-        print len(album_songview)
         if album_songview[0]["title"]=="":
             album = {}
-            print "Hi"
             album["artist"] = ""
             album["artist_id"] = ""
             album["path"] = ""
@@ -280,15 +273,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:    
             for item in album_albumview:
                 title = item["title"]
-                print title
+                #print title
                 for songview in album_songview:
                     if songview["title"] == title:
                         album = {}
                         album["artist"] = artist
                         album["artist_id"] = local_id
                         album["path"] = songview["path"]
-                        print album["artist"]
-                        print album["path"]
+                        #print album["artist"]
+                        #print album["path"]
                         path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)." , album["path"], re.I)
                         title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d)" , title, re.I)
                         if title_match:
@@ -472,7 +465,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return cdart_find        
     
     # finds the cdart for the album list    
-    def find_cdart( self , aname , atitle ):
+    def find_cdart( self , aname , atitle, remote_cdart_url ):
+        match = ""
+        name = str.lower( aname )
+        title = str.lower( atitle )
+        for item in remote_cdart_url:
+            if str.lower(item["title"])==title:
+                return item["picture"]
+        return match
+
+
+    # finds the cdart for the album list    
+    def find_cdart2( self , aname , atitle ):
         match = None
         name = str.lower( aname )
         title = str.lower( atitle )
@@ -555,18 +559,22 @@ class GUI( xbmcgui.WindowXMLDialog ):
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (artist["name"], artist["local_id"], artist["distant_id"])
             local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
+            remote_cdart_url = self.remote_cdart_list( artist, 2 )
             for album in local_album_list:
+                if remote_cdart_url == []:
+                    print "#    No cdARTs found"
+                    break
                 album_count = album_count + 1
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
                 name = artist["name"]
                 title = album["title"]
                 print "#     Album: %s" % album["title"]
                 if album["cdart"] == "FALSE":
-                    test_album = self.find_cdart( name, title )
-                    if not test_album == [] : 
+                    test_album = self.find_cdart( name, title, remote_cdart_url )
+                    if not test_album == "" : 
                         print "#            ALBUM MATCH FOUND"
                         #print "test_album[0]: %s" % test_album[0]
-                        message, d_success = self.download_cdart( test_album[0] , album )
+                        message, d_success = self.download_cdart( test_album , album )
                         if d_success == 1:
                             download_count = download_count + 1
                             album["cdart"] = "TRUE"
@@ -618,7 +626,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 name = artist["name"]
                 title = album["title"]
                 pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
-                test_album = self.find_cdart(name , title)
+                test_album = self.find_cdart2(name , title)
                 print "#        Album: %s" % album["title"]
                 if not test_album == [] : 
                     print "#            ALBUM MATCH FOUND"
@@ -657,12 +665,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
             differnece = 0
         return cdart_lvd, difference
 
-    def remote_cdart_list( self, artist_menu ):
+    def remote_cdart_list( self, artist_menu, mode ):
         print "#  Finding Remote cdARTs"
         print "# "
+        if mode == 1:
+            print "#        Mode - Populate Album List"
+        elif mode == 2:
+            print "#        Mode - Find cdART"
+        else:
+            print "#        Mode - unknown"        
         cdart_url = []
         #If there is something in artist_menu["distant_id"] build cdart_url
-        #print "# distant id: %s" % artist_menu["distant_id"]
+        print "# distant id: %s" % artist_menu["distant_id"]
         if artist_menu["distant_id"] :
             #print "#    Local artist matched on XBMCSTUFF.COM"
             #print "#        Artist: %s     Local ID: %s     Distant ID: %s" % (artist_menu["name"] , artist_menu["local_id"] , artist_menu["distant_id"])
@@ -697,8 +711,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 cdart_url.append(album)
                 #print "cdart_url: %s " % cdart_url
         #If artist_menu["distant_id"] is empty, search for name match
-        else :
-            cdart_url = self.search( artist_menu["name"], artist_menu["local_id"])
+        else:
+            if mode == 1:
+                cdart_url = self.search( artist_menu["name"], artist_menu["local_id"])
+            else:
+                pass
             #print cdart_url
         return cdart_url
             
@@ -908,6 +925,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         destination = ""
         fn_format = int(__settings__.getSetting("folder"))
         unique_folder = __settings__.getSetting("unique_path")
+        resize = __settings__.getSetting("enableresize")
         if unique_folder =="":
             __settings__.openSettings()
             unique_folder = __settings__.getSetting("unique_path")
@@ -928,7 +946,26 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 pass
             print "filename: %s" % fn
             try:
-                shutil.copy(source, fn)
+                if resize:
+                    try:
+                        cdart = Image.open(source)
+                        print "##   Opening image: %s" % source
+                        if cdart.size[0] != cdart.size[1]:
+                            print "###      Original cdART not square, not my fault if resize is wrong ###"
+                        if cdart.size[0] > 450 or cdart.size[1] > 450:
+                            print "##       Resizing cdART"
+                            cdart_resized = cdart.resize((450,450), Image.ANTIALIAS)
+                            print "##   Saving image: %s" % fn
+                            cdart_resized.save(fn)
+                        else:
+                            print "##       Not Resizing...."
+                            print "#    Saving: %s" % fn
+                            shutil.copy(source, fn)
+                    except:
+                        print "#### Resizing error"
+                else:
+                    print "#    Saving: %s" % fn
+                    shutil.copy(source, fn)
             except:
                 print "#  Copying error, check path and file permissions"
         else:
@@ -985,7 +1022,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "#   Error: cdART file does not exist..  Please check..."
         return
     
-    
     # Copy's all the local unique cdARTs to a folder specified bye the user
     def unique_cdart_copy( self, unique ):
         print "### Copying Unique cdARTs..."
@@ -996,6 +1032,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album = {}
         fn_format = int(__settings__.getSetting("folder"))
         unique_folder = __settings__.getSetting("unique_path")
+        resize = __settings__.getSetting("enableresize")
         if unique_folder =="":
             __settings__.openSettings()
             unique_folder = __settings__.getSetting("unique_path")
@@ -1004,11 +1041,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.create( _(32060) )
         for album in unique:
             #print album
+            percent = int((count/len(unique))*100)
             if (pDialog.iscanceled()):
                 break
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
-                #print "#    source: %s" % source
+                print "#    Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"])
+                print "#        source: %s" % source
                 if os.path.isfile(source):
                     if fn_format == 0:
                         destination=os.path.join(unique_folder, (album["artist"].replace("/","")).replace("'","")) #to fix AC/DC
@@ -1016,23 +1055,43 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         destination=unique_folder
                         fn = os.path.join(destination, ((((album["artist"].replace("/", "")).replace("'","")) + " - " + ((album["title"].replace("/","")).replace("'","")) + ".png").lower()))
-                    #print "#    destination: %s" % destination
                     if not os.path.exists(destination):
                         #pass
                         os.makedirs(destination)
                     else:
                         pass
-                    #print "filename: %s" % fn
+                    print "#        destination: %s" % fn
                     if os.path.isfile(fn):
                         print "################## cdART Not being copied, File exists: %s" % fn
                         duplicates = duplicates + 1
                     else:
                         try:
-                            shutil.copy(source, fn)
+                            if resize:
+                                try:
+                                    cdart = Image.open(source)
+                                    print "##   Opening image: %s" % source
+                                    if cdart.size[0] != cdart.size[1]:
+                                        print "###      Original cdART not square, not my fault if resize is wrong ###"
+                                    if cdart.size[0] > 450 or cdart.size[1] > 450:
+                                        print "##       Resizing cdART"
+                                        cdart_resized = cdart.resize((450,450), Image.ANTIALIAS)
+                                        print "##   Saving image: %s" % fn
+                                        cdart_resized.save(fn)
+                                    else:
+                                        print "##       Not Resizing...."
+                                        print "#    Saving: %s" % fn
+                                        shutil.copy(source, fn)
+                                except:
+                                    print "#### Resizing error"
+                            
+                            else:
+                                print "#    Saving: %s" % fn                                    
+                                shutil.copy(source, fn)
                             count=count + 1
-                            pDialog.update( percent , (_(32064) % unique_folder) , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ), "%s Duplicates Found" % duplicates )
                         except:
                             print "#  Copying error, check path and file permissions"
+                            count=count + 1
+                        pDialog.update( percent, _(32064) % unique_folder , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
@@ -1072,7 +1131,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for part in local_db:
             if (pDialog.iscanceled()):
                 break
-            print "#     Artist: %-30s  Album: %s" % (part["artist"], part["title"])
+            print "#     Artist: %-30s  ##  Album: %s" % (part["artist"], part["title"])
             print "#        Album Path: %s" % part["path"]
             percent = int(total_count/float(total_albums))*100
             if fn_format == 0:
@@ -1319,7 +1378,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.artist_menu["local_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
                 self.artist_menu["name"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
                 self.artist_menu["distant_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
-            self.remote_cdart_url = self.remote_cdart_list( self.artist_menu )
+            self.remote_cdart_url = self.remote_cdart_list( self.artist_menu, 1 )
             #print "# %s" % self.artist_menu
             #print artist_menu
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
