@@ -133,7 +133,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.remotelocal_color = "yellow"
             self.unmatched_color = "white"
             self.localcdart_color = "orange"
-        print "#### Custom Colours
+        print "#### Custom Colours"
         print "#  Recognized: %s" % self.recognized_color
         print "#  Unrecognized: %s" % self.unrecognized_color
         print "#  Remote: %s" % self.remote_color
@@ -141,7 +141,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Local & Remote Match: %s" % self.remotelocal_color
         print "#  Unmatched: %s" % self.unmatched_color
         print "#  Local cdART: %s" % self.localcdart_color
-        print "#### End Custom Colours
+        print "#### End Custom Colours"
             
 
     def remove_special( self, temp ):
@@ -1099,9 +1099,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
                 if album["local"] and album["distant"]:
-                    print "#    Local and Distant cdART exists"
+                    print "#        Local and Distant cdART exists"
                 else:
-                    print "#    Local cdART does not exists"
+                    print "#        Local cdART does not exists"
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
         return
