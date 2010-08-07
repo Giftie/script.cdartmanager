@@ -925,11 +925,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         destination = ""
         fn_format = int(__settings__.getSetting("folder"))
         unique_folder = __settings__.getSetting("unique_path")
-        resize = __settings__.getSetting("enableresize")
         if unique_folder =="":
             __settings__.openSettings()
             unique_folder = __settings__.getSetting("unique_path")
-        print "#    source: %s" % source
+        resize = __settings__.getSetting("enableresize")
+        print "#    Resize: %s" % resize
+        print "#    Unique Folder: %s" % unique_folder
         if os.path.isfile(source):
             print "#    source: %s" % source
             if fn_format == 0:
@@ -944,7 +945,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 os.makedirs(destination)
             else:
                 pass
-            print "filename: %s" % fn
             try:
                 if resize:
                     try:
@@ -958,7 +958,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             print "##   Saving image: %s" % fn
                             cdart_resized.save(fn)
                         else:
-                            print "##       Not Resizing...."
+                            print "##       Resizing Not Needed...."
                             print "#    Saving: %s" % fn
                             shutil.copy(source, fn)
                     except:
@@ -1025,6 +1025,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # Copy's all the local unique cdARTs to a folder specified bye the user
     def unique_cdart_copy( self, unique ):
         print "### Copying Unique cdARTs..."
+        print "#"
         percent = 0
         count = 0
         duplicates = 0
@@ -1032,22 +1033,22 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album = {}
         fn_format = int(__settings__.getSetting("folder"))
         unique_folder = __settings__.getSetting("unique_path")
-        resize = __settings__.getSetting("enableresize")
         if unique_folder =="":
             __settings__.openSettings()
             unique_folder = __settings__.getSetting("unique_path")
-        #print "#    fn_format: %s" % fn_format
-        #print "#    unique_folder: %s" % unique_folder
+        resize = __settings__.getSetting("enableresize")
+        print "#    Unique Folder: %s" % unique_folder
+        print "#    Resize: %s" % resize
         pDialog.create( _(32060) )
         for album in unique:
             #print album
             percent = int((count/len(unique))*100)
+            print "#    Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"])
             if (pDialog.iscanceled()):
                 break
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
-                print "#    Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"])
-                print "#        source: %s" % source
+                print "#        Source: %s" % source
                 if os.path.isfile(source):
                     if fn_format == 0:
                         destination=os.path.join(unique_folder, (album["artist"].replace("/","")).replace("'","")) #to fix AC/DC
@@ -1060,7 +1061,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         os.makedirs(destination)
                     else:
                         pass
-                    print "#        destination: %s" % fn
+                    print "#        Destination: %s" % fn
                     if os.path.isfile(fn):
                         print "################## cdART Not being copied, File exists: %s" % fn
                         duplicates = duplicates + 1
@@ -1095,7 +1096,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
-                pass
+                print "#   Local and Distant cdART exists"
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
         return
