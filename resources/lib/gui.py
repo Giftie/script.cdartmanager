@@ -133,13 +133,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.remotelocal_color = "yellow"
             self.unmatched_color = "white"
             self.localcdart_color = "orange"
-        print self.recognized_color
-        print self.unrecognized_color
-        print self.remote_color
-        print self.local_color
-        print self.remotelocal_color
-        print self.unmatched_color
-        print self.localcdart_color
+        print "#### Custom Colours
+        print "#  Recognized: %s" % self.recognized_color
+        print "#  Unrecognized: %s" % self.unrecognized_color
+        print "#  Remote: %s" % self.remote_color
+        print "#  Local: %s" % self.local_color
+        print "#  Local & Remote Match: %s" % self.remotelocal_color
+        print "#  Unmatched: %s" % self.unmatched_color
+        print "#  Local cdART: %s" % self.localcdart_color
+        print "#### End Custom Colours
             
 
     def remove_special( self, temp ):
@@ -246,7 +248,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     #retrieve local albums based on artist's name from xbmc's db
     def get_local_album( self , artist, local_id):
-        print "#  Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
+        print "#    Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
         local_album_list = []
         album_albumview = []
         temp_albums = []
@@ -1096,7 +1098,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
             else:
-                print "#   Local and Distant cdART exists"
+                if album["local"] and album["distant"]:
+                    print "#    Local and Distant cdART exists"
+                else:
+                    print "#    Local cdART does not exists"
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
         return
