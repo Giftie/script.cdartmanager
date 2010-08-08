@@ -36,6 +36,8 @@ KEY_KEYBOARD_ESC = 61467
 _              = sys.modules[ "__main__" ].__language__
 __scriptname__ = sys.modules[ "__main__" ].__scriptname__
 __scriptID__   = sys.modules[ "__main__" ].__scriptID__
+__author__     = sys.modules[ "__main__" ].__author__
+__credits__    = sys,modules[ "__main__" ].__credits__
 __version__    = sys.modules[ "__main__" ].__version__
 __settings__   = sys.modules[ "__main__" ].__settings__
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
@@ -113,6 +115,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
 
     def onInit( self ):
+        print "############################################################"
+        print "#    %-50s    #" % __scriptname__
+        print "#        gui.py module                                     #"
+        print "#    %-50s    #" % __scriptID__
+        print "#    %-50s    #" % __author__
+        print "#    %-50s    #" % __version__
+        print "#    %-50s    #" % __credits__
+        print "#    Thanks the the help guys...                           #"
+        print "############################################################"
         self.setup_colors()       
 	self.setup_all()
 
