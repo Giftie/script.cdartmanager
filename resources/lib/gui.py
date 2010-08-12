@@ -37,7 +37,7 @@ _              = sys.modules[ "__main__" ].__language__
 __scriptname__ = sys.modules[ "__main__" ].__scriptname__
 __scriptID__   = sys.modules[ "__main__" ].__scriptID__
 __author__     = sys.modules[ "__main__" ].__author__
-__credits__    = sys,modules[ "__main__" ].__credits__
+__credits__    = sys.modules[ "__main__" ].__credits__
 __version__    = sys.modules[ "__main__" ].__version__
 __settings__   = sys.modules[ "__main__" ].__settings__
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
@@ -1339,6 +1339,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 image =""
                 #image=addon_img
         self.getControl( 210 ).setImage( image )
+
+    def popup(self, header, line1, line2, line3):        
+        #self.getControl( 400 ).setLabel( header )
+        #self.getControl( 150 ).setLabel( line1 )
+        #self.getControl( 151 ).setLabel( line2 )
+        #self.getControl( 152 ).setLabel( line3 )
+        #self.getControl( 9012 ).setVisible( True )
+        pDialog.create( header, line1, line2, line3 )
+        xbmc.sleep(2000)
+        pDialog.close()
+        #self.getControl( 9012 ).setVisible( False )        
             
     # setup self. strings and initial local counts
     def setup_all( self ):
@@ -1499,7 +1510,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.single_cdart_delete( path, album_title )
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-            self.setFocusId( 140 )
+            self.popup( _(32075), self.getControl(140).getSelectedItem().getLabel(),"", "")
+            self.setFocusId( 140 )            
             self.populate_local_cdarts()
         if controlId == 142 : #Backup to backup folder
             artist_album = self.getControl(140).getSelectedItem().getLabel()
@@ -1510,6 +1522,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print "# Album: %s" % album_title
             #print "# Artist: %s" % artist
             self.single_backup_copy( artist, album_title, path )
+            self.popup(_(32074),self.getControl(140).getSelectedItem().getLabel(), "", path)
+            self.setFocusId( 140 )
+            self.populate_local_cdarts()
         if controlId == 144 : #Copy to Unique folder
             artist_album = self.getControl(140).getSelectedItem().getLabel()
             artist_album = self.remove_color(artist_album)
@@ -1519,6 +1534,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print "# Album: %s" % album_title
             #print "# Artist: %s" % artist
             self.single_unique_copy( artist, album_title, path )
+            self.popup(_(32076),self.getControl(140).getSelectedItem().getLabel(), "", path)
+            self.setFocusId( 140 )
+            self.populate_local_cdarts()
         if controlId == 100 : #Search Artist
             self.setFocusId( 105 )
         if controlId == 103 : #Advanced

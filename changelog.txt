@@ -1,3 +1,9 @@
+1.0.3
+- added feedback to user for single cdART copying
+
+1.0.2
+- added logfile footprints
+
 1.0.1 
 - added script.module.pil use
 - Resizing of unique cdARTS for uploading to XBMCSTUFF.com
