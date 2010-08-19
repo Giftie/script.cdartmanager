@@ -890,6 +890,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album["artist"] = translate_string( item[4].encode("utf-8")).strip("'u")
             local_album_list.append(album)
             c.close
+        self.missing_list(local_album_list)
         return local_album_list
     
     #retrieves counts for local album, artist and cdarts
@@ -1253,7 +1254,29 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#     Duplicate cdARTs: %s" % duplicates
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), bkup_folder), "%s %s" % ( count , _(32059)), "%s Duplicates Found" % duplicates)
         return
-    
+
+    def missing_list( self, albums ):
+        count = 0
+        percent = 0
+        line = ""
+        bkup_folder = __settings__.getSetting("backup_path")
+        if bkup_folder =="":
+            __settings__.openSettings()
+            bkup_folder = __settings__.getSetting("backup_path")
+        filename=os.path.join(bkup_folder, "missing.txt")
+        missing=open(filename, "w")
+        missing.write("Albums Missing cdARTs\n")
+        missing.write("---------------------\n")
+        missing.write("\n")
+        for album in albums:
+            count = count + 1
+            print album
+            if album["cdart"] == "FALSE":
+                line = album["artist"] + " - " + album["title"]+"\n"
+                print line
+                missing.write( line )
+        missing.close()
+        
          
     def setup_artist_list( self, artist):
         self.artist_menu = {}
