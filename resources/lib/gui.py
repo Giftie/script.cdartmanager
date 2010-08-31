@@ -1268,16 +1268,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
         filename=os.path.join(bkup_folder, "missing.txt")
-        missing=open(filename, "wb")
-        missing.write("Albums Missing cdARTs\n")
-        missing.write("---------------------\n")
-        missing.write("\n")
-        for album in albums:
-            count = count + 1
-            if album["cdart"] == "FALSE":
-                line = album["artist"] + " - " + album["title"]+"\n"
-                missing.write( line )
-        missing.close()
+        try:
+            missing=open(filename, "wb")
+            missing.write("Albums Missing cdARTs\n")
+            missing.write("---------------------\n")
+            missing.write("\n")
+            for album in albums:
+                count = count + 1
+                if album["cdart"] == "FALSE":
+                    line = album["artist"] + " - " + album["title"]+"\n"
+                    missing.write( line )
+            missing.close()
+        except:
+            print "#### Error saving missing.txt file"
         
          
     def setup_artist_list( self, artist):
