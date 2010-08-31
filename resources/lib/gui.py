@@ -484,7 +484,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         name = str.lower( aname )
         title = str.lower( atitle )
         s_title = self.remove_special( title )
-        print remote_cdart_url
         for album in remote_cdart_url:
             r_title1 = str.lower( album["title"] )
             r_title2 = str.lower( album["title"].split(" (")[0] )
@@ -509,12 +508,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if not xml == "":
                 match = re.findall( "<picture>(.*?)</picture>", xml )
             else:
-                print "# Error, xml= %s" % xml
+                print "#### Error, xml= %s" % xml
                 match = []
         elif not xml == "":
             match = re.findall( "<picture>(.*?)</picture>", xml )
         else:
-            print "# Error, xml= %s" % xml
+            print "#### Error, xml= %s" % xml
             match = []
         return match
     
@@ -1260,6 +1259,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
 # Search for missing cdARTs and save to missing.txt in backup folder
     def missing_list( self, albums ):
+        print "#    Saving Missing cdART list to backup folder"
         count = 0
         percent = 0
         line = ""
@@ -1268,7 +1268,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
         filename=os.path.join(bkup_folder, "missing.txt")
-        missing=open(filename, "w")
+        missing=open(filename, "wb")
         missing.write("Albums Missing cdARTs\n")
         missing.write("---------------------\n")
         missing.write("\n")
