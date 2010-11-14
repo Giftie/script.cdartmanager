@@ -20,5 +20,6 @@
     <description>With this script you are able to manage your cdARTs.  You can download cdARTs from XBMCSTUFF.COM, Backup your cdARTs, View and even delete your local cdARTs </description>
     <description lang="hu">A programmal könnyen kezelheted a CD lemez képeidet (CDArts). Letöltheted vele őket az XBMCSTUFF.COM-ról, biztonsági másolatot készíthetsz róluk, megnézheted és még törölheted is a gépeden lévő lemezképeket.</description>
     <description lang="de">Mit diesem Programm verwaltet man seine cdARTs. Man kann cdARTs von XBMCSTUFF.com herunterladen, ein Backup von seinen cdARTs erstellen, cdARTS anzeigen und lokale cdARTs löschen.</description>
+    <description lang="nl">Met dit script kun je je cdARTs beheren. Je kunt cdARTs downloaden van XBMCSTUFF.com, een backup maken, cdARTs bekijken en je eigen cdARTS verwijderen.</description>
   </extension>
 </addon>

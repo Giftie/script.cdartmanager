@@ -250,7 +250,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
             #print "album %s" % album["title"]
             album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
-            #print album["path"]
+            print "Corrected: %s" % album["path"]
+            print "Uncorrected: %s" % l[1]
             album_songview.append(album)
         if len(album_songview)==0:
             album = {}
