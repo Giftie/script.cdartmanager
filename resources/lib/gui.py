@@ -63,6 +63,7 @@ addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
+usemysql = __settings__.getSetting("usemysql")
 
 CHAR_REPLACEMENT = {
     # latin-1 characters that don't have a unicode decomposition
@@ -216,21 +217,44 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #retrieve local artist list from xbmc's music db
     def get_local_artist( self ):
         print "#  Retrieving Local Artist from XBMC's Music DB"
-        conn_b = sqlite3.connect(musicdb_path)
-        d = conn_b.cursor()
-        d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""')
-        count = 1
         artist_list = []
-        for item in d:
-            #print item[0]
-            artist = {}
-            name = item[0].translate(unaccented_map())
-            artist["name"]= ((repr(name).lstrip("'u")).rstrip("'")).strip('"')
-            artist["local_id"]= item[1]
-            artist_list.append(artist)
-            count = count + 1
-        d.close
-        count = count - 1
+        count = 0
+        #print usemysql
+        if not usemysql=="true":
+            conn_b = sqlite3.connect(musicdb_path)
+            d = conn_b.cursor()
+            d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""')
+            for item in d:
+                print item[0]
+                artist = {}
+                name = item[0].translate(unaccented_map())
+                artist["name"]= ((repr(name).lstrip("'u")).rstrip("'")).strip('"')
+                artist["local_id"]= item[1]
+                artist_list.append(artist)
+                count = count + 1
+            d.close
+        else:
+            query = 'SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""'
+            response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
+            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            print "#### response"
+            print response
+            print "#### match"
+            print match
+            try:
+                for item in match:
+                    print item[0]
+                    artist = {}
+                    name = item[0]
+                    #name = item[0].translate(unaccented_map())
+                    artist["name"]= ((repr(name).lstrip("'u")).rstrip("'")).strip('"')
+                    artist["local_id"]= item[1]
+                    artist_list.append(artist)
+                    count = count + 1
+            except:
+                print_exc()
+                print "### no artists found in db"
+
         print "# Total Local Artists: %s" % count
         return artist_list, count
 
@@ -240,25 +264,56 @@ class GUI( xbmcgui.WindowXMLDialog ):
         ascii_title =""
         search_title = ""
         album_songview = []
-        conn_b = sqlite3.connect(musicdb_path)
-        d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
-        #print d
-        for l in d:
-            album = {}
-            ascii_title = l[0].translate(unaccented_map())
-            album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
-            #print "album %s" % album["title"]
-            album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
-            print "Corrected: %s" % album["path"]
-            print "Uncorrected: %s" % l[1]
-            album_songview.append(album)
-        if len(album_songview)==0:
-            album = {}
-            album["title"]=""
-            album["path"]=""
-            album_songview.append(album)
-        d.close
+        if not usemysql=="true":
+            conn_b = sqlite3.connect(musicdb_path)
+            d = conn_b.cursor()
+            d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
+            #print d
+            for l in d:
+                album = {}
+                ascii_title = l[0].translate(unaccented_map())
+                album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+                #print "album %s" % album["title"]
+                album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
+                print "Corrected: %s" % album["path"]
+                print "Uncorrected: %s" % l[1]
+                album_songview.append(album)
+            if len(album_songview)==0:
+                album = {}
+                album["title"]=""
+                album["path"]=""
+                album_songview.append(album)
+            d.close
+        else:
+            query = """SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id 
+            response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
+
+            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            print "#### response"
+            print response
+            print "#### match"
+            print match
+            try:
+                for l in match:
+                    album = {}
+                    print l[0]
+                    print l[1]
+                    ascii_title = l[0]
+                    #ascii_title = l[0].translate(unaccented_map())
+                    album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+                    #print "album %s" % album["title"]
+                    album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
+                    print "Corrected: %s" % album["path"]
+                    print "Uncorrected: %s" % l[1]
+                    album_songview.append(album)
+            except:
+                print_exc()
+                print "### no albums found in db"
+            if len(album_songview)==0:
+                album = {}
+                album["title"]=""
+                album["path"]=""
+                album_songview.append(album)
         return album_songview
         
     
@@ -270,16 +325,37 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_albumview = []
         temp_albums = []
         album_songview = []
-        conn_b = sqlite3.connect(musicdb_path)
-        d = conn_b.cursor()
-        d.execute("""SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id)
-        #print d
-        for item in d:
-            albums = {}
-            ascii_title = item[0].translate(unaccented_map())
-            albums["title"] = (translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
-            album_albumview.append(albums)
-        d.close
+        if not usemysql=="true":
+            conn_b = sqlite3.connect(musicdb_path)
+            d = conn_b.cursor()
+            d.execute("""SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id)
+            #print d
+            for item in d:
+                albums = {}
+                ascii_title = item[0].translate(unaccented_map())
+                albums["title"] = (translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+                album_albumview.append(albums)
+            d.close
+        else:
+            query = """SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id
+            response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
+            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            print "#### response"
+            print response
+            print "#### match"
+            print match
+            try:
+                for item in match:
+                    print item[0]
+                    albums = {}
+                    ascii_title = item[0]
+                    #ascii_title = item[0].translate(unaccented_map())
+                    albums["title"] = (translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+                    album_albumview.append(albums)
+            except:
+                print_exc()
+                print "### no local albums found in db"
+            
         album_songview = self.get_albums( local_id )
         if album_songview[0]["title"]=="":
             album = {}
