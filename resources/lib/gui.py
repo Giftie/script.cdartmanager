@@ -63,7 +63,7 @@ addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
-usemysql = __settings__.getSetting("usemysql")
+usehttpapi = "true"
 
 CHAR_REPLACEMENT = {
     # latin-1 characters that don't have a unicode decomposition
@@ -218,9 +218,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def get_local_artist( self ):
         print "#  Retrieving Local Artist from XBMC's Music DB"
         artist_list = []
-        count = 0
-        #print usemysql
-        if not usemysql=="true":
+        count = 1
+        #print usehttpapi
+        if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
             d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""')
@@ -254,7 +254,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             except:
                 print_exc()
                 print "### no artists found in db"
-
+        count = count - 1
         print "# Total Local Artists: %s" % count
         return artist_list, count
 
@@ -264,7 +264,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         ascii_title =""
         search_title = ""
         album_songview = []
-        if not usemysql=="true":
+        if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
             d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
@@ -287,28 +287,28 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             query = """SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id 
             response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
-
             match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
             print "#### response"
             print response
             print "#### match"
             print match
-            try:
-                for l in match:
-                    album = {}
-                    print l[0]
-                    print l[1]
-                    ascii_title = l[0]
-                    #ascii_title = l[0].translate(unaccented_map())
-                    album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
-                    #print "album %s" % album["title"]
-                    album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
-                    print "Corrected: %s" % album["path"]
-                    print "Uncorrected: %s" % l[1]
-                    album_songview.append(album)
-            except:
-                print_exc()
-                print "### no albums found in db"
+            if not match=="":
+                try:
+                    for l in match:
+                        album = {}
+                        print l[0]
+                        print l[1]
+                        ascii_title = l[0]
+                        #ascii_title = l[0].translate(unaccented_map())
+                        album["title"]=(translate_string( repr(ascii_title).lstrip("'u").strip('"').rstrip("'") )).replace('"','')
+                        #print "album %s" % album["title"]
+                        album["path"]=(repr(l[1]).lstrip("'u").rstrip("'")).replace('"','')
+                        print "Corrected: %s" % album["path"]
+                        print "Uncorrected: %s" % l[1]
+                        album_songview.append(album)
+                except:
+                    print_exc()
+                    print "### no albums found in db"
             if len(album_songview)==0:
                 album = {}
                 album["title"]=""
@@ -325,7 +325,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_albumview = []
         temp_albums = []
         album_songview = []
-        if not usemysql=="true":
+        if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
             d.execute("""SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id)
@@ -942,10 +942,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for artist in local_artist:
             c.execute("insert into lalist(local_id, name) values (?, ?)", (artist["local_id"], artist["name"]))
             artist_count = artist_count + 1
-            percent = int((artist_count / float(count_artist_local)) * 100) 
+            percent = int((artist_count / float(count_artist_local)) * 100)
+            print "Artist Count: %s" % artist_count
+            print "Count Artist Local: %s" % count_artist_local
+            print "Percent: %s" % percent
             local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
             for album in local_album_list:
-                pDialog.update( percent, _(32016), "" , "%s - %s" % ( artist["name"] , album["title"] ) )
+                pDialog.update( percent, _(32016), "" , "Local Artist Count:%6s      Local Album Count:%6s" % ( artist_count , album_count ) )
                 album_count = album_count + 1               
                 if album["cdart"] == "TRUE" :
                    cdart_existing = cdart_existing + 1
@@ -961,6 +964,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.close()
         conn.commit()
         c.close()
+        print "made it this far"
+        print "album Count: %s" % album_count
+        print "artist Count: %s" % artist_count
+        print "cdart existing: %s" % cdart_existing
         return album_count, artist_count, cdart_existing
     
     #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
@@ -1015,7 +1022,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             db_delete = xbmcgui.Dialog().yesno( _(32042) , _(32015) )
             if db_delete :
                 os.remove(addon_db)
-                local_album_count, local_artist_count, local_cdart_count = self.database_setup()                
+                local_album_count, local_artist_count, local_cdart_count = self.database_setup()
             else:
                 pass            
         else :
@@ -1023,8 +1030,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_album_count, local_artist_count, local_cdart_count = self.database_setup()
         #update counts
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-        return
-
+        
     def single_unique_copy(self, artist, album, source):
         print "### Copying to Unique Folder: %s - %s" % (artist,album) 
         destination = ""
@@ -1367,6 +1373,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
          
     def setup_artist_list( self, artist):
+        print "##### Setting up artist list"
         self.artist_menu = {}
         self.artist_menu["local_id"] = str(artist[self.getControl( 120 ).getSelectedPosition()]["local_id"])
         self.artist_menu["name"] = str(artist[self.getControl( 120 ).getSelectedPosition()]["name"])
@@ -1374,11 +1381,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.populate_album_list( self.artist_menu )
                     
     def refresh_counts( self, local_album_count, local_artist_count, local_cdart_count ):
+        print "##### Refreshing Counts"
         self.getControl( 109 ).setLabel( _(32007) % local_artist_count)
         self.getControl( 110 ).setLabel( _(32010) % local_album_count)
         self.getControl( 112 ).setLabel( _(32008) % local_cdart_count)
 
     def populate_local_cdarts( self ):
+        print "##### Populating Local cdARTS"
         label2= ""
         cdart_img=""
         url = ""
@@ -1573,6 +1582,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmcgui.Dialog().ok( "There are no unique local cdARTs")
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             self.refresh_db()
+            pDialog.close()
+            print "made it back to here."
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
