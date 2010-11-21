@@ -219,11 +219,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Retrieving Local Artist from XBMC's Music DB"
         artist_list = []
         count = 1
+        query = 'SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""'
         #print usehttpapi
         if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
-            d.execute('SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""')
+            d.execute(query)
             for item in d:
                 print item[0]
                 artist = {}
@@ -234,13 +235,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 count = count + 1
             d.close
         else:
-            query = 'SELECT DISTINCT strArtist , idArtist FROM albumview WHERE strAlbum!=""'
             response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
-            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            match = re.findall( "<field>(.*?)</field><field>(.*?)</field>", response, re.DOTALL )
             print "#### response"
             print response
             print "#### match"
             print match
+            print "match length: %s" % len(match)
+            if len(match)==0:
+                match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+                print "#### match"
+                print match
+                print "match length: %s" % len(match)
             try:
                 for item in match:
                     print item[0]
@@ -264,10 +270,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         ascii_title =""
         search_title = ""
         album_songview = []
+        query = """SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id 
         if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
-            d.execute("""SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id )
+            d.execute(query)
             #print d
             for l in d:
                 album = {}
@@ -285,13 +292,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 album_songview.append(album)
             d.close
         else:
-            query = """SELECT DISTINCT strAlbum, strPath FROM songview WHERE idArtist="%s" AND strAlbum !=''""" % local_id 
             response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
-            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            match = re.findall( "<field>(.*?)</field><field>(.*?)</field>", response, re.DOTALL )
             print "#### response"
             print response
             print "#### match"
             print match
+            print "match length: %s" % len(match)
+            if len(match)==0:
+                match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+                print "#### match"
+                print match
+                print "match length: %s" % len(match)
             if not match=="":
                 try:
                     for l in match:
@@ -325,10 +337,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_albumview = []
         temp_albums = []
         album_songview = []
+        query = """SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id
         if not usehttpapi=="true":
             conn_b = sqlite3.connect(musicdb_path)
             d = conn_b.cursor()
-            d.execute("""SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id)
+            d.execute(query)
             #print d
             for item in d:
                 albums = {}
@@ -337,13 +350,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 album_albumview.append(albums)
             d.close
         else:
-            query = """SELECT DISTINCT strAlbum, idAlbum FROM albumview WHERE idArtist="%s" AND strAlbum !=''""" % local_id
             response = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( query ), )
-            match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+            match = re.findall( "<field>(.*?)</field><field>(.*?)</field>", response, re.DOTALL )
             print "#### response"
             print response
             print "#### match"
             print match
+            print "match length: %s" % len(match)
+            if len(match)==0:
+                match = re.findall( "<record><field>(.*?)</field><field>(.*?)</field></record>", response, re.DOTALL )
+                print "#### match"
+                print match
+                print "match length: %s" % len(match)
+            
             try:
                 for item in match:
                     print item[0]
