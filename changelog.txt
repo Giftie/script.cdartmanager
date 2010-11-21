@@ -1,3 +1,6 @@
+1.0.8
+- Added HTTP API database calls to allow MySQL users to use script.
+
 1.0.7
 - Added Dutch translation - Thanks redje
 - Added ascii converstion to album names(may help scraping for the time being)
