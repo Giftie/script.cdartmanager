@@ -1,3 +1,11 @@
+1.1.1
+- rewrite xbmc database access, using json now instead of pysqlite and HTTP API
+- change os.getcwd() to getAddonInfo('path') to provide forward compatibility
+
+1.0.9 - 1.1.0
+- multi-Database stepping stones
+- fixed path name.
+
 1.0.8
 - Added HTTP API database calls to allow MySQL users to use script.
 
