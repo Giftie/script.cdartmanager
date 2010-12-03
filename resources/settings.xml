@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <category label="Settings">
+    <category label="32099">
         <setting type="sep" />
         <setting label="32095" type="lsep" />
         <setting label="32018" type="folder" id="backup_path" default="" source="auto" option="writeable" />

@@ -1,3 +1,6 @@
+1.1.5
+- fixed some hard coded labels(for language files)
+
 1.1.4
 - fixed JSONRPC parsing(for albums)
 - fixed some more unicode errors

@@ -304,7 +304,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for detail in album_list:
             album_count = album_count + 1
             percent = int((album_count/float(total)) * 100)
-            pDialog.update( percent, _(32016), "" , "Album #:%6s      Total Albums:%6s" % ( album_count, total ) )
+            pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail["local_id"]
             #print "# Album ID: %s" % album_id
             json_album_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"fields": ["albumartist", "album", "databaseid"], "albumid": %s}, "id": 1}' % album_id
@@ -374,7 +374,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent = 0
         total = 0
         album_count = 0
-        pDialog.create( _(32021), "Retrieving Album Details" )
+        pDialog.create( _(32021), _(32105) )
         album_list, total = self.retrieve_album_list()
         album_detail_list = self.retrieve_album_details( album_list, total )
         previous_artist = ""
@@ -936,7 +936,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         c = conn.cursor()
         percent = 0 
         for album in local_album_list:
-            pDialog.update( percent, _(32016), "" , "Local Album Count:%6s" % ( album_count ) )
+            pDialog.update( percent, _(32016), "" , "%s:%6s" % ( _(32100), album_count ) )
             album_count = album_count + 1
             print "Album Count: %s" % album_count
             print "Album ID: %s" % album["local_id"]
@@ -1036,7 +1036,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_artist_list = self.get_all_local_artists()         # retrieve local artists(to get idArtist)
         percent = 0
         for artist in album_artist:        # match album artist to local artist id
-            pDialog.update( percent, _(32016), "Sorting Album Artists" , "Artist Name:%s" % ( repr(artist["name"]) ) )
+            pDialog.update( percent, _(32016), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
             if (pDialog.iscanceled()):
                 break
             #print artist
@@ -1069,7 +1069,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_album_list = []
         query = ""
         if artist_name == "all artists":
-            pDialog.create( "Retrieving Local Database", _(32016) )
+            pDialog.create( _(32102), _(32016) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist ORDER BY artist"
         else:
             query='SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE artist="%s"' % artist_name
@@ -1496,7 +1496,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         line = ""
         albums = self.get_local_albums_db("all artists")
         bkup_folder = __settings__.getSetting("backup_path")
-        pDialog.create( "Saving Missing cdART List to Backup Folder", _(32016) )
+        pDialog.create( _(32103), _(32016) )
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
@@ -1530,7 +1530,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         line = ""
         zip_filename = ""
         bkup_folder = __settings__.getSetting("backup_path")
-        pDialog.create( "Uploading Missing cdART List to website", _(32016) )
+        pDialog.create( _(32104), _(32016) )
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")

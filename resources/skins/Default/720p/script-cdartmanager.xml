@@ -885,7 +885,7 @@
                     <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
-                    <label>Local cdART List</label>
+                    <label>$ADDON[script.cdartmanager 32098]</label>
                     <!--
                     <label>$ADDON[script.cdartmanager 32005]</label>
                     -->
