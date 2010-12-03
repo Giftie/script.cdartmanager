@@ -2,7 +2,7 @@ __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
 __version__       = "1.1.3"
-__credits__       = "Ppic, Reaven, Imaginos, redje, Jair and many many others"
+__credits__       = "Ppic, Reaven, Imaginos, redje, Jair"
 __XBMC_Revision__ = "35415"
 __date__          = "12-02-10"
 import sys

@@ -1544,7 +1544,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             for album in albums:
                 count = count + 1
                 if album["cdart"] == "FALSE":
-                    line = album["artist"] + " - " + album["title"]+"\n"
+                    artist = repr(album["artist"]) 
+                    title = repr(album["title"])
+                    line = artist + " - " + title + "\n"
                     missing.write( line )
             missing.close()
         except:
