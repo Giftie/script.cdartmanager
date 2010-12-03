@@ -1,4 +1,9 @@
-1.1.1
+1.1.3
+- start adding uploading and downloading
+- re-arrange how things are processed
+- full json implementation
+
+1.1.1 - 1.1.2
 - rewrite xbmc database access, using json now instead of pysqlite and HTTP API
 - change os.getcwd() to getAddonInfo('path') to provide forward compatibility
 

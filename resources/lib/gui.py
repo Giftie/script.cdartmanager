@@ -60,6 +60,7 @@ album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvf
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cross"
 addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
+download_temp_folder = os.path.join(addon_work_folder, "temp")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
@@ -339,7 +340,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             album_artist["path"] = path
                             album_artist["cdart"] = self.get_album_cdart( album_artist["path"] )
                             previous_path = path
-                            path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d)." , album_artist["path"], re.I)
+                            path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d)." , path, re.I)
                             title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d)" , title, re.I)
                             if title_match:
                                 print "#     Title has CD count"
@@ -365,6 +366,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def sort_album_artists_id( self, all_artists, album_artist ):
         print "# Sorting Album Artists"
         local_id = 0
+        percent = 0
         for artist in all_artists:
             if album_artist == artist["name"]:
                 local_id = artist["local_id"]
@@ -415,24 +417,25 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #retrieve local albums based on artist's name from addon's db
     def get_local_album( self , artist, local_id):
         print "#    Retrieving Local Albums from XBMC's Music DB, based on artist id: %s" % local_id
-        ascii_title =""
         local_album_list = []
-        temp_albums = []
-        query = """SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE  artist="%s" AND strAlbum !=''""" % artist
+        query = """SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE  artist="%s" AND title !=''""" % artist
+        print query
         conn_b = sqlite3.connect(addon_db)
         d = conn_b.cursor()
         d.execute(query)
-        #print d
+        print d
         for item in d:
             albums = {}
             albums["local_id"] = ( item[0].encode("utf-8")).strip("'u")
             albums["title"] = ( item[1].encode("utf-8")).strip("'u")
             albums["artist"] = ( item[2].encode("utf-8")).strip("'u")
-            album["artist_id"] = local_id
+            albums["artist_id"] = local_id
             albums["path"] = ((item[3]).encode("utf-8")).replace('"','').strip("'u")
             albums["cdart"] = ( item[4].encode("utf-8")).strip("'u")
             local_album_list.append(albums)
+            print repr(local_album_list)
         d.close
+        print "# Finished retrieving local albums for artist: %s" % repr(artist)
         return local_album_list
             
     #match artists on xbmcstuff.com with local database    
@@ -449,7 +452,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for artist in local_album_artist:
             name = str.lower(artist["name"])
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(name) ), distant_artist )
-            percent = int((float(count)/len(l_artist))*100)
+            percent = int((float(count)/len(local_album_artist))*100)
             if match: 
                 true = true + 1
                 artist["distant_id"] = match.group(1)
@@ -598,6 +601,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
     
     # finds the cdart for the album list    
     def find_cdart( self , aname , atitle, remote_cdart_url ):
+        print "# Finding cdART for album list"
+        print "#"
         match = ""
         s_title = ""
         name = str.lower( aname )
@@ -687,26 +692,31 @@ class GUI( xbmcgui.WindowXMLDialog ):
         cdart_existing = 0
         album_count = 0
         d_error=0
+        percent = 0
+        local_artist = self.get_local_artists_db()
         distant_artist = str.lower(self.get_html_source( artist_url ))
         if not distant_artist == "":
             recognized_artists, local_artists = self.get_recognized( distant_artist , local_artist )
+        else:
+            return
         pDialog.create( _(32046) )
         count_artist_local = len(recognized_artists)
+        percent = 0
         for artist in recognized_artists:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
-            print "#    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (artist["name"], artist["local_id"], artist["distant_id"])
-            local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
+            print "#    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"])
+            local_album_list = self.get_local_albums_db( artist["name"] )
             remote_cdart_url = self.remote_cdart_list( artist, 2 )
             for album in local_album_list:
                 if remote_cdart_url == []:
                     print "#    No cdARTs found"
                     break
                 album_count = album_count + 1
-                pDialog.update( percent , "%s%s" % (_(32038) , artist["name"] )  , "%s%s" % (_(32039) , album["title"] ) )
+                pDialog.update( percent , "%s%s" % (_(32038) , repr(artist["name"]) )  , "%s%s" % (_(32039) , repr(album["title"] )) )
                 name = artist["name"]
                 title = album["title"]
-                print "#     Album: %s" % album["title"]
+                print "#     Album: %s" % repr(album["title"])
                 if album["cdart"] == "FALSE":
                     test_album = self.find_cdart( name, title, remote_cdart_url )
                     if not test_album == "" : 
@@ -718,7 +728,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             album["cdart"] = "TRUE"
                         else:
                             print "#  Download Error...  Check Path."
-                            print "#      Path: %s" % album["path"]
+                            print "#      Path: %s" % repr(album["path"])
                             d_error = 1
                     else :
                         print "#            ALBUM MATCH NOT FOUND"
@@ -750,11 +760,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_count = 0
         temp_album = {}
         cdart_lvd = []
+        local_artist = self.get_local_artists_db()
         for artist in local_artist:
             artist_count = artist_count + 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             print "#    Artist: %-40s Local ID: %s" % (artist["name"], artist["local_id"])
-            local_album_list = self.get_local_album( artist["name"], artist["local_id"] )
+            local_album_list = self.get_local_albums_db( artist["name"] )
             for album in local_album_list:
                 temp_album = {}
                 album_count = album_count + 1
@@ -1015,9 +1026,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
     def store_counts( self, artist_count, album_count, cdart_existing ):
         print "#  Storing Counts"
-        print "album Count: %s" % album_count
-        print "artist Count: %s" % artist_count
-        print "cdart existing: %s" % cdart_existing
+        print "#    Album Count: %s" % album_count
+        print "#    Artist Count: %s" % artist_count
+        print "#    cdARTs Existing Count: %s" % cdart_existing
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
         c.execute("insert into counts(artists, albums, cdarts) values (?, ?, ?)", (artist_count, album_count, cdart_existing))
@@ -1049,16 +1060,21 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #print addon_db
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
-        c.execute('''create table counts(artists, albums, cdarts)''')
-        c.execute('''create table lalist(local_id, name)''')
-        c.execute('''create table alblist(album_id, title, artist, path, cdart)''')
+        c.execute('''create table counts(artists, albums, cdarts)''') 
+        c.execute('''create table lalist(local_id, name)''')   # create local album artists database
+        c.execute('''create table alblist(album_id, title, artist, path, cdart)''')  # create local album database
+        c.execute('''create table unqlist(title, artist, path, cdart)''')  # create unique database
         conn.commit()
         c.close()
         album_count, cdart_existing = self.store_alblist( local_album_list ) # store album details first
         album_artist = self.retrieve_distinct_album_artists()               # then retrieve distinct album artists
-        local_artist_list = self.get_all_local_artists()                    # retrieve local artists(to get idArtist)
-        for artist in album_artist:        # match album artist to local artist
-            print artist
+        local_artist_list = self.get_all_local_artists()         # retrieve local artists(to get idArtist)
+        percent = 0
+        for artist in album_artist:        # match album artist to local artist id
+            pDialog.update( percent, _(32016), "Sorting Album Artists" , "Artist Name:%s" % ( repr(artist["name"]) ) )
+            if (pDialog.iscanceled()):
+                break
+            #print artist
             album_artist_1 = {}
             name = ""
             name = artist["name"]
@@ -1070,7 +1086,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album_artist_1["name"] = name                                   # store name and
             album_artist_1["local_id"] = id                                 # local id
             local_album_artist_list.append(album_artist_1)
-        print local_album_artist_list
+        #print local_album_artist_list
         count = self.store_lalist( local_album_artist_list, artist_count )         # then store in database
         if (pDialog.iscanceled()):
             pDialog.close()
@@ -1082,57 +1098,66 @@ class GUI( xbmcgui.WindowXMLDialog ):
         return album_count, artist_count, cdart_existing
     
     #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
-    def get_local_albums_db( self ):
+    def get_local_albums_db( self, artist_name ):
         print "#  Retrieving Local Albums Database"
         print "#"
-        local_album_list = []    
+        local_album_list = []
+        query = ""
+        if artist_name == "all artists":
+            pDialog.create( "Retrieving Local Database", _(32016) )
+            query="SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist ORDER BY artist"
+        else:
+            query='SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE artist="%s"' % artist_name
         conn_l = sqlite3.connect(addon_db)
         c = conn_l.cursor()
-        c.execute("""SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist""")
+        c.execute(query)
         db=c.fetchall()
         for item in db:
-            print item
+            #print item
             album = {}
             album["local_id"] = ( item[0].encode("utf-8")).strip("'u")
             album["title"] = ( item[1].encode("utf-8")).strip("'u")
             album["artist"] = ( item[2].encode("utf-8")).strip("'u")
             album["path"] = ((item[3]).encode("utf-8")).replace('"','').strip("'u")
             album["cdart"] = ( item[4].encode("utf-8")).strip("'u")
-            print repr(album)
+            #print repr(album)
             local_album_list.append(album)
         c.close
-        print local_album_list
-        self.missing_list(local_album_list)
+        #print local_album_list
+        if artist_name == "all artists":
+            pDialog.close()
         return local_album_list
         
     def get_local_artists_db( self ):
         print "#  Retrieving Local Artists Database"
         print "#"
         local_artist_list = []    
+        query = "SELECT DISTINCT local_id, name FROM lalist ORDER BY name"
         conn_l = sqlite3.connect(addon_db)
         c = conn_l.cursor()
-        c.execute("""SELECT DISTINCT local_id, name FROM lalist""")
+        c.execute(query)
         db=c.fetchall()
         for item in db:
-            print item
+            #print item
             artists = {}
             artists["local_id"] = ( item[0].encode("utf-8")).strip("'u")
             artists["name"] = ( item[1].encode("utf-8")).strip("'u")
-            print repr(artists)
-            local_artist_list.append(atirsts)
+            #print repr(artists)
+            local_artist_list.append(artists)
         c.close
-        print local_artist_list
+        #print local_artist_list
         return local_artist_list
     
     #retrieves counts for local album, artist and cdarts
     def new_local_count( self ):
         print "#  Counting Local Artists, Albums and cdARTs"
         print "#"
+        query = "SELECT artists, albums, cdarts FROM counts"
         pDialog.create( _(32020), _(32016) )
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         conn_l = sqlite3.connect(addon_db)
         c = conn_l.cursor()
-        c.execute("""SELECT artists, albums, cdarts FROM counts""")
+        c.execute(query)
         counts=c.fetchall()
         for item in counts:
             local_artist = item[0]
@@ -1255,19 +1280,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "### Deleting: %s" % source
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
-        c.execute("""UPDATE alblist SET cdart="FALSE" WHERE title='%s'""" % album)
-        conn.commit()
-        c.close()
         if os.path.isfile(source):
             try:
                 os.remove(source)
+                c.execute("""UPDATE alblist SET cdart="FALSE" WHERE title='%s'""" % album)
+                conn.commit()
             except:
                 print "#  Deleteing error, check path and file permissions"
         else:
             print "#   Error: cdART file does not exist..  Please check..."
+        c.close()
         return
     
-    # Copy's all the local unique cdARTs to a folder specified bye the user
+    # Copy's all the local unique cdARTs to a folder specified by the user
     def unique_cdart_copy( self, unique ):
         print "### Copying Unique cdARTs..."
         print "#"
@@ -1293,7 +1318,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 break
             if album["local"] == "TRUE" and album["distant"] == "FALSE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
-                print "#        Source: %s" % source
+                print "#        Source: %s" % repr(source)
                 if os.path.isfile(source):
                     if fn_format == 0:
                         destination=os.path.join(unique_folder, (album["artist"].replace("/","")).replace("'","")) #to fix AC/DC
@@ -1306,16 +1331,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         os.makedirs(destination)
                     else:
                         pass
-                    print "#        Destination: %s" % fn
+                    print "#        Destination: %s" % repr(fn)
                     if os.path.isfile(fn):
-                        print "################## cdART Not being copied, File exists: %s" % fn
+                        print "################## cdART Not being copied, File exists: %s" % repr(fn)
                         duplicates = duplicates + 1
                     else:
                         try:
                             if resize:
                                 try:
                                     cdart = Image.open(source)
-                                    print "##   Opening image: %s" % source
+                                    print "##   Opening image: %s" % repr(source)
                                     if cdart.size[0] != cdart.size[1]:
                                         print "###      Original cdART not square, not my fault if resize is wrong ###"
                                     if cdart.size[0] > 450 or cdart.size[1] > 450:
@@ -1325,18 +1350,28 @@ class GUI( xbmcgui.WindowXMLDialog ):
                                         cdart_resized.save(fn)
                                     else:
                                         print "##       Not Resizing...."
-                                        print "#    Saving: %s" % fn
+                                        print "#    Saving: %s" % repr(fn)
                                         shutil.copy(source, fn)
+                                        conn = sqlite3.connect(addon_db)
+                                        c = conn.cursor()
+                                        c.execute("insert into unqlist(title, artist, path, cdart) values (?, ?, ?, ?)", ( unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]), album["local"]))
+                                        c.commit
+                                    
                                 except:
                                     print "#### Resizing error"
                             
                             else:
-                                print "#    Saving: %s" % fn                                    
+                                print "#    Saving: %s" % repr(fn)                                    
                                 shutil.copy(source, fn)
+                                conn = sqlite3.connect(addon_db)
+                                c = conn.cursor()
+                                c.execute("insert into unqlist(title, artist, path, cdart) values (?, ?, ?, ?)", ( unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]), album["local"]))
+                                c.commit
                             count=count + 1
                         except:
                             print "#  Copying error, check path and file permissions"
                             count=count + 1
+                        c.close()
                         pDialog.update( percent, _(32064) % unique_folder , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                 else:
                     print "#   Error: cdART file does not exist..  Please check..."
@@ -1353,6 +1388,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "### Restoring cdARTs from backup folder"
         pDialog.create( _(32069) )
         #Onscreen Dialog - Restoring cdARTs from backup...
+        bkup_folder = __settings__.getSetting("backup_path")
+        if bkup_folder =="":
+            __settings__.openSettings()
+            bkup_folder = __settings__.getSetting("backup_path")
+        else:
+            pass
+        self.copy_cdarts(bkup_folder)
+        pDialog.close()
+        
+    def copy_cdarts( self, from_folder ): 
+        print "#  Copying cdARTs from: %s" % repr(from_folder)
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
         destination = ""
@@ -1365,53 +1411,50 @@ class GUI( xbmcgui.WindowXMLDialog ):
         total_albums = 0 
         total_count = 0
         fn_format = int(__settings__.getSetting("folder"))
-        bkup_folder = __settings__.getSetting("backup_path")
-        if bkup_folder =="":
-            __settings__.openSettings()
-            bkup_folder = __settings__.getSetting("backup_path")
-        else:
-            pass
-        print "#    fn_format: %s" % fn_format
-        print "#    bkup_folder: %s" % bkup_folder
-        local_db = self.get_local_albums_db()
+        pDialog.create( _(32069) )
+        print "#    Filename format: %s" % fn_format
+        print "#    From Folder: %s" % from_folder
+        local_db = self.get_local_albums_db("all artists")
         total_albums=len(local_db)
         print "#    total albums: %s" % total_albums
         #print "#    albums: %s" % albums
         for part in local_db:
             if (pDialog.iscanceled()):
                 break
-            print "#     Artist: %-30s  ##  Album: %s" % (part["artist"], part["title"])
-            print "#        Album Path: %s" % part["path"]
+            print "#     Artist: %-30s  ##  Album: %s" % (repr(part["artist"]), repr(part["title"]))
+            print "#        Album Path: %s" % repr(part["path"])
             percent = int(total_count/float(total_albums))*100
             if fn_format == 0:
-                source=os.path.join( bkup_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
+                source=os.path.join( from_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
                 fn = os.path.join(source, ( ( part["title"].replace("/","").replace("'","") ) + ".png") )
                 if not os.path.isfile(fn):
-                    source=os.path.join( bkup_folder ) #to fix AC/DC
+                    source=os.path.join( from_folder ) #to fix AC/DC
                     fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
             else:
-                source=os.path.join( bkup_folder ) #to fix AC/DC
+                source=os.path.join( from_folder ) #to fix AC/DC
                 fn = os.path.join(source, ( ( ( part["artist"].replace("/", "").replace("'","") ) + " - " + ( part["title"].replace("/","").replace("'","") ) + ".png").lower() ) )
                 if not os.path.isfile(fn):
-                    source=os.path.join( bkup_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
+                    source=os.path.join( from_folder, (part["artist"].replace("/","").replace("'","") ) )#to fix AC/DC and other artists with a / in the name
                     fn = os.path.join(source, ( ( part["title"].replace("/","").replace("'","") ) + ".png") )
-            print "#        Source folder: %s" % source
-            print "#        Source filename: %s" % fn
+            print "#        Source folder: %s" % repr(source)
+            print "#        Source filename: %s" % repr(fn)
             if os.path.isfile(fn):
                 destination = os.path.join(part["path"], "cdart.png")
-                print "#        Destination: %s" % destination
+                print "#        Destination: %s" % repr(destination)
                 try:
                     shutil.copy(fn, destination)
+                    if not from_folder == __settings__.getSetting("backup_path"):
+                        os.remove(fn)  # remove file
                     count = count + 1
                 except:
                     print "######  Copying error, check path and file permissions"
                 try:
                     c.execute("""UPDATE alblist SET cdart="TRUE" WHERE title='%s'""" % part["title"])
                 except:
-                    print "######  Problem modifying Database!!  Artist: %s   Album: %s" % (part["artist"], part["title"])
+                    print "######  Problem modifying Database!!  Artist: %s   Album: %s" % (repr(part["artist"]), repr(part["title"]))
             else:
                 pass
-            pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
+            pDialog.update( percent , "From Folder: %s" % from_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
             total_count = total_count + 1
         pDialog.close()
         conn.commit()
@@ -1437,7 +1480,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
             cdart_list_folder = __settings__.getSetting("cdart_path")
-        albums = self.get_local_albums_db()
+        albums = self.get_local_albums_db("all artists")
         pDialog.create( _(32060) )
         for album in albums:
             if (pDialog.iscanceled()):
@@ -1445,7 +1488,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if album["cdart"] == "TRUE":
                 source=os.path.join(album["path"].replace("\\\\" , "\\"), "cdart.png")
                 print "#     cdART #: %s" % count
-                print "#     Artist: %-30s  Album: %s" % (album["artist"], album["title"])
+                print "#     Artist: %-30s  Album: %s" % (repr(album["artist"]), repr(album["title"]))
                 print "#        Album Path: %s" % source
                 if os.path.isfile(source):
                     if fn_format == 0:
@@ -1481,12 +1524,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
         
 # Search for missing cdARTs and save to missing.txt in backup folder
-    def missing_list( self, albums ):
+    def missing_list( self ):
         print "#    Saving Missing cdART list to backup folder"
         count = 0
         percent = 0
         line = ""
+        albums = self.get_local_albums_db("all artists")
         bkup_folder = __settings__.getSetting("backup_path")
+        pDialog.create( "Saving Missing cdART List to Backup Folder", _(32016) )
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
@@ -1504,8 +1549,96 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.close()
         except:
             print "#### Error saving missing.txt file"
+        pDialog.close()
         
-         
+    def upload_missing_list( self ):
+        # Nothing here yet.
+        # 
+        # Here the script will upload the missing list stored in backup folder
+        # and wait for a response from the website(a file) that will either initiate 
+        # a batch download or a dialog stating that there are not any matches
+        print "#    Saving Missing cdART list to backup folder"
+        count = 0
+        percent = 0
+        line = ""
+        zip_filename = ""
+        bkup_folder = __settings__.getSetting("backup_path")
+        pDialog.create( "Uploading Missing cdART List to website", _(32016) )
+        if bkup_folder =="":
+            __settings__.openSettings()
+            bkup_folder = __settings__.getSetting("backup_path")
+        filename=os.path.join(bkup_folder, "missing.txt")
+        return zip_filename
+        
+    def download_from_website( self, zip_filename ):
+        # Nothing really here yet
+        #
+        # Here the script will download the zip file that the website
+        # will create which stores the cdARTs matching the missing.txt file
+        # The file will be stored in addon_data/script.cdartmanager/temp
+        # 
+        # 
+        zip_file = ""
+        
+    def extract_zip( self, zip_filename ):
+        # Nothing really here yet
+        #
+        # Here the script will extract the cdARTs store in the zip file downloaded from
+        # the website and delete file after extraction is complete(no wasted space)
+        # files will be stored in addon_data/script.cdartmanager/temp/extracted_cdarts
+        zip_file = ""
+        
+    def download_missing_cdarts( self ):
+        # Nothing really here yet
+        #
+        # Here the script will call each of the steps for downloading the missing cdARTs
+        # and extracting.  It will also recheck the local database and update counts for display
+        local_album_count = 0
+        local_artist_count = 0
+        local_cdart_count = 0
+        zip_file = ""
+        zip_filename = ""
+        zip_file=self.upload_missing_list()
+        if zip_file == "":
+            print "# Sorry no matching cdARTs"
+        else:
+            zip_filename = os.path.join(download_temp_folder, zip_file)
+            self.download_from_website(zip_filename)
+            self.extract_zip(zip_filename)
+            os.remove(zip_filename)
+            extracted_cdarts_folder = os.path.join(download_temp_folder, "extracted_cdarts")
+            self.copy_cdarts(extracted_cdarts_folder)
+            # refresh local database
+            os.remove(addon_db)
+            local_album_count, local_artist_count, local_cdart_count = self.new_database_setup()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
+            
+    def upload_to_website( self, zip_file ):
+        # Nothing really here yet
+        # 
+        # open ftp and send a zip file to the website
+        zip_filename = ""
+
+    def compress_cdarts( self, unique_folder ):
+        # Nothing really here yet
+        #
+        # compress the cdarts in the unique folder for upload to website
+        filename = ""
+        
+    def upload_unique_cdarts( self ):
+        # Nothing really here yet
+        # 
+        # Here the script will call each step for uploading unique cdARTs
+        zip_file = ""
+        unique, difference = self.local_vs_distant()
+        if difference == 1:
+            self.unique_cdart_copy( unique )
+            unique_folder = __settings__.getSetting("unique_path")
+            zip_file = self.compress_cdarts( unique_folder )
+            self.upload_to_website( zip_file )
+        else:
+            xbmcgui.Dialog().ok( "There are no unique local cdARTs")        
+        
     def setup_artist_list( self, artist):
         print "##### Setting up artist list"
         self.artist_menu = {}
@@ -1519,6 +1652,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 109 ).setLabel( _(32007) % local_artist_count)
         self.getControl( 110 ).setLabel( _(32010) % local_album_count)
         self.getControl( 112 ).setLabel( _(32008) % local_cdart_count)
+        self.missing_list()
 
     def populate_local_cdarts( self ):
         print "##### Populating Local cdARTS"
@@ -1526,7 +1660,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         cdart_img=""
         url = ""
         work_temp = []
-        l_artist = self.get_local_albums_db()
+        l_artist = self.get_local_albums_db("all artists")
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         self.getControl( 140 ).reset()
         for album in l_artist:
@@ -1620,7 +1754,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-        self.local_artists = self.get_local_albums_db() # retrieve data from addon's database
+        self.local_artists = self.get_local_artists_db() # retrieve data from addon's database
         self.setFocusId( 100 ) # set menu selection to the first option(Search Artists)
 
 
@@ -1637,7 +1771,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             distant_artist = str.lower(self.get_html_source( artist_url ))
             print "Distant Artists:"
             print distant_artist
-            local_artists=self.get_local_albums_db()
+            local_artists=self.get_local_artists_db()
             if not distant_artist == "":
                 self.recognized_artists, self.local_artists = self.get_recognized( distant_artist , local_artists )
         if controlId == 105 : #Recognized Artists
@@ -1722,7 +1856,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             self.refresh_db()
             pDialog.close()
-            print "made it back to here."
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
