@@ -309,7 +309,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print "# Album ID: %s" % album_id
             json_album_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"fields": ["albumartist", "album", "databaseid"], "albumid": %s}, "id": 1}' % album_id
             json_album_detail = xbmc.executeJSONRPC(json_album_detail_query)
-            #print json_album_detail
+            print json_album_detail
             albumdetails = re.compile( "{(.*?)}", re.DOTALL ).findall(json_album_detail)
             if (pDialog.iscanceled()):
                 break
@@ -386,7 +386,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         paths = []
         json_songs_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %s}, "id": 1}' % albumid
         json_songs_detail = xbmc.executeJSONRPC(json_songs_detail_query)
-        print repr(json_songs_detail)
+        #print json_songs_detail
+        #print repr(json_songs_detail)
         songs_detail = re.compile( "{(.*?)}", re.DOTALL ).findall(json_songs_detail)
         for song in songs_detail:
             match = re.search( '"file" : "(.*?)",', song )
