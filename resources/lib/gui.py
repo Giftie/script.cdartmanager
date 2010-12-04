@@ -64,7 +64,8 @@ download_temp_folder = os.path.join(addon_work_folder, "temp")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
-usehttpapi = "true"
+usehttpapi = __settings__.getSetting("usingdharma")
+#usehttpapi = "true"
 
 CHAR_REPLACEMENT = {
     # latin-1 characters that don't have a unicode decomposition
@@ -301,67 +302,137 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_count = 0
         percent =0
         print repr(album_list)
-        for detail in album_list:
-            album_count = album_count + 1
-            percent = int((album_count/float(total)) * 100)
-            pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
-            album_id = detail["local_id"]
-            #print "# Album ID: %s" % album_id
-            json_album_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"fields": ["albumartist", "album", "databaseid"], "albumid": %s}, "id": 1}' % album_id
-            json_album_detail = xbmc.executeJSONRPC(json_album_detail_query)
-            print json_album_detail
-            albumdetails = re.compile( "{(.*?)}", re.DOTALL ).findall(json_album_detail)
-            if (pDialog.iscanceled()):
-                break
-            for albums in albumdetails:
+        #####
+        #####  Delete all HTTP API once AudioLibrary.GetAlbumDetails is added to Dharma #####
+        #####
+        if not usehttpapi:
+            for detail in album_list:
+                album_count = album_count + 1
+                percent = int((album_count/float(total)) * 100)
+                pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                album_id = detail["local_id"]
+                #print "# Album ID: %s" % album_id
+                json_album_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"fields": ["albumartist", "album", "databaseid"], "albumid": %s}, "id": 1}' % album_id
+                json_album_detail = xbmc.executeJSONRPC(json_album_detail_query)
+                #print json_album_detail
+                albumdetails = re.compile( "{(.*?)}", re.DOTALL ).findall(json_album_detail)
                 if (pDialog.iscanceled()):
                     break
-                albummatch = re.search( '"album" : "(.*?)",', albums )
-                if albummatch:
-                    album_title = (albummatch.group(1))
-                artistmatch = re.search( '"albumartist" : "(.*?)",', albums )
-                if artistmatch:
-                    artist_name = (artistmatch.group(1))
-                albumid_match = re.search( '"albumid" : (.*?),', albums )
-                if albumid_match:
-                    album_localid = (albumid_match.group(1))
-                paths = self.get_album_path( album_localid )
-                previous_path =""
-                for path in paths:
+                for albums in albumdetails:
                     if (pDialog.iscanceled()):
                         break
-                    album_artist = {}
-                    if not path == previous_path:
-                        #print repr(path)
-                        if os.path.exists(path):
-                            print "Path Exists"
-                            album_artist["local_id"] = album_localid
-                            title = album_title
-                            album_artist["artist"] = artist_name
-                            album_artist["path"] = path
-                            album_artist["cdart"] = self.get_album_cdart( album_artist["path"] )
-                            previous_path = path
-                            path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)." , path, re.I)
-                            title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)" , title, re.I)
-                            if title_match:
-                                print "#     Title has CD count"
-                                album_artist["title"] = title
-                            else:
-                                if path_match:
-                                    print "#     Path has CD count"
-                                    print "#        %s" % path_match.group(1)
-                                    album_artist["title"] = "%s - %s" % (title, path_match.group(1))
-                                    print "#     New Album Title: %s" % repr(album_artist["title"])
-                                else:
-                                    album_artist["title"] = title
-                            print "Album Title: %s" % album_artist["title"]
-                            print "Album Artist: %s" % album_artist["artist"]
-                            print "Album ID: %s" % album_artist["local_id"]
-                            print "Album Path: %s" % repr(album_artist["path"])
-                            print "cdART Exists?: %s" % album_artist["cdart"]
-                            album_detail_list.append(album_artist)
-                        else:
+                    albummatch = re.search( '"album" : "(.*?)",', albums )
+                    if albummatch:
+                        album_title = (albummatch.group(1))
+                    artistmatch = re.search( '"albumartist" : "(.*?)",', albums )
+                    if artistmatch:
+                        artist_name = (artistmatch.group(1))
+                    albumid_match = re.search( '"albumid" : (.*?),', albums )
+                    if albumid_match:
+                        album_localid = (albumid_match.group(1))
+                    paths = self.get_album_path( album_localid )
+                    previous_path =""
+                    for path in paths:
+                        if (pDialog.iscanceled()):
                             break
+                        album_artist = {}
+                        if not path == previous_path:
+                            #print repr(path)
+                            if os.path.exists(path):
+                                print "Path Exists"
+                                album_artist["local_id"] = album_localid
+                                title = album_title
+                                album_artist["artist"] = artist_name
+                                album_artist["path"] = path
+                                album_artist["cdart"] = self.get_album_cdart( album_artist["path"] )
+                                previous_path = path
+                                path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)." , path, re.I)
+                                title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)" , title, re.I)
+                                if title_match:
+                                    print "#     Title has CD count"
+                                    album_artist["title"] = title
+                                else:
+                                    if path_match:
+                                        print "#     Path has CD count"
+                                        print "#        %s" % path_match.group(1)
+                                        album_artist["title"] = "%s - %s" % (title, path_match.group(1))
+                                        print "#     New Album Title: %s" % repr(album_artist["title"])
+                                    else:
+                                        album_artist["title"] = title
+                                print "Album Title: %s" % album_artist["title"]
+                                print "Album Artist: %s" % album_artist["artist"]
+                                print "Album ID: %s" % album_artist["local_id"]
+                                print "Album Path: %s" % repr(album_artist["path"])
+                                print "cdART Exists?: %s" % album_artist["cdart"]
+                                album_detail_list.append(album_artist)
+                            else:
+                                break
+        else: #use HTTP API to get album Details
+            print "# Using HTTP API"
+            for detail in album_list:
+                album_count = album_count + 1
+                percent = int((album_count/float(total)) * 100)
+                pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                album_id = detail["local_id"]
+                print "# Album ID: %s" % album_id
+                httpapi_album_detail_query="""SELECT DISTINCT strAlbum, strArtist, idAlbum  FROM albumview WHERE idAlbum="%s" AND strAlbum !=''""" % album_id 
+                httpapi_album_detail = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( httpapi_album_detail_query ), )
+                print httpapi_album_detail
+                match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
+                #match = re.compile( "{(.*?)}", re.DOTALL ).findall(httpapi_album_detail)
+                print "#### match"
+                print match
+                print "match length: %s" % len(match)
+                if not match=="":
+                    try:
+                        for albums in match:
+                            album = {}
+                            print repr(albums[0])
+                            print repr(albums[1])
+                            print repr(albums[2])
+                            album_title = albums[0]
+                            artist_name = albums[1]
+                            album_localid = albums[2]
+                            paths = self.get_album_path( album_localid )
+                            previous_path =""
+                        for path in paths:
+                            if (pDialog.iscanceled()):
+                                break
+                            album_artist = {}
+                            if not path == previous_path:
+                                #print repr(path)
+                                if os.path.exists(path):
+                                    print "Path Exists"
+                                    album_artist["local_id"] = album_localid
+                                    title = album_title
+                                    album_artist["artist"] = artist_name
+                                    album_artist["path"] = path
+                                    album_artist["cdart"] = self.get_album_cdart( album_artist["path"] )
+                                    previous_path = path
+                                    path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)." , path, re.I)
+                                    title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)" , title, re.I)
+                                    if title_match:
+                                        print "#     Title has CD count"
+                                        album_artist["title"] = title
+                                    else:
+                                        if path_match:
+                                            print "#     Path has CD count"
+                                            print "#        %s" % path_match.group(1)
+                                            album_artist["title"] = "%s - %s" % (title, path_match.group(1))
+                                            print "#     New Album Title: %s" % repr(album_artist["title"])
+                                        else:
+                                            album_artist["title"] = title
+                                    print "Album Title: %s" % album_artist["title"]
+                                    print "Album Artist: %s" % album_artist["artist"]
+                                    print "Album ID: %s" % album_artist["local_id"]
+                                    print "Album Path: %s" % repr(album_artist["path"])
+                                    print "cdART Exists?: %s" % album_artist["cdart"]
+                                    album_detail_list.append(album_artist)
+                                else:
+                                    break
+                    except:
+                        print_exc()
+                        print "### no albums found in db"
         return album_detail_list
          
     def get_xbmc_database_info( self ):
