@@ -1,3 +1,7 @@
+1.1.7
+- fixed another spot where HTTP API was needed
+- Corrected 'Settings' in German language string.xml
+
 1.1.6
 - added back some HTTP API functions until AudioLibrary.GetAlbumDetails is added to the JSON RPC(Dharma and beyond)
 

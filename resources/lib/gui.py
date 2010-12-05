@@ -247,13 +247,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_list = []
         json_artist = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "id": 1}')
         json_artists = re.compile( "{(.*?)}", re.DOTALL ).findall(json_artist)
-        #print json_artist
+        print json_artist
         for i in json_artists:
             match = re.search( '"artistid" : (.*?),', i )
             if match:
                 artistid = (match.group(1))                
                 #print "Artist ID: %s" % artistid
-            match2 = re.search( '"label" : "(.*?)",',i)
+            match2 = re.search( '"label" : "(.*?)"',i)
             if match2:
                 artistname = (match2.group(1))
             else:
@@ -263,7 +263,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist["name"]=artistname
             artist["local_id"]= artistid
             artist_list.append(artist)
-            #print artist_list
+            print artist_list
         return artist_list
     
     def retrieve_album_list( self ):
@@ -1026,6 +1026,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
         c.close()
         print "# Finished Storing ablist"
         return album_count, cdart_existing
+    
+    def recount_cdarts( self ):
+        print "#  Recounting cdARTS"
+        cdart_existing = 0
+        conn = sqlite3.connect(addon_db)
+        c = conn.cursor()
+        c.execute("""SELECT title, cdart FROM alblist""")
+        db=c.fetchall()
+        for item in db:
+            if item[1] == "TRUE":
+                cdart_existing = cdart_existing + 1
+        c.close()
+        return cdart_existing
         
     def store_lalist( self, local_artist_list, count_artist_local ):
         print "#  Storing lalist"
@@ -1201,6 +1214,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album_count = item[1]
             cdart_existing = item[2]
         c.close
+        cdart_existing = self.recount_cdarts()
         pDialog.close()
         return album_count, local_artist, cdart_existing
     
