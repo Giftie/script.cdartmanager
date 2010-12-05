@@ -301,7 +301,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_detail_list = []
         album_count = 0
         percent =0
-        print repr(album_list)
+        #print repr(album_list)
         #####
         #####  Delete all HTTP API once AudioLibrary.GetAlbumDetails is added to Dharma #####
         #####
@@ -309,7 +309,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             for detail in album_list:
                 album_count = album_count + 1
                 percent = int((album_count/float(total)) * 100)
-                pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
                 album_id = detail["local_id"]
                 #print "# Album ID: %s" % album_id
                 json_album_detail_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"fields": ["albumartist", "album", "databaseid"], "albumid": %s}, "id": 1}' % album_id
@@ -372,24 +372,24 @@ class GUI( xbmcgui.WindowXMLDialog ):
             for detail in album_list:
                 album_count = album_count + 1
                 percent = int((album_count/float(total)) * 100)
-                pDialog.update( percent, _(32016), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
                 album_id = detail["local_id"]
-                print "# Album ID: %s" % album_id
+                #print "# Album ID: %s" % album_id
                 httpapi_album_detail_query="""SELECT DISTINCT strAlbum, strArtist, idAlbum  FROM albumview WHERE idAlbum="%s" AND strAlbum !=''""" % album_id 
                 httpapi_album_detail = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( httpapi_album_detail_query ), )
                 print httpapi_album_detail
-                match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
+                #match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
                 #match = re.compile( "{(.*?)}", re.DOTALL ).findall(httpapi_album_detail)
-                print "#### match"
-                print match
-                print "match length: %s" % len(match)
+                #print "#### match"
+                #print match
+                #print "match length: %s" % len(match)
                 if not match=="":
                     try:
                         for albums in match:
                             album = {}
-                            print repr(albums[0])
-                            print repr(albums[1])
-                            print repr(albums[2])
+                            #print repr(albums[0])
+                            #print repr(albums[1])
+                            #print repr(albums[2])
                             album_title = albums[0]
                             artist_name = albums[1]
                             album_localid = albums[2]
@@ -409,7 +409,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                                     album_artist["path"] = path
                                     album_artist["cdart"] = self.get_album_cdart( album_artist["path"] )
                                     previous_path = path
-                                    path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)." , path, re.I)
+                                    path_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)" , path, re.I)
                                     title_match = re.search( ".*(CD \d|CD\d|Disc\d|Disc \d|Part\d|Part \d|CD \dd|CD\dd|Disc\dd|Disc \dd|Part\dd|Part \dd)" , title, re.I)
                                     if title_match:
                                         print "#     Title has CD count"
@@ -684,7 +684,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def download_cdart( self, url_cdart , album ):
         destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png") 
         download_success = 0
-        pDialog.create( _(32047) )
+        pDialog.create( _(13413) )
         #Onscreen Dialog - "Downloading...."
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
@@ -1008,7 +1008,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         c = conn.cursor()
         percent = 0 
         for album in local_album_list:
-            pDialog.update( percent, _(32016), "" , "%s:%6s" % ( _(32100), album_count ) )
+            pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
             album_count = album_count + 1
             print "Album Count: %s" % album_count
             print "Album ID: %s" % album["local_id"]
@@ -1081,7 +1081,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#    cdARTs Existing Count: %s" % cdart_existing
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
-        c.execute("insert into counts(artists, albums, cdarts) values (?, ?, ?)", (artist_count, album_count, cdart_existing))
+        c.execute("insert into counts(artists, albums, cdarts, version) values (?, ?, ?, ?)", (artist_count, album_count, cdart_existing, __version__))
         conn.commit()
         c.close()
         print "# Finished Storing Counts"
@@ -1104,13 +1104,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "#  Settings not set, aborting database creation"
             return album_count, artist_count, cdart_existing
         local_album_list = self.get_xbmc_database_info()
-        pDialog.create( _(32021), _(32016) )
+        pDialog.create( _(32021), _(20186) )
         #Onscreen Dialog - Creating Addon Database
         #                      Please Wait....
         #print addon_db
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
-        c.execute('''create table counts(artists, albums, cdarts)''') 
+        c.execute('''create table counts(artists, albums, cdarts, version)''') 
         c.execute('''create table lalist(local_id, name)''')   # create local album artists database
         c.execute('''create table alblist(album_id, title, artist, path, cdart)''')  # create local album database
         c.execute('''create table unqlist(title, artist, path, cdart)''')  # create unique database
@@ -1121,7 +1121,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_artist_list = self.get_all_local_artists()         # retrieve local artists(to get idArtist)
         percent = 0
         for artist in album_artist:        # match album artist to local artist id
-            pDialog.update( percent, _(32016), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
+            pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
             if (pDialog.iscanceled()):
                 break
             #print artist
@@ -1154,7 +1154,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_album_list = []
         query = ""
         if artist_name == "all artists":
-            pDialog.create( _(32102), _(32016) )
+            pDialog.create( _(32102), _(20186) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist ORDER BY artist"
         else:
             query='SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE artist="%s"' % artist_name
@@ -1203,7 +1203,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#  Counting Local Artists, Albums and cdARTs"
         print "#"
         query = "SELECT artists, albums, cdarts FROM counts"
-        pDialog.create( _(32020), _(32016) )
+        pDialog.create( _(32020), _(20186) )
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         conn_l = sqlite3.connect(addon_db)
         c = conn_l.cursor()
@@ -1582,7 +1582,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         line = ""
         albums = self.get_local_albums_db("all artists")
         bkup_folder = __settings__.getSetting("backup_path")
-        pDialog.create( _(32103), _(32016) )
+        pDialog.create( _(32103), _(20186) )
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
@@ -1616,7 +1616,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         line = ""
         zip_filename = ""
         bkup_folder = __settings__.getSetting("backup_path")
-        pDialog.create( _(32104), _(32016) )
+        pDialog.create( _(32104), _(20186) )
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")

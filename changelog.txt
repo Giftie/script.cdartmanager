@@ -1,3 +1,10 @@
+1.1.9
+- removed strings that are already available through XBMC
+
+1.1.8
+- programmed version testing(stored in addon's DB) to correct for changes if required
+- fixed 'add disc numbering if included in path' - allows multiple disc albums to download cdARTs for each disc(if path has CD #, Disc # or Part #)
+
 1.1.7
 - fixed another spot where HTTP API was needed
 - Corrected 'Settings' in German language string.xml
