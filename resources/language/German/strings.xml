@@ -7,17 +7,17 @@
   <string id="32003">Suche Alben</string>
   <string id="32004">Automatischer Download</string>
   <string id="32005">Speichere lokale cdART Liste</string>
-  <string id="32006">Einstellungen</string>
+  <string id="32006"></string>
   <string id="32007">Lokale Künstler: %s</string>
   <string id="32008">Lokale cdARTs: %s</string>
-  <string id="32009">Beenden</string>
+  <string id="32009"></string>
   <string id="32010">Lokale Alben: %s</string>
   <string id="32011">Erweitert</string>
   <string id="32012">Lokale Datenbank aktualisieren</string>
   <string id="32013">Musik Datenbank bereinigen</string>
   <string id="32014">Musik Datenbank aktualisieren</string>
   <string id="32015">Lokale Datenbank löschen?</string>
-  <string id="32016">Bitte warten....</string>
+  <string id="32016"></string>
   <string id="32017">Lokales cdART Verzeichnis</string>
   <string id="32018">cdART  Backup Verzeichnis</string>
   <string id="32019">Backup Speicher Format: </string>
@@ -48,7 +48,7 @@
   <string id="32044">Lokale cdARTs:</string>  <!-- string insert for local cdARTs -->
   <string id="32045">Lokale Alben:</string>  <!-- string insert for local albums -->
   <string id="32046">Automatischer Download von cdARTs</string>
-  <string id="32047">Downloading.....</string>
+  <string id="32047"></string>
   <string id="32048">Überprüfe Liste der erkannten Künstler....</string>
   <string id="32049">Passende Künstler: %s</string>
   <string id="32050">Datenbank Setup abgebrochen...</string>
@@ -80,13 +80,13 @@
   <string id="32076">Copy To Unique Folder For Upload</string>
   <!-- Colour choices for labels -->
   <string id="32077">Benutzerdefinierte Farbe der Markierung</string>
-  <string id="32078">Grün</string>
-  <string id="32079">Blau</string>
-  <string id="32080">Rot</string>
-  <string id="32081">Gelb</string>
-  <string id="32082">Orange</string>
-  <string id="32083">Weiss</string>
-  <string id="32084">Cyan</string>
+  <string id="32078"></string>
+  <string id="32079"></string>
+  <string id="32080"></string>
+  <string id="32081"></string>
+  <string id="32082"></string>
+  <string id="32083"></string>
+  <string id="32084"></string>
   <string id="32085">Violett</string>
   <string id="32086">Pink</string>
   <string id="32087">   Farbe für erkanntr Künstler</string>
@@ -101,7 +101,7 @@
   <string id="32096">Duplikat gefunden</string>
   <string id="32097">Größe von cdARTs anpassen?</string>
   <string id="32098">Local cdART List</string>  <string id="32098">Local cdART List</string>
-  <string id="32099">Settings</string>
+  <string id="32099"></string>
   <string id="32100">Local Album Count</string>
   <string id="32101">Sorting Album Artists</string>
   <string id="32102">Retrieving Local Database</string>
