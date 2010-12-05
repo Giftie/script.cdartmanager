@@ -80,13 +80,13 @@
   <string id="32076">Copy To Unique Folder For Upload</string>
   <!-- Colour choices for labels -->
   <string id="32077">Benutzerdefinierte Farbe der Markierung</string>
-  <string id="32078"></string>
-  <string id="32079"></string>
-  <string id="32080"></string>
-  <string id="32081"></string>
-  <string id="32082"></string>
-  <string id="32083"></string>
-  <string id="32084"></string>
+  <string id="32078">Grün</string>
+  <string id="32079">Blau</string>
+  <string id="32080">Rot</string>
+  <string id="32081">Gelb</string>
+  <string id="32082">Orange</string>
+  <string id="32083">Weiss</string>
+  <string id="32084">Cyan</string>
   <string id="32085">Violett</string>
   <string id="32086">Pink</string>
   <string id="32087">   Farbe für erkanntr Künstler</string>

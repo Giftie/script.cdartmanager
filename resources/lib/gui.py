@@ -3,11 +3,7 @@
 # -  *add comments showing what local strings are being displayed   _(32002) = Search Artist
 # -  add log printing
 # -  insure mouse use works properly - at the moment it seems to break everything!
-# -  add save local cdART list, showing which album have or don't have cdARTs
 # -  add user input(ie keyboard) to get more advanced searches
-# -  add database update for any downloads
-#        many need to read local database(l_cdart - lalist) to find local id #'s
-#        then write to l_cdart - alblist with the important information
 # -  add bulk uploading and downloading
 # -  add website
 #
@@ -23,13 +19,12 @@ import xbmcaddon
 import xbmc
 import socket
 import shutil
+import tarfile
 from pysqlite2 import dbapi2 as sqlite3
 from PIL import Image
 from string import maketrans
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
-
-
 
 KEY_BUTTON_BACK = 275
 KEY_KEYBOARD_ESC = 61467
@@ -66,6 +61,7 @@ addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
 usehttpapi = __settings__.getSetting("usingdharma")
 #usehttpapi = "true"
+safe_db_version = "1.1.8"
 
 CHAR_REPLACEMENT = {
     # latin-1 characters that don't have a unicode decomposition
@@ -237,6 +233,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not error == 0:
             return ""
         else:
+            print repr(htmlsource)
+            print htmlsource
             return htmlsource  
 
     #retrieve local artist list from xbmc's music db
@@ -378,7 +376,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 httpapi_album_detail_query="""SELECT DISTINCT strAlbum, strArtist, idAlbum  FROM albumview WHERE idAlbum="%s" AND strAlbum !=''""" % album_id 
                 httpapi_album_detail = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( httpapi_album_detail_query ), )
                 print httpapi_album_detail
-                #match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
+                match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
                 #match = re.compile( "{(.*?)}", re.DOTALL ).findall(httpapi_album_detail)
                 #print "#### match"
                 #print match
@@ -682,6 +680,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
     # downloads the cdart.  used from album list selections
     def download_cdart( self, url_cdart , album ):
+        print "#    Downloading cdART... "
+        print "#      Path: %s" repr(album["path"])
         destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png") 
         download_success = 0
         pDialog.create( _(13413) )
@@ -940,10 +940,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     # set the matched colour local and distant colour
                     #colour the label to the matched colour if not
                     if album["cdart"] == "TRUE":
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"], (os.path.join(album["path"], "cdart.png")))
+                        label2 = "%s&&%s&&&&%s" % (url, album["path"], (album["path"].replace("\\\\" , "\\") , "cdart.png")))
                         cdart_img = os.path.join(album["path"], "cdart.png")
                         label1 = "%s - %s     ***Local & xbmcstuff.com cdART Exists***" % (album["artist"] , album["title"])
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"], "cdart.png")) )
+                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"].replace("\\\\" , "\\") , "cdart.png")) )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
                         listitem.setLabel2( label2 )                        
@@ -958,7 +958,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else :
                     url = ""
                     if album["cdart"] == "TRUE":
-                        cdart_img = os.path.join(album["path"], "cdart.png")
+                        cdart_img = os.path.join(album["path"] , "cdart.png")
                         label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
                         label1 = "%s - %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
@@ -969,8 +969,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         label1 = "choose for %s - %s" % (album["artist"] , album["title"] )
                         cdart_img = ""
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
-                        print "#  labe2: %s" % label2
+                        label2 = "%s&&%s&&&&%s" % (url, album["path"].replace("\\\\" , "\\"), cdart_img)
+                        print "#  labe2: %s" % repr(label2)
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , self.unmatched_color , label1 ) )
@@ -1066,7 +1066,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print db
         for item in db:
             artist = {}
-            artist["name"] = ( item[0].encode('utf-8') ).strip("'u").rstrip("'")
+            artist["name"] = ( item[0].encode('utf-8') ).lstrip("'u").rstrip("'")
             print repr(artist["name"])
             album_artists.append(artist)
         print repr(album_artists)
@@ -1081,7 +1081,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#    cdARTs Existing Count: %s" % cdart_existing
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
-        c.execute("insert into counts(artists, albums, cdarts, version) values (?, ?, ?, ?)", (artist_count, album_count, cdart_existing, __version__))
+        c.execute("insert into counts(artists, albums, cdarts, version) values (?, ?, ?, ?)", (artist_count, album_count, cdart_existing, safe_db_version))
         conn.commit()
         c.close()
         print "# Finished Storing Counts"
@@ -1165,11 +1165,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for item in db:
             #print item
             album = {}
-            album["local_id"] = ( item[0].encode("utf-8")).strip("'u")
-            album["title"] = ( item[1].encode("utf-8")).strip("'u")
-            album["artist"] = ( item[2].encode("utf-8")).strip("'u")
-            album["path"] = ((item[3]).encode("utf-8")).replace('"','').strip("'u")
-            album["cdart"] = ( item[4].encode("utf-8")).strip("'u")
+            album["local_id"] = ( item[0].encode("utf-8")).lstrip("'u")
+            album["title"] = ( item[1].encode("utf-8")).lstrip("'u")
+            album["artist"] = ( item[2].encode("utf-8")).lstrip("'u")
+            album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u")
+            album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
             #print repr(album)
             local_album_list.append(album)
         c.close
@@ -1190,8 +1190,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for item in db:
             #print item
             artists = {}
-            artists["local_id"] = ( item[0].encode("utf-8")).strip("'u")
-            artists["name"] = ( item[1].encode("utf-8")).strip("'u")
+            artists["local_id"] = ( item[0].encode("utf-8")).lstrip("'u")
+            artists["name"] = ( item[1].encode("utf-8")).lstrip("'u")
             #print repr(artists)
             local_artist_list.append(artists)
         c.close
@@ -1433,6 +1433,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     print "#        Local cdART does not exists"
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
+        self.compress_cdarts( unique_folder )
         return
 
     def restore_from_backup( self ):
@@ -1633,14 +1634,27 @@ class GUI( xbmcgui.WindowXMLDialog ):
         # 
         zip_file = ""
         
-    def extract_zip( self, zip_filename ):
-        # Nothing really here yet
-        #
+    def extract_zip( self, filename ):
         # Here the script will extract the cdARTs store in the zip file downloaded from
         # the website and delete file after extraction is complete(no wasted space)
         # files will be stored in addon_data/script.cdartmanager/temp/extracted_cdarts
-        zip_file = ""
-        
+        print "#  Decompressing unique cdARTs"
+        print "#"
+        source = os.path.join(addon_work_folder, 'filename')
+        destination = os.path.join(addon_work_folder, 'temp')
+        print "#    Source: %s ", source
+        print "#    Destination: %s ", destination
+        output = tarfile.TarFile.open(destination, 'r:gz2')
+        try:
+            output = tarfile.TarFile.open(destination, 'r:gz2')
+            try: 
+                file.extractall()
+            finally:
+                file.close()
+        except:
+            print "# Problem extracting file"
+
+            
     def download_missing_cdarts( self ):
         # Nothing really here yet
         #
@@ -1673,11 +1687,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
         zip_filename = ""
 
     def compress_cdarts( self, unique_folder ):
-        # Nothing really here yet
-        #
-        # compress the cdarts in the unique folder for upload to website
-        filename = ""
-        
+        print "#  Compressing unique cdARTs"
+        print "#"
+        source = 'unique_folder'
+        destination = os.path.join(addon_work_folder, 'unique.tar.gz2')
+        print "#    Source: %s ", source
+        print "#    Destination: %s ", destination
+        try:
+            output = tarfile.TarFile.open(destination, 'w:gz2')
+            output.add(source)
+            output.close()
+        except:
+            print "# Problem Compressing Unique cdARTs"
+    
     def upload_unique_cdarts( self ):
         # Nothing really here yet
         # 
@@ -1736,6 +1758,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
   
     # This selects which cdART image shows up in the display box (image id 210) 
     def cdart_icon( self ):
+        print "# Displaying cdART icon"
         try:   # If there is information in label 2 of list id 122(album list)
             local_cdart = ""
             url = ""
@@ -1743,6 +1766,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_cdart = (self.getControl(122).getSelectedItem().getLabel2()).split("&&&&")[1]
             url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
             cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+            print "# cdART url: %s" % url
+            print "# cdART path: %s" % cdart_path["path"]
             if not local_cdart == "": #Test to see if there is a path in local_cdart
                 image = local_cdart
                 self.getControl( 210 ).setImage( image )
@@ -1758,6 +1783,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
                 url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
                 cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+                print "# cdART url: %s" % url
+                print "# cdART path: %s" % cdart_path["path"]
                 if not local_cdart == "": #Test to see if there is a path in local_cdart
                     image = local_cdart
                     self.getControl( 210 ).setImage( image )

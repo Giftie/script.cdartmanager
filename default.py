@@ -2,7 +2,8 @@ __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
 __version__       = "1.1.9"
-__credits__       = "Ppic, Reaven, Imaginos, redje, Jair"
+__credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
+__credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
 __date__          = "12-04-10"
 import sys
@@ -43,7 +44,7 @@ if ( __name__ == "__main__" ):
         c.execute(query)
         version=c.fetchall()
         for item in version:
-            if item[0]==__version__:
+            if item[0]=="1.1.8":
                 print item[0]
             else:
                 os.remove(addon_db)

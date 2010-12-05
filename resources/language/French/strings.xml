@@ -80,13 +80,13 @@
   <string id="32076">Copy To Unique Folder For Upload</string>
     <!-- Colour choices for labels -->
   <string id="32077">Custom Label Colors</string>
-  <string id="32078"></string>
-  <string id="32079"></string>
-  <string id="32080"></string>
-  <string id="32081"></string>
-  <string id="32082"></string>
-  <string id="32083"></string>
-  <string id="32084"></string>
+  <string id="32078">Green</string>
+  <string id="32079">Blue</string>
+  <string id="32080">Red</string>
+  <string id="32081">Yellow</string>
+  <string id="32082">Orange</string>
+  <string id="32083">White</string>
+  <string id="32084">Cyan</string>
   <string id="32085">Violet</string>
   <string id="32086">Pink</string>
   <string id="32087">   Recognized Artists Color</string>
