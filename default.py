@@ -52,9 +52,7 @@ if ( __name__ == "__main__" ):
                 __settings__.openSettings()
         c.close    
     except:
-        os.remove(addon_db)
-        os.remove(settings_file)
-        __settings__.openSettings()
+        print "# unable to remove folder"
     path = __settings__.getAddonInfo('path')
     if not os.path.exists(addon_work_folder):
         __settings__.openSettings()

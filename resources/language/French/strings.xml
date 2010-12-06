@@ -48,7 +48,7 @@
   <string id="32044">Local cdARTs:</string>  <!-- string insert for local cdARTs --><!--Translation needed -->
   <string id="32045">Local Albums:</string>  <!-- string insert for local albums --><!--Translation needed -->
   <string id="32046">Automatic Downloading cdARTs</string><!--Translation needed -->
-  <string id="32047"></string><!--Translation needed -->
+  <string id="32047">Downloading...</string><!--Translation needed -->
   <string id="32048">Recherchant la liste identifiée d'artiste….</string><!--Translation needed -->
   <string id="32049">Artists Matched: %s</string><!--Translation needed -->
   <string id="32050">L'installation de données a avorté... </string>

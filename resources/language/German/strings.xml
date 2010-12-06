@@ -48,7 +48,7 @@
   <string id="32044">Lokale cdARTs:</string>  <!-- string insert for local cdARTs -->
   <string id="32045">Lokale Alben:</string>  <!-- string insert for local albums -->
   <string id="32046">Automatischer Download von cdARTs</string>
-  <string id="32047"></string>
+  <string id="32047">Downloading...</string>
   <string id="32048">Überprüfe Liste der erkannten Künstler....</string>
   <string id="32049">Passende Künstler: %s</string>
   <string id="32050">Datenbank Setup abgebrochen...</string>

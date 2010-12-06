@@ -48,7 +48,7 @@
   <string id="32044">Helyi cd-képek:</string>  <!-- string insert for local cdARTs -->
   <string id="32045">Helyi albumok:</string>  <!-- string insert for local albums -->
   <string id="32046">cd-képek automatikus letöltése</string>
-  <string id="32047"></string>
+  <string id="32047">Letöltése...</string>
   <string id="32048">Felismert előadók listájának beolvasása....</string>
   <string id="32049">Talált előadók: %s</string>
   <string id="32050">Adatbázis felállítás megszakadt...</string>

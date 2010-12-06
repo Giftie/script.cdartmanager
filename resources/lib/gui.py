@@ -233,8 +233,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not error == 0:
             return ""
         else:
-            print repr(htmlsource)
-            print htmlsource
+            #print repr(htmlsource)
+            #print htmlsource
             return htmlsource  
 
     #retrieve local artist list from xbmc's music db
@@ -245,7 +245,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_list = []
         json_artist = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "id": 1}')
         json_artists = re.compile( "{(.*?)}", re.DOTALL ).findall(json_artist)
-        print json_artist
+        #print json_artist
         for i in json_artists:
             match = re.search( '"artistid" : (.*?),', i )
             if match:
@@ -261,7 +261,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist["name"]=artistname
             artist["local_id"]= artistid
             artist_list.append(artist)
-            print artist_list
+            #print artist_list
         return artist_list
     
     def retrieve_album_list( self ):
@@ -591,6 +591,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         else:
                             album["picture"] = ""                    
                         #print "#                         Album cdART: %s" % album["picture"]
+                        print album
                         search_list.append(album)            
             if search_dialog: 
                 select = xbmcgui.Dialog().select( _(32032), search_dialog)
@@ -600,6 +601,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 for item in search_list : 
                     if item["artist"] == search_list[select]["artist"]:
                         artist_album_list.append(item)
+                    #print artist_album_list
                 return artist_album_list    
             else:
                 if error == 1:
@@ -681,10 +683,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # downloads the cdart.  used from album list selections
     def download_cdart( self, url_cdart , album ):
         print "#    Downloading cdART... "
-        print "#      Path: %s" repr(album["path"])
-        destination = os.path.join( album["path"].replace("\\\\" , "\\") , "cdart.png") 
+        print "#      Path: %s" % repr(album["path"])
+        path = album["path"].replace("\\\\" , "\\")
+        destination = os.path.join( path , "cdart.png") 
         download_success = 0
-        pDialog.create( _(13413) )
+        pDialog.create( _(32047))
         #Onscreen Dialog - "Downloading...."
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
@@ -698,19 +701,22 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #Onscreen Dialog - *DOWNLOADING CDART*
                 if ( pDialog.iscanceled() ):
                     pass  
-            if os.path.exists(album["path"]):
+            if os.path.exists( path ):
                 fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
-                message = [_(32023), _(32024), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+                message = [_(32023), _(32024), "File: %s" % path , "Url: %s" % url_cdart]
                 #message = ["Download Sucessful!"]
                 c.execute('''UPDATE alblist SET cdart="TRUE" WHERE title="%s"''' % album["title"])
                 download_success = 1
             else:
-                message = [ _(32026),  _(32025) , "File: %s" % album["path"] , "Url: %s" % url_cdart]
+                print destination
+                print "#  Path error"
+                message = [ _(32026),  _(32025) , "File: %s" % path , "Url: %s" % url_cdart]
                 #message = Download Problem, Check file paths - cdART Not Downloaded]           
             if ( pDialog.iscanceled() ):
                 pDialog.close()            
         except:
-            message = [ _(32026), _(32025), "File: %s" % album["path"] , "Url: %s" % url_cdart]
+            print "#  General download error"
+            message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
             #message = [Download Problem, Check file paths - cdART Not Downloaded]           
             print_exc()
         conn.commit()
@@ -940,10 +946,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     # set the matched colour local and distant colour
                     #colour the label to the matched colour if not
                     if album["cdart"] == "TRUE":
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"], (album["path"].replace("\\\\" , "\\") , "cdart.png")))
-                        cdart_img = os.path.join(album["path"], "cdart.png")
+                        label2 = "%s&&%s&&&&%s" % (url, album["path"] , "cdart.png")
+                        cdart_img = os.path.join(album["path"].replace("\\\\","\\"), "cdart.png")
                         label1 = "%s - %s     ***Local & xbmcstuff.com cdART Exists***" % (album["artist"] , album["title"])
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"].replace("\\\\" , "\\") , "cdart.png")) )
+                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"], "cdart.png")) )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
                         listitem.setLabel2( label2 )                        
@@ -958,7 +964,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else :
                     url = ""
                     if album["cdart"] == "TRUE":
-                        cdart_img = os.path.join(album["path"] , "cdart.png")
+                        cdart_img = os.path.join(album["path"].replace("\\\\","\\") , "cdart.png")
                         label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
                         label1 = "%s - %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
@@ -969,8 +975,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else:
                         label1 = "choose for %s - %s" % (album["artist"] , album["title"] )
                         cdart_img = ""
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"].replace("\\\\" , "\\"), cdart_img)
-                        print "#  labe2: %s" % repr(label2)
+                        label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
+                        #print "#  labe2: %s" % repr(label2)
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                         self.getControl( 122 ).addItem( listitem )
                         listitem.setLabel( self.coloring( label1 , self.unmatched_color , label1 ) )
@@ -1063,13 +1069,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         c = conn.cursor()
         c.execute("""SELECT DISTINCT artist FROM alblist""")
         db=c.fetchall()
-        print db
+        #print db
         for item in db:
             artist = {}
             artist["name"] = ( item[0].encode('utf-8') ).lstrip("'u").rstrip("'")
             print repr(artist["name"])
             album_artists.append(artist)
-        print repr(album_artists)
+        #print repr(album_artists)
         c.close()
         print "# Finished Retrieving Distinct Album Artists"
         return album_artists
@@ -1168,7 +1174,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album["local_id"] = ( item[0].encode("utf-8")).lstrip("'u")
             album["title"] = ( item[1].encode("utf-8")).lstrip("'u")
             album["artist"] = ( item[2].encode("utf-8")).lstrip("'u")
-            album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u")
+            album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u").rstrip("'")
             album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
             #print repr(album)
             local_album_list.append(album)
@@ -1758,7 +1764,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
   
     # This selects which cdART image shows up in the display box (image id 210) 
     def cdart_icon( self ):
-        print "# Displaying cdART icon"
+        #print "# Displaying cdART icon"
         try:   # If there is information in label 2 of list id 122(album list)
             local_cdart = ""
             url = ""
@@ -1766,14 +1772,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_cdart = (self.getControl(122).getSelectedItem().getLabel2()).split("&&&&")[1]
             url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
             cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
-            print "# cdART url: %s" % url
-            print "# cdART path: %s" % cdart_path["path"]
+            print "# cdART url: %s" % repr(url)
+            print "# cdART path: %s" % repr(cdart_path["path"])
             if not local_cdart == "": #Test to see if there is a path in local_cdart
-                image = local_cdart
+                image = (local_cdart.replace("\\\\" , "\\"))
                 self.getControl( 210 ).setImage( image )
             else:
                 if not cdart_path["path"] =="": #Test to see if there is an url in cdart_path["path"]
-                    image = cdart_path["path"]
+                    image = (cdart_path["path"].replace("\\\\" , "\\"))
                     self.getControl( 210 ).setImage( image )
                 else:
                     image =""
@@ -1786,11 +1792,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 print "# cdART url: %s" % url
                 print "# cdART path: %s" % cdart_path["path"]
                 if not local_cdart == "": #Test to see if there is a path in local_cdart
-                    image = local_cdart
+                    image = (local_cdart.replace("\\\\" , "\\"))
                     self.getControl( 210 ).setImage( image )
                 else:
                     if not cdart_path["path"] =="": #Test to see if there is an url in cdart_path["path"]
-                        image = cdart_path["path"]
+                        image = (cdart_path["path"].replace("\\\\" , "\\"))
                         self.getControl( 210 ).setImage( image )
                     else:
                         image =""
@@ -1829,10 +1835,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)
         #checking to see if addon_db exists, if not, run database_setup()
-        if not os.path.isfile((addon_db).replace("\\\\" , "\\").encode("utf-8")):
-            local_album_count, local_artist_count, local_cdart_count = self.new_database_setup()
-        else:
+        if os.path.isfile((addon_db).replace("\\\\" , "\\").encode("utf-8")):
             local_album_count, local_artist_count, local_cdart_count = self.new_local_count()
+        else:
+            local_album_count, local_artist_count, local_cdart_count = self.new_database_setup()
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         self.local_artists = self.get_local_artists_db() # retrieve data from addon's database
         self.setFocusId( 100 ) # set menu selection to the first option(Search Artists)
@@ -1849,8 +1855,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = str.lower(self.get_html_source( artist_url ))
-            print "Distant Artists:"
-            print distant_artist
+            #print "Distant Artists:"
+            #print distant_artist
             local_artists=self.get_local_artists_db()
             if not distant_artist == "":
                 self.recognized_artists, self.local_artists = self.get_recognized( distant_artist , local_artists )

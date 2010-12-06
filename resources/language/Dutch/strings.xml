@@ -48,7 +48,7 @@
   <string id="32044">Lokale cdARTs:</string>  <!-- string insert for local cdARTs -->
   <string id="32045">Lokale Albums:</string>  <!-- string insert for local albums -->
   <string id="32046">Automatisch Downloaden cdARTs</string>
-  <string id="32047"></string>
+  <string id="32047">Downloaden...</string>
   <string id="32048">Ophalen Herkende Artiesten Lijst....</string>
   <string id="32049">Herkende Artiesten: %s</string>
   <string id="32050">Database setup afgebroken...</string>

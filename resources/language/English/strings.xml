@@ -48,7 +48,7 @@
   <string id="32044">Local cdARTs:</string>  <!-- string insert for local cdARTs -->
   <string id="32045">Local Albums:</string>  <!-- string insert for local albums -->
   <string id="32046">Automatic Downloading cdARTs</string>
-  <string id="32047"></string>
+  <string id="32047">Downloading...</string>
   <string id="32048">Retrieving Recognized Artist List....</string>
   <string id="32049">Artists Matched: %s</string>
   <string id="32050">Database setup aborted...</string>
