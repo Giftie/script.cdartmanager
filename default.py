@@ -37,25 +37,27 @@ if ( __name__ == "__main__" ):
     print "#    %-50s    #" % __credits__
     print "#    Thanks the the help guys...                           #"
     print "############################################################"
-    query = "SELECT version FROM counts"
-    try:
-        conn_l = sqlite3.connect(addon_db)
-        c = conn_l.cursor()
-        c.execute(query)
-        version=c.fetchall()
-        for item in version:
-            if item[0]=="1.1.8":
-                print item[0]
-            else:
-                os.remove(addon_db)
-                os.remove(settings_file)
-                __settings__.openSettings()
-        c.close    
-    except:
-        print "# unable to remove folder"
-    path = __settings__.getAddonInfo('path')
+    query = "SELECT version FROM counts"    
     if not os.path.exists(addon_work_folder):
         __settings__.openSettings()
+    else:
+        try:
+            conn_l = sqlite3.connect(addon_db)
+            c = conn_l.cursor()
+            c.execute(query)
+            version=c.fetchall()
+            for item in version:
+                if item[0]=="1.1.8":
+                    print item[0]
+                else:
+                    os.remove(addon_db)
+                    os.remove(settings_file)
+                    __settings__.openSettings()
+            c.close    
+        except:
+            print "# unable to remove folder"
+        path = __settings__.getAddonInfo('path')
+       
     import gui
     ui = gui.GUI( "script-cdartmanager.xml" , __settings__.getAddonInfo('path'), "Default")
     ui.doModal()
