@@ -946,8 +946,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     # set the matched colour local and distant colour
                     #colour the label to the matched colour if not
                     if album["cdart"] == "TRUE":
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"] , "cdart.png")
-                        cdart_img = os.path.join(album["path"].replace("\\\\","\\"), "cdart.png")
+                        cdart_img = os.path.join(album["path"], "cdart.png")
+                        label2 = "%s&&%s&&&&%s" % (url, album["path"] , cdart_img)
                         label1 = "%s - %s     ***Local & xbmcstuff.com cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"], "cdart.png")) )
                         self.getControl( 122 ).addItem( listitem )
@@ -964,7 +964,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else :
                     url = ""
                     if album["cdart"] == "TRUE":
-                        cdart_img = os.path.join(album["path"].replace("\\\\","\\") , "cdart.png")
+                        cdart_img = os.path.join(album["path"] , "cdart.png")
                         label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
                         label1 = "%s - %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
                         listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
