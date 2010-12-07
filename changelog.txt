@@ -1,3 +1,7 @@
+1.2.1
+- fixed some utf-8 vs. latin-1 coding
+- fixed Artist Search(seems to have been broken for a long time)
+
 1.2.0
 - some fixes for Windows machines.
 

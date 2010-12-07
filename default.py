@@ -1,7 +1,7 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.2.0"
+__version__       = "1.2.1"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
@@ -35,6 +35,7 @@ if ( __name__ == "__main__" ):
     print "#    %-50s    #" % __author__
     print "#    %-50s    #" % __version__
     print "#    %-50s    #" % __credits__
+    print "#    %-50s    #" % __credits2__
     print "#    Thanks the the help guys...                           #"
     print "############################################################"
     query = "SELECT version FROM counts"    
@@ -54,8 +55,9 @@ if ( __name__ == "__main__" ):
                     os.remove(settings_file)
                     __settings__.openSettings()
             c.close    
-        except:
+        except StandardError, e:
             print "# unable to remove folder"
+            print "# Error: ",e.__class__.__name__
         path = __settings__.getAddonInfo('path')
        
     import gui
