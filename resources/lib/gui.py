@@ -568,7 +568,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         match = re.search( "<artist>(.*?)</artist>", i )
                         if match:
                             album["artist"] = set_entity_or_charref((match.group(1).replace("&amp;", "&")).replace("'",""))
-                            #print "#               Artist Matched: %s" % album["artist"]
+                            print "#               Artist Matched: %s" % album["artist"]
                         else:
                             album["artist"] = ""
                         if not album["artist"] in search_dialog:
@@ -597,6 +597,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 select = xbmcgui.Dialog().select( _(32032), search_dialog)
                 #Onscreen Select Menu
                 print select
+                print search_list[select]
             if not select == -1:
                 for item in search_list : 
                     if item["artist"] == search_list[select]["artist"]:
@@ -611,7 +612,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
                     #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No cdART found for 
         return
-
 
     def cdart_search( self, cdart_url, title ):
         print "#  Searching for matching remote albums & cdARTs"
@@ -1021,11 +1021,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "Album Title: %s" % repr(album["title"])
             print "Album Artist: %s" % repr(album["artist"])
             print "Album Artist: %s" % repr(unicode(album["artist"], 'utf-8'))
-            print "Album Path: %s" % repr(album["path"])
+            print "Album Path: %s" % repr(album["path"]).replace("\\\\" , "\\")
             print "cdART Exist?: %s" % album["cdart"]
             if album["cdart"] == "TRUE" :
                 cdart_existing = cdart_existing + 1
-            c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]), album["cdart"]))
+            c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]).replace("\\\\" , "\\"), album["cdart"]))
             if (pDialog.iscanceled()):
                 break
         conn.commit()
@@ -1816,7 +1816,64 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.create( header, line1, line2, line3 )
         xbmc.sleep(2000)
         pDialog.close()
-        #self.getControl( 9012 ).setVisible( False )        
+        #self.getControl( 9012 ).setVisible( False ) 
+
+    def get_distant_artists(self, distant_artist):
+        print "# Retrieving Distant Artists"
+        print "#"
+        d_artist_lists = []
+        d_artist = re.compile( '<artist id="(.*?)">(.*?)</artist>', re.DOTALL )
+        #print d_artist
+        for item in d_artist.finditer(distant_artist):
+            distant = {}
+            #print item
+            distant["name"] = ( item.group(2) )
+            distant["id"] = ( item.group(1) )
+            #print distant["name"]
+            #print distant["id"]
+            d_artist_lists.append(distant)
+        return d_artist_lists 
+
+    def search_distant( self, name, distant ):
+        print "# Comparing distant artists to %s:" % name
+        print "#"
+        name = str.lower(name)
+        distant_id = None
+        search_dialog = []
+        search_distantid = []
+        search_name = self.remove_special( name )
+        #print search_name
+        search_name = search_name.replace("-", " ") # break up name if hyphens are present
+        for part in search_name.split(" "):
+            #print "Part: %s" % part
+            for temp in distant:
+                temp_name = {}
+                temp_id = {}
+                match = re.search(part, temp["name"])
+                #print match
+                if match:
+                    temp_name["name"] = temp["name"]
+                    #print "Temp Name: %s" % temp_name["name"]
+                    temp_id["distant_id"] = temp["id"]
+                    #print "Temp id: %s" % temp_id["distant_id"]
+                    search_dialog.append(temp_name["name"])
+                    search_distantid.append(temp_id["distant_id"])
+                #print "search Dialog: %s" % search_dialog
+        print len(search_dialog)
+        if not len(search_dialog) == 0:
+            select = xbmcgui.Dialog().select( _(32032), search_dialog)
+        else:
+            distant_id = None
+            return distant_id
+        #print select
+        if not select == -1:
+            distant_id = search_distantid[select]
+            print "#    Distant ID: %s" % distant_id
+        else:
+            distant_id = None
+            xbmcgui.Dialog().ok( _(32033), "%s %s" % ( _(32034), name) )
+            #Onscreen Dialog - Not Found on XBMCSTUFF.COM, No cdART found for 
+        return distant_id
             
     # setup self. strings and initial local counts
     def setup_all( self ):
@@ -1873,14 +1930,27 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.artist_menu["local_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
                 self.artist_menu["name"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
                 self.artist_menu["distant_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
+                self.remote_cdart_url = self.remote_cdart_list( self.artist_menu, 1 )
+                #print "# %s" % self.artist_menu
+                #print artist_menu
             elif self.menu_mode == 2: #information pulled from All Artist List
                 self.artist_menu = {}
                 self.artist_menu["local_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
+                print self.artist_menu["local_id"]
                 self.artist_menu["name"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
+                print self.artist_menu["name"]
                 self.artist_menu["distant_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
-            self.remote_cdart_url = self.remote_cdart_list( self.artist_menu, 1 )
-            #print "# %s" % self.artist_menu
-            #print artist_menu
+                print self.artist_menu["distant_id"]
+                                if not self.artist_menu["distant_id"]:
+                    distant_artist = str.lower(self.get_html_source( artist_url ))
+                    d_art = self.get_distant_artists(distant_artist)
+                    self.artist_menu["distant_id"] = self.search_distant( self.artist_menu["name"], d_art )
+                if self.artist_menu["distant_id"]==None:
+                    self.remote_cdart_url = None
+                else:
+                    print "# %s" % self.artist_menu
+                    self.remote_cdart_url = self.remote_cdart_list( self.artist_menu, 1 )
+                    #print artist_menu
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 122 : #Retrieving information from Album List
             #print "#  Setting up Album List"
