@@ -303,7 +303,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #####
         #####  Delete all HTTP API once AudioLibrary.GetAlbumDetails is added to Dharma #####
         #####
-        if not usehttpapi:
+        if not usehttpapi=="true":
             for detail in album_list:
                 album_count = album_count + 1
                 percent = int((album_count/float(total)) * 100)
@@ -1594,8 +1594,21 @@ class GUI( xbmcgui.WindowXMLDialog ):
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
         filename=os.path.join(bkup_folder, "missing.txt")
+        filename2 = os.path.join(addon_work_folder, "missing.txt")
         try:
             missing=open(filename, "wb")
+            missing.write("Albums Missing cdARTs\n")
+            missing.write("---------------------\n")
+            missing.write("\n")
+            for album in albums:
+                count = count + 1
+                if album["cdart"] == "FALSE":
+                    artist = repr(album["artist"]) 
+                    title = repr(album["title"])
+                    line = artist + " - " + title + "\n"
+                    missing.write( line )
+            missing.close()
+            missing=open(filename2, "wb")
             missing.write("Albums Missing cdARTs\n")
             missing.write("---------------------\n")
             missing.write("\n")
@@ -1627,7 +1640,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if bkup_folder =="":
             __settings__.openSettings()
             bkup_folder = __settings__.getSetting("backup_path")
-        filename=os.path.join(bkup_folder, "missing.txt")
+        filename=os.path.join(addon_work_folder, "missing.txt")
         return zip_filename
         
     def download_from_website( self, zip_filename ):
