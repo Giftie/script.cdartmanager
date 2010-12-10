@@ -20,9 +20,11 @@ import xbmc
 import socket
 import shutil
 import tarfile
+import zipfile
 from pysqlite2 import dbapi2 as sqlite3
 from PIL import Image
 from string import maketrans
+import zlib
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
 
@@ -212,6 +214,36 @@ class GUI( xbmcgui.WindowXMLDialog ):
         clean_text = ((clean_text.replace("[COLOR=FFEE82EE]","")).replace("[COLOR=FFFF1493]","")).replace("[COLOR=FFFF0000]","")
         clean_text = ((clean_text.replace("[COLOR=FF00FF00]","")).replace("[COLOR=FFFFFF00]","")).replace("[COLOR=FFFF4500]","")
         return clean_text
+        
+    def dirEntries(self, dir_name, subdir, *args):
+        '''Return a list of file names found in directory 'dir_name'
+        If 'subdir' is True, recursively access subdirectories under 'dir_name'.
+        Additional arguments, if any, are file extensions to match filenames. Matched
+            file names are added to the list.
+        If there are no additional arguments, all files found in the directory are
+            added to the list.
+        Example usage: fileList = dirEntries(r'H:\TEMP', False, 'txt', 'py')
+            Only files with 'txt' and 'py' extensions will be added to the list.
+        Example usage: fileList = dirEntries(r'H:\TEMP', True)
+            All files and all the files in subdirectories under H:\TEMP will be added
+            to the list.
+        '''
+        print "dir_name: %s" % dir_name
+        print "subdir: %s" % subdir
+        fileList = []
+        for f in os.listdir(dir_name):
+            dirfile = os.path.join(dir_name, f)
+            if os.path.isfile(dirfile):
+                if not args:
+                    fileList.append(dirfile)
+                else:
+                    if os.path.splitext(dirfile)[1][1:] in args:
+                        fileList.append(dirfile)
+            # recursively access file names in subdirectories
+            elif os.path.isdir(dirfile) and subdir:
+                print "Accessing directory:", dirfile
+                fileList.extend(self.dirEntries(dirfile, subdir, *args))
+        return fileList
 
 
     def get_html_source( self , url ):
@@ -1362,7 +1394,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # Copy's all the local unique cdARTs to a folder specified by the user
     def unique_cdart_copy( self, unique ):
         print "### Copying Unique cdARTs..."
-        print "#"
+        print "#"        
         percent = 0
         count = 0
         duplicates = 0
@@ -1449,7 +1481,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     print "#        Local cdART does not exists"
         pDialog.close()
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), unique_folder), "%s %s" % ( count , _(32059)))
-        self.compress_cdarts( unique_folder )
+        # uncomment the next line when website is ready
+        #self.compress_cdarts( unique_folder )
         return
 
     def restore_from_backup( self ):
@@ -1718,16 +1751,31 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def compress_cdarts( self, unique_folder ):
         print "#  Compressing unique cdARTs"
         print "#"
-        source = 'unique_folder'
-        destination = os.path.join(addon_work_folder, 'unique.tar.gz2')
-        print "#    Source: %s ", source
-        print "#    Destination: %s ", destination
+        
+        source = unique_folder
+        destination = os.path.join(addon_work_folder, 'unique.tar.gz')
+        print "#    Source: %s " % source
+        print "#    Destination: %s " % destination
+        fileList = self.dirEntries(source, True)
         try:
-            output = tarfile.TarFile.open(destination, 'w:gz2')
-            output.add(source)
+            output = tarfile.TarFile.open(destination, 'w:gz')
+            for f in fileList:
+                print "archiving file %s" % (f)
+                output.add(f)
             output.close()
         except:
             print "# Problem Compressing Unique cdARTs"
+        #destination = os.path.join(addon_work_folder, 'unique.zip')
+#        source = unique_folder
+#        fileList = self.dirEntries(source, True)
+#       try:
+#            output = zipfile.ZipFile(destination, 'w', zipfile.ZIP_STORED)
+#            for f in fileList:
+#                print "archiving file %s" % (f)
+#                output.write(f)
+#            output.close()
+#        except: 
+#            print "# Problem Compressing Unique cdARTs"
     
     def upload_unique_cdarts( self ):
         # Nothing really here yet
@@ -2021,8 +2069,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
+            print "#  Executing Built-in - CleanLibrary(music)"
             xbmc.executebuiltin( "CleanLibrary(music)") 
         if controlId == 133 : #Update Music database selected from Advanced Menu
+            print "#  Executing Built-in - UpdateLibrary(music)"
             xbmc.executebuiltin( "UpdateLibrary(music)")
         if controlId == 135 : #Back up cdART selected from Advanced Menu
             self.cdart_copy()

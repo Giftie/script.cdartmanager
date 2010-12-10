@@ -1,3 +1,8 @@
+1.2.2
+- Moved Italian translation to the correct Folder
+- Added Back database removal, if Addon database does not match the proper version
+- Changed 'Refresh Local Database' to 'Refresh Addon Database'
+
 1.2.1
 - fixed some utf-8 vs. latin-1 coding
 - fixed Artist Search(seems to have been broken for a long time)

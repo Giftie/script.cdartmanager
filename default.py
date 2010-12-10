@@ -1,11 +1,11 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.2.1"
+__version__       = "1.2.2"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
-__date__          = "12-05-10"
+__date__          = "12-09-10"
 import sys
 import os
 import xbmcaddon
@@ -56,8 +56,14 @@ if ( __name__ == "__main__" ):
                     __settings__.openSettings()
             c.close    
         except StandardError, e:
-            print "# unable to remove folder"
             print "# Error: ",e.__class__.__name__
+            try: 
+                os.remove(addon_db)
+                os.remove(settings_file)
+                __settings__.openSettings()
+            except StandardError, e:
+                print "# unable to remove folder"
+                print "# Error: ",e.__class__.__name__
         path = __settings__.getAddonInfo('path')
        
     import gui
