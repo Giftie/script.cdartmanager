@@ -271,8 +271,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #print htmlsource
             return htmlsource  
 
-    #retrieve local artist list from xbmc's music db
-#    def get_local_artist( self ):
+#retrieve local artist list from xbmc's music db
     def get_all_local_artists( self ):
         print "# Retrieving All Local Artists"
         print "#"
@@ -297,7 +296,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_list.append(artist)
             #print artist_list
         return artist_list
-    
+        
+# Using JSONRPC, retrieve Album List    
     def retrieve_album_list( self ):
         print "# Retrieving Album List"        
         album_list = []
@@ -1060,11 +1060,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if album["cdart"] == "TRUE" :
                 cdart_existing = cdart_existing + 1
             try:
-                c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]).replace("\\\\" , "\\"), album["cdart"]))
+                c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
             except UnicodeDecodeError:
                 temp_title = album["title"].decode('latin-1')
                 album_title["title"] = temp_title.encode('utf-8')
-                c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]).replace("\\\\" , "\\"), album["cdart"]))
+                c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
             except StandardError, e:
                 print "# Error Saving to Database"
                 print "# Error: ",e.__class__.__name__
@@ -1898,6 +1898,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for item in d_artist.finditer(distant_artist):
             distant = {}
             #print item
+            #temp_name = ( item.group(2) ).decode('iso-8859-1')
+            #print temp_name
             distant["name"] = ( item.group(2) )
             distant["id"] = ( item.group(1) )
             #print distant["name"]
