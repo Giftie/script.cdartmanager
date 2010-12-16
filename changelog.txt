@@ -1,3 +1,7 @@
+1.2.4
+- Organized Settings
+- Updated addon.xml with an Italian description of the script
+
 1.2.3
 - fixed hopefully the last unicode error...
 

@@ -24,6 +24,7 @@ import zipfile
 from pysqlite2 import dbapi2 as sqlite3
 from PIL import Image
 from string import maketrans
+from ftplib import FTP
 import zlib
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
@@ -1062,9 +1063,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
             try:
                 c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
             except UnicodeDecodeError:
-                temp_title = album["title"].decode('latin-1')
-                album_title["title"] = temp_title.encode('utf-8')
-                c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
+                try:
+                    temp_title = album["title"].decode('latin-1')
+                    album_title["title"] = temp_title.encode('utf-8')
+                    c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
+                except UnicodeDecodeError:
+                    try:
+                        temp_title = album["title"].decode('cp850')
+                        album_title["title"] = temp_title.encode('utf-8')
+                        c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'cp850'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
+                    except:
+                        print "# Error Saving to Database"            
             except StandardError, e:
                 print "# Error Saving to Database"
                 print "# Error: ",e.__class__.__name__
@@ -1278,7 +1287,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             db_delete = xbmcgui.Dialog().yesno( _(32042) , _(32015) )
             if db_delete :
                 print "#    Deleting Local Database"
-                os.remove(addon_db)
+                try:
+                    os.remove(addon_db)
+                except:
+                    print "Unable to delete Database"
                 local_album_count, local_artist_count, local_cdart_count = self.new_database_setup()
             else:
                 pass            
@@ -1742,16 +1754,25 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_album_count, local_artist_count, local_cdart_count = self.new_database_setup()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             
-    def upload_to_website( self, zip_file ):
+    def upload_to_website( self ):
         # Nothing really here yet
         # 
         # open ftp and send a zip file to the website
-        zip_filename = ""
+        source = os.path.join(addon_work_folder, 'unique.tar.gz')
+        cmd = "STOR unique.tar.gz"
+        try:
+            ftp_upload = FTP('192.168.2.9')
+            ftp_upload.login('giftie61', 'gmracing')
+            upload = open(source, 'rb')
+            ftp_upload.storbinary(cmd, upload)
+            upload.close()
+            ftp_upload.close()
+        except StandardError, e:
+            print "Error uploading file: %s" % e
 
     def compress_cdarts( self, unique_folder ):
         print "#  Compressing unique cdARTs"
-        print "#"
-        
+        print "#"        
         source = unique_folder
         destination = os.path.join(addon_work_folder, 'unique.tar.gz')
         print "#    Source: %s " % source
@@ -1763,19 +1784,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 print "archiving file %s" % (f)
                 output.add(f)
             output.close()
+            self.upload_to_website()
         except:
             print "# Problem Compressing Unique cdARTs"
-        #destination = os.path.join(addon_work_folder, 'unique.zip')
-#        source = unique_folder
-#        fileList = self.dirEntries(source, True)
-#       try:
-#            output = zipfile.ZipFile(destination, 'w', zipfile.ZIP_STORED)
-#            for f in fileList:
-#                print "archiving file %s" % (f)
-#                output.write(f)
-#            output.close()
-#        except: 
-#            print "# Problem Compressing Unique cdARTs"
     
     def upload_unique_cdarts( self ):
         # Nothing really here yet
@@ -1787,7 +1798,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.unique_cdart_copy( unique )
             unique_folder = __settings__.getSetting("unique_path")
             zip_file = self.compress_cdarts( unique_folder )
-            self.upload_to_website( zip_file )
+            self.upload_to_website()
         else:
             xbmcgui.Dialog().ok( "There are no unique local cdARTs")        
         

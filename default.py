@@ -1,11 +1,11 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.2.3"
+__version__       = "1.2.4"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
-__date__          = "12-10-10"
+__date__          = "12-15-10"
 import sys
 import os
 import xbmcaddon
@@ -25,6 +25,7 @@ print BASE_RESOURCE_PATH
 
 addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
+addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
 settings_file = os.path.join(addon_work_folder, "settings.xml")
 
 if ( __name__ == "__main__" ):
@@ -41,6 +42,9 @@ if ( __name__ == "__main__" ):
     query = "SELECT version FROM counts"    
     if not os.path.exists(addon_work_folder):
         __settings__.openSettings()
+    elif os.path.isfile(addon_db_crash):
+        os.remove(addon_db)
+        os.remove(addon_db_crash)
     else:
         try:
             conn_l = sqlite3.connect(addon_db)
