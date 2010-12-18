@@ -1,3 +1,6 @@
+1.2.5
+- Added Portuguese (Brazil) language strings and description - Thanks Jair!
+
 1.2.4
 - Organized Settings
 - Updated addon.xml with an Italian description of the script
