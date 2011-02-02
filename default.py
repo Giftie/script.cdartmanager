@@ -1,21 +1,21 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.2.5"
+__version__       = "1.2.6"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
-__date__          = "12-17-10"
+__date__          = "2-1-11"
 import sys
 import os
 import xbmcaddon
 import xbmc
 from pysqlite2 import dbapi2 as sqlite3
 
-__settings__ = xbmcaddon.Addon(__scriptID__)
-__language__ = __settings__.getLocalizedString
+__addon__ = xbmcaddon.Addon(__scriptID__)
+__language__ = __addon__.getLocalizedString
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __settings__.getAddonInfo('path'), 'resources' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
@@ -23,7 +23,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 print BASE_RESOURCE_PATH
 
 
-addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
+addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
 settings_file = os.path.join(addon_work_folder, "settings.xml")
@@ -41,7 +41,7 @@ if ( __name__ == "__main__" ):
     print "############################################################"
     query = "SELECT version FROM counts"    
     if not os.path.exists(addon_work_folder):
-        __settings__.openSettings()
+        __addon__.openSettings()
     elif os.path.isfile(addon_db_crash):
         os.remove(addon_db)
         os.remove(addon_db_crash)
@@ -57,21 +57,21 @@ if ( __name__ == "__main__" ):
                 else:
                     os.remove(addon_db)
                     os.remove(settings_file)
-                    __settings__.openSettings()
+                    __addon__.openSettings()
             c.close    
         except StandardError, e:
             print "# Error: ",e.__class__.__name__
             try: 
                 os.remove(addon_db)
                 os.remove(settings_file)
-                __settings__.openSettings()
+                __addon__.openSettings()
             except StandardError, e:
                 print "# unable to remove folder"
                 print "# Error: ",e.__class__.__name__
-        path = __settings__.getAddonInfo('path')
+        path = __addon__.getAddonInfo('path')
        
     import gui
-    ui = gui.GUI( "script-cdartmanager.xml" , __settings__.getAddonInfo('path'), "Default")
+    ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
     ui.doModal()
     del ui
     sys.modules.clear()

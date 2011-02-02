@@ -26,6 +26,7 @@ from PIL import Image
 from string import maketrans
 from ftplib import FTP
 import zlib
+
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
 
@@ -38,16 +39,17 @@ __scriptname__ = sys.modules[ "__main__" ].__scriptname__
 __scriptID__   = sys.modules[ "__main__" ].__scriptID__
 __author__     = sys.modules[ "__main__" ].__author__
 __credits__    = sys.modules[ "__main__" ].__credits__
-__credits2__    = sys.modules[ "__main__" ].__credits2__
+__credits2__   = sys.modules[ "__main__" ].__credits2__
 __version__    = sys.modules[ "__main__" ].__version__
-__settings__   = sys.modules[ "__main__" ].__settings__
+__addon__      = sys.modules[ "__main__" ].__addon__
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __settings__.getAddonInfo('path'), 'resources' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from convert import set_entity_or_charref
 from convert import translate_string
+from folder import dirEntries
 
 #variables
 intab = ""
@@ -57,13 +59,13 @@ musicdb_path = os.path.join(xbmc.translatePath( "special://profile/Database/" ),
 artist_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=artists"
 album_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cdarts"
 cross_url = "http://www.xbmcstuff.com/music_scraper.php?&id_scraper=65DFdfsdfgvfd6v8&t=cross"
-addon_work_folder = os.path.join(xbmc.translatePath( "special://profile/addon_data/" ), __scriptID__)
-addon_db = os.path.join(addon_work_folder, "l_cdart.db")
+addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
+addon_db = os.path.join(addon_work_folder, "l_cdart.db") 
 download_temp_folder = os.path.join(addon_work_folder, "temp")
 addon_image_path = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
 addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 pDialog = xbmcgui.DialogProgress()
-usehttpapi = __settings__.getSetting("usingdharma")
+usehttpapi = __addon__.getSetting("usingdharma")
 #usehttpapi = "true"
 safe_db_version = "1.1.8"
 
@@ -117,8 +119,7 @@ class unaccented_map(dict):
 class GUI( xbmcgui.WindowXMLDialog ):
     def __init__( self, *args, **kwargs ):    	
         pass
-
-
+        
     def onInit( self ):
         print sys.getdefaultencoding()
         print "############################################################"
@@ -136,11 +137,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.setup_all()
 
     def retrieve_settings( self ):
-        backup_path = __settings__.getSetting("backup_path")
-        unique_path = __settings__.getSetting("unique_path")
-        enableresize = __settings__.getSetting("enableresize")
-        folder = __settings__.getSetting("folder")
-        enablecustom = __settings__.getSetting("enablecustom")
+        backup_path = __addon__.getSetting("backup_path")
+        unique_path = __addon__.getSetting("unique_path")
+        enableresize = __addon__.getSetting("enableresize")
+        folder = __addon__.getSetting("folder")
+        enablecustom = __addon__.getSetting("enablecustom")
         print "# Settings                                                 #"
         print "#                                                          #"
         print "#    Backup Folder: %-35s    #" % backup_path
@@ -150,16 +151,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "#    Enable Custom Colours: %-27s    #" % enablecustom
         print "#                                                          #"
         
-        
     def setup_colors( self ):
-        if __settings__.getSetting("enablecustom")=="true":
-            self.recognized_color = str.lower(__settings__.getSetting("recognized"))
-            self.unrecognized_color = str.lower(__settings__.getSetting("unrecognized"))
-            self.remote_color = str.lower(__settings__.getSetting("remote"))
-            self.local_color = str.lower(__settings__.getSetting("local"))
-            self.remotelocal_color = str.lower(__settings__.getSetting("remotelocal"))
-            self.unmatched_color = str.lower(__settings__.getSetting("unmatched"))
-            self.localcdart_color = str.lower(__settings__.getSetting("localcdart"))
+        if __addon__.getSetting("enablecustom")=="true":
+            self.recognized_color = str.lower(__addon__.getSetting("recognized"))
+            self.unrecognized_color = str.lower(__addon__.getSetting("unrecognized"))
+            self.remote_color = str.lower(__addon__.getSetting("remote"))
+            self.local_color = str.lower(__addon__.getSetting("local"))
+            self.remotelocal_color = str.lower(__addon__.getSetting("remotelocal"))
+            self.unmatched_color = str.lower(__addon__.getSetting("unmatched"))
+            self.localcdart_color = str.lower(__addon__.getSetting("localcdart"))
         else:
             self.recognized_color = "green"
             self.unrecognized_color = "white"
@@ -216,37 +216,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         clean_text = ((clean_text.replace("[COLOR=FF00FF00]","")).replace("[COLOR=FFFFFF00]","")).replace("[COLOR=FFFF4500]","")
         return clean_text
         
-    def dirEntries(self, dir_name, subdir, *args):
-        '''Return a list of file names found in directory 'dir_name'
-        If 'subdir' is True, recursively access subdirectories under 'dir_name'.
-        Additional arguments, if any, are file extensions to match filenames. Matched
-            file names are added to the list.
-        If there are no additional arguments, all files found in the directory are
-            added to the list.
-        Example usage: fileList = dirEntries(r'H:\TEMP', False, 'txt', 'py')
-            Only files with 'txt' and 'py' extensions will be added to the list.
-        Example usage: fileList = dirEntries(r'H:\TEMP', True)
-            All files and all the files in subdirectories under H:\TEMP will be added
-            to the list.
-        '''
-        print "dir_name: %s" % dir_name
-        print "subdir: %s" % subdir
-        fileList = []
-        for f in os.listdir(dir_name):
-            dirfile = os.path.join(dir_name, f)
-            if os.path.isfile(dirfile):
-                if not args:
-                    fileList.append(dirfile)
-                else:
-                    if os.path.splitext(dirfile)[1][1:] in args:
-                        fileList.append(dirfile)
-            # recursively access file names in subdirectories
-            elif os.path.isdir(dirfile) and subdir:
-                print "Accessing directory:", dirfile
-                fileList.extend(self.dirEntries(dirfile, subdir, *args))
-        return fileList
-
-
     def get_html_source( self , url ):
         """ fetch the html source """
         error = 0
@@ -282,10 +251,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #print json_artist
         for i in json_artists:
             match = re.search( '"artistid" : (.*?),', i )
+            if not match:
+                match = re.search( '"artistid":(.*?),', i )
             if match:
                 artistid = (match.group(1))                
                 #print "Artist ID: %s" % artistid
             match2 = re.search( '"label" : "(.*?)"',i)
+            if not match2:
+                match2 = re.search( '"label":"(.*?)"',i)
             if match2:
                 artistname = (match2.group(1))
             else:
@@ -309,10 +282,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         for i in json_albums:
             album = {}
             id = re.search( '"albumid" : (.*?),', i )
+            if not id:
+                id = re.search( '"albumid":(.*?),', i )
             if id:
                 albumid = (id.group(1))                
                 #print "Album ID: %s" % albumid
             title = re.search( '"label" : "(.*?)"',i)
+            if not title:
+                title = re.search( '"label":"(.*?)"',i)
             if title:
                 albumtitle = (title.group(1))
                 #print "Album: %s" % repr(albumtitle)
@@ -355,12 +332,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     if (pDialog.iscanceled()):
                         break
                     albummatch = re.search( '"album" : "(.*?)",', albums )
+                    if not albummatch:
+                        albummatch = re.search( '"album":"(.*?)",', albums )
                     if albummatch:
                         album_title = (albummatch.group(1))
                     artistmatch = re.search( '"albumartist" : "(.*?)",', albums )
+                    if not artistmatch:
+                        artistmatch = re.search( '"albumartist":"(.*?)",', albums )
                     if artistmatch:
                         artist_name = (artistmatch.group(1))
                     albumid_match = re.search( '"albumid" : (.*?),', albums )
+                    if not albumid_match:
+                        albumid_match = re.search( '"albumid":(.*?),', albums )
                     if albumid_match:
                         album_localid = (albumid_match.group(1))
                     paths = self.get_album_path( album_localid )
@@ -495,6 +478,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         songs_detail = re.compile( "{(.*?)}", re.DOTALL ).findall(json_songs_detail)
         for song in songs_detail:
             match = re.search( '"file" : "(.*?)",', song )
+            if not match:
+                match = re.search( '"file":"(.*?)",', song )
             if match:
                 path = os.path.dirname( match.group(1) )
                 #print "Path: %s" % repr(path)
@@ -1161,10 +1146,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print "#  Settings not set, aborting database creation"
             return album_count, artist_count, cdart_existing
         local_album_list = self.get_xbmc_database_info()
+        #print local_album_list
         pDialog.create( _(32021), _(20186) )
         #Onscreen Dialog - Creating Addon Database
         #                      Please Wait....
-        #print addon_db
+        print addon_db
         conn = sqlite3.connect(addon_db)
         c = conn.cursor()
         c.execute('''create table counts(artists, albums, cdarts, version)''') 
@@ -1304,12 +1290,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def single_unique_copy(self, artist, album, source):
         print "### Copying to Unique Folder: %s - %s" % (artist,album) 
         destination = ""
-        fn_format = int(__settings__.getSetting("folder"))
-        unique_folder = __settings__.getSetting("unique_path")
+        fn_format = int(__addon__.getSetting("folder"))
+        unique_folder = __addon__.getSetting("unique_path")
         if unique_folder =="":
-            __settings__.openSettings()
-            unique_folder = __settings__.getSetting("unique_path")
-        resize = __settings__.getSetting("enableresize")
+            __addon__.openSettings()
+            unique_folder = __addon__.getSetting("unique_path")
+        resize = __addon__.getSetting("enableresize")
         print "#    Resize: %s" % resize
         print "#    Unique Folder: %s" % unique_folder
         if os.path.isfile(source):
@@ -1357,11 +1343,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def single_backup_copy(self, artist, album, source):
         print "### Copying To Backup Folder: %s - %s" % (artist,album) 
         destination = ""
-        fn_format = int(__settings__.getSetting("folder"))
-        backup_folder = __settings__.getSetting("backup_path")
+        fn_format = int(__addon__.getSetting("folder"))
+        backup_folder = __addon__.getSetting("backup_path")
         if backup_folder =="":
-            __settings__.openSettings()
-            backup_folder = __settings__.getSetting("backup_path")
+            __addon__.openSettings()
+            backup_folder = __addon__.getSetting("backup_path")
         print "#    source: %s" % source
         if os.path.isfile(source):
             print "#    source: %s" % source
@@ -1412,12 +1398,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
         duplicates = 0
         destination = ""
         album = {}
-        fn_format = int(__settings__.getSetting("folder"))
-        unique_folder = __settings__.getSetting("unique_path")
+        fn_format = int(__addon__.getSetting("folder"))
+        unique_folder = __addon__.getSetting("unique_path")
         if unique_folder =="":
-            __settings__.openSettings()
-            unique_folder = __settings__.getSetting("unique_path")
-        resize = __settings__.getSetting("enableresize")
+            __addon__.openSettings()
+            unique_folder = __addon__.getSetting("unique_path")
+        resize = __addon__.getSetting("enableresize")
         print "#    Unique Folder: %s" % unique_folder
         print "#    Resize: %s" % resize
         pDialog.create( _(32060) )
@@ -1501,10 +1487,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         print "### Restoring cdARTs from backup folder"
         pDialog.create( _(32069) )
         #Onscreen Dialog - Restoring cdARTs from backup...
-        bkup_folder = __settings__.getSetting("backup_path")
+        bkup_folder = __addon__.getSetting("backup_path")
         if bkup_folder =="":
-            __settings__.openSettings()
-            bkup_folder = __settings__.getSetting("backup_path")
+            __addon__.openSettings()
+            bkup_folder = __addon__.getSetting("backup_path")
         else:
             pass
         self.copy_cdarts(bkup_folder)
@@ -1523,7 +1509,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         count = 0
         total_albums = 0 
         total_count = 0
-        fn_format = int(__settings__.getSetting("folder"))
+        fn_format = int(__addon__.getSetting("folder"))
         pDialog.create( _(32069) )
         print "#    Filename format: %s" % fn_format
         print "#    From Folder: %s" % from_folder
@@ -1556,7 +1542,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 print "#        Destination: %s" % repr(destination)
                 try:
                     shutil.copy(fn, destination)
-                    if not from_folder == __settings__.getSetting("backup_path"):
+                    if not from_folder == __addon__.getSetting("backup_path"):
                         os.remove(fn)  # remove file
                     count = count + 1
                 except:
@@ -1586,13 +1572,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         total = 0
         album = {}
         albums = []
-        fn_format = int(__settings__.getSetting("folder"))
-        bkup_folder = __settings__.getSetting("backup_path")
-        cdart_list_folder = __settings__.getSetting("cdart_path")
+        fn_format = int(__addon__.getSetting("folder"))
+        bkup_folder = __addon__.getSetting("backup_path")
+        cdart_list_folder = __addon__.getSetting("cdart_path")
         if bkup_folder =="":
-            __settings__.openSettings()
-            bkup_folder = __settings__.getSetting("backup_path")
-            cdart_list_folder = __settings__.getSetting("cdart_path")
+            __addon__.openSettings()
+            bkup_folder = __addon__.getSetting("backup_path")
+            cdart_list_folder = __addon__.getSetting("cdart_path")
         albums = self.get_local_albums_db("all artists")
         pDialog.create( _(32060) )
         for album in albums:
@@ -1643,11 +1629,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent = 0
         line = ""
         albums = self.get_local_albums_db("all artists")
-        bkup_folder = __settings__.getSetting("backup_path")
+        bkup_folder = __addon__.getSetting("backup_path")
         pDialog.create( _(32103), _(20186) )
         if bkup_folder =="":
-            __settings__.openSettings()
-            bkup_folder = __settings__.getSetting("backup_path")
+            __addon__.openSettings()
+            bkup_folder = __addon__.getSetting("backup_path")
         filename=os.path.join(bkup_folder, "missing.txt")
         filename2 = os.path.join(addon_work_folder, "missing.txt")
         try:
@@ -1690,11 +1676,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent = 0
         line = ""
         zip_filename = ""
-        bkup_folder = __settings__.getSetting("backup_path")
+        bkup_folder = __addon__.getSetting("backup_path")
         pDialog.create( _(32104), _(20186) )
         if bkup_folder =="":
-            __settings__.openSettings()
-            bkup_folder = __settings__.getSetting("backup_path")
+            __addon__.openSettings()
+            bkup_folder = __addon__.getSetting("backup_path")
         filename=os.path.join(addon_work_folder, "missing.txt")
         return zip_filename
         
@@ -1777,7 +1763,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         destination = os.path.join(addon_work_folder, 'unique.tar.gz')
         print "#    Source: %s " % source
         print "#    Destination: %s " % destination
-        fileList = self.dirEntries(source, True)
+        fileList = dirEntries(source, media_type="files", recursive="TRUE", contains="")
         try:
             output = tarfile.TarFile.open(destination, 'w:gz')
             for f in fileList:
@@ -1796,7 +1782,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         unique, difference = self.local_vs_distant()
         if difference == 1:
             self.unique_cdart_copy( unique )
-            unique_folder = __settings__.getSetting("unique_path")
+            unique_folder = __addon__.getSetting("unique_path")
             zip_file = self.compress_cdarts( unique_folder )
             self.upload_to_website()
         else:
@@ -2107,7 +2093,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.populate_local_cdarts()
         if controlId == 104 : #Settings
             self.menu_mode = 5
-            __settings__.openSettings()
+            __addon__.openSettings()
             self.setup_colors()
         if controlId == 111 : #Exit
             self.menu_mode = 0
