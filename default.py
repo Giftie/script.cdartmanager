@@ -19,10 +19,6 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('p
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
-
-print BASE_RESOURCE_PATH
-
-
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
 addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")

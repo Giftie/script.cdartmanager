@@ -393,7 +393,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #print "# Album ID: %s" % album_id
                 httpapi_album_detail_query="""SELECT DISTINCT strAlbum, strArtist, idAlbum  FROM albumview WHERE idAlbum="%s" AND strAlbum !=''""" % album_id 
                 httpapi_album_detail = xbmc.executehttpapi("QueryMusicDatabase(%s)" % urllib.quote_plus( httpapi_album_detail_query ), )
-                print httpapi_album_detail
+                #print httpapi_album_detail
                 match = re.findall( "<field>(.*?)</field><field>(.*?)</field><field>(.*?)</field>", httpapi_album_detail, re.DOTALL )
                 #match = re.compile( "{(.*?)}", re.DOTALL ).findall(httpapi_album_detail)
                 #print "#### match"
