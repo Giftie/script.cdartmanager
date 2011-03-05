@@ -1,3 +1,8 @@
+1.2.7
+- added some logging
+- changed how logging is sent to XBMC
+- fixed database version test
+
 1.2.6
 - keeping script valid against updates in git.
 
