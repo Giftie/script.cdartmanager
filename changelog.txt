@@ -1,5 +1,6 @@
 1.2.8
 - change how script works on start up.  Should help Windows 7 users
+- Windows 7 permissions still get in the way, but script will not run if they do.
 
 1.2.7
 - added some logging

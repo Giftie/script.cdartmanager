@@ -26,7 +26,7 @@ addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
 settings_file = os.path.join(addon_work_folder, "settings.xml")
 script_fail = False
 first_run = False
-image = xbmc.translatePath( os.path.join( _addon_.getAddonInfo("path"), "icon.png") )
+image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
 
 
@@ -51,7 +51,12 @@ if ( __name__ == "__main__" ):
         __addon__.openSettings()
         first_run = True
     else:
-        xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking Database", xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
+    if not os.path.isfile(addon_db):
+        xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
+        first_run = True
+    else:
+        xbmc.log( "[script.cdartmanager] - Addon Db Found, Checking Database Version", xbmc.LOGNOTICE )
     if os.path.isfile(addon_db_crash) and not first_run:
         xbmc.log( "[script.cdartmanager] - Detected Database Crash, Trying to delete", xbmc.LOGNOTICE )
         try:
@@ -102,5 +107,5 @@ if ( __name__ == "__main__" ):
         del ui
     else:
         xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
-        xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", time_delay, image) )
+        xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", 500, image) )
     sys.modules.clear()
