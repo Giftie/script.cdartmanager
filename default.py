@@ -1,7 +1,7 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.2.9"
+__version__       = "1.3.0"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
@@ -30,7 +30,7 @@ image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.
 
 
 
-if ( __name__ == "__main__" ):
+if __name__ == "__main__":
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __scriptname__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #        default.py module                                 #", xbmc.LOGNOTICE )

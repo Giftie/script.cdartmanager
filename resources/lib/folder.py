@@ -1,4 +1,4 @@
-import sys, os, re
+from re import DOTALL, search, compile
 import xbmc
 
 def dirEntries( dir_name, media_type="files", recursive="FALSE", contains="" ):
@@ -14,11 +14,11 @@ def dirEntries( dir_name, media_type="files", recursive="FALSE", contains="" ):
     fileList = []
     json_query = '{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "recursive": "%s"}, "id": 1}' % ( escapeDirJSON( dir_name ), media_type, recursive )
     json_folder_detail = xbmc.executeJSONRPC(json_query)
-    file_detail = re.compile( "{(.*?)}", re.DOTALL ).findall(json_folder_detail)
+    file_detail = compile( "{(.*?)}", DOTALL ).findall(json_folder_detail)
     for f in file_detail:
-        match = re.search( '"file" : "(.*?)",', f )
+        match = search( '"file" : "(.*?)",', f )
         if not match:
-            match = re.search( '"file":"(.*?)",', f )
+            match = search( '"file":"(.*?)",', f )
         if match:
             if ( match.group(1).endswith( "/" ) or match.group(1).endswith( "\\" ) ):
                 if ( recursive == "TRUE" ):

@@ -502,7 +502,7 @@
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
                     <onleft>140</onleft>
-                    <onright></onright>
+                    <onright>142</onright>
                     <onup>144</onup>
                     <ondown>143</ondown>
                 </control>
@@ -525,7 +525,7 @@
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
                     <onleft>140</onleft>
-                    <onright></onright>
+                    <onright>143</onright>
                     <onup>142</onup>
                     <ondown>144</ondown>                       
                 </control>
@@ -548,7 +548,7 @@
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
                     <onleft>140</onleft>
-                    <onright></onright>
+                    <onright>144</onright>
                     <onup>143</onup>
                     <ondown>142</ondown>
                 </control>

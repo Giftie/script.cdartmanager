@@ -1,3 +1,6 @@
+1.3.0
+- Fixed UnboundLocal error
+
 1.2.9
 - Added Spanish Translation - Thanks KiSUAN
 - Added Aspect Ratio Fix for cdART Image - Thanks KiSUAN 
@@ -85,7 +88,7 @@
 - Added German translation - Thanks Mad-Max
 
 1.0.4
-- fine tuned Album Name Stripping(now script removes items contained in round brackets only if preceeded by a space)
+- fine tuned Album Name Stripping(now script removes items contained in round brackets only if preceded by a space)
   example->  Greatest Hits (2005)     becomes->  Greatest Hits
 
 1.0.3

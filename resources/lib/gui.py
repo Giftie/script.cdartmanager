@@ -20,12 +20,10 @@ import xbmc
 import socket
 import shutil
 import tarfile
-import zipfile
 from pysqlite2 import dbapi2 as sqlite3
 from PIL import Image
 from string import maketrans
 from ftplib import FTP
-import zlib
 
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
@@ -48,7 +46,6 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('p
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from convert import set_entity_or_charref
-from convert import translate_string
 from folder import dirEntries
 
 #variables
@@ -134,7 +131,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
         self.retrieve_settings()
         self.setup_colors()
-        self.setup_all()
+        try:
+            self.setup_all()
+        except:
+            pDialog.close()
+            print_exc()
 
     def retrieve_settings( self ):
         backup_path = __addon__.getSetting("backup_path")
@@ -219,6 +220,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def get_html_source( self , url ):
         """ fetch the html source """
         error = 0
+        htmlsource = ""
         class AppURLopener(urllib.FancyURLopener):
             version = __useragent__
         urllib._urlopener = AppURLopener()
@@ -298,7 +300,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if albumtitle == "":
                 pass
             else:
-                total=total + 1
+                total += 1
                 album["title"]=albumtitle
                 album["local_id"]= albumid
                 album_list.append(album)
@@ -310,14 +312,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.log( "[script.cdartmanager] - # Retrieving Album Details", xbmc.LOGNOTICE )
         album_detail_list = []
         album_count = 0
-        percent =0
+        percent = 0
         #xbmc.log( repr(album_list), xbmc.LOGNOTICE )
         #####
         #####  Delete all HTTP API once AudioLibrary.GetAlbumDetails is added to Dharma #####
         #####
         if not usehttpapi=="true":
             for detail in album_list:
-                album_count = album_count + 1
+                album_count += 1
                 percent = int((album_count/float(total)) * 100)
                 pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
                 album_id = detail["local_id"]
@@ -386,7 +388,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else: #use HTTP API to get album Details
             xbmc.log( "[script.cdartmanager] - # Using HTTP API", xbmc.LOGNOTICE )
             for detail in album_list:
-                album_count = album_count + 1
+                album_count += 1
                 percent = int((album_count/float(total)) * 100)
                 pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
                 album_id = detail["local_id"]
@@ -402,7 +404,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if not match=="":
                     try:
                         for albums in match:
-                            album = {}
                             #xbmc.log( repr(albums[0]), xbmc.LOGNOTICE )
                             #xbmc.log( repr(albums[1]), xbmc.LOGNOTICE )
                             #xbmc.log( repr(albums[2]), xbmc.LOGNOTICE )
@@ -410,7 +411,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             artist_name = albums[1]
                             album_localid = albums[2]
                             paths = self.get_album_path( album_localid )
-                            previous_path =""
+                            previous_path = ""
                         for path in paths:
                             if (pDialog.iscanceled()):
                                 break
@@ -453,18 +454,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
          
     def get_xbmc_database_info( self ):
         xbmc.log( "[script.cdartmanager] - #  Retrieving Album Info from XBMC's Music DB", xbmc.LOGNOTICE )
-        artist_list = []
-        album_list = []
-        album_detail_list = []
-        album_artist_list = []
-        count = 1
-        percent = 0
-        total = 0
-        album_count = 0
         pDialog.create( _(32021), _(32105) )
         album_list, total = self.retrieve_album_list()
         album_detail_list = self.retrieve_album_details( album_list, total )
-        previous_artist = ""
         pDialog.close()
         return album_detail_list     
         
@@ -502,7 +494,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         name = ""
         artist_list = []
         recognized = []
-        percent = 0
+        #percent = 0
         pDialog.create( _(32048) )
         #Onscreen dialog - Retrieving Recognized Artist List....
         for artist in local_album_artist:
@@ -510,7 +502,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             match = re.search('<artist id="(.*?)">%s</artist>' % str.lower( re.escape(name) ), distant_artist )
             percent = int((float(count)/len(local_album_artist))*100)
             if match: 
-                true = true + 1
+                true += 1
                 artist["distant_id"] = match.group(1)
                 recognized.append(artist)
                 artist_list.append(artist)
@@ -520,7 +512,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     s_name = s_name.replace("the ", "") # Try removing 'the ' from the name
                 match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
                 if match: 
-                    true = true + 1
+                    true += 1
                     artist["distant_id"] = match.group(1)
                     recognized.append(artist)
                     artist_list.append(artist)
@@ -528,7 +520,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     s_name = s_name.replace("&","&amp;") #Change any '&' to '&amp;' - matches xbmcstuff.com's format
                     match = re.search('<artist id="(.*?)">%s</artist>' % re.escape( s_name ), distant_artist )
                     if match: 
-                        true = true + 1
+                        true += 1
                         artist["distant_id"] = match.group(1)
                         recognized.append(artist)
                         artist_list.append(artist)
@@ -536,7 +528,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         s_name = self.remove_special( s_name ) #remove punctuation and other special characters
                         match = re.search('<artist id="(.*?)">%s</artist>' % re.escape(s_name), distant_artist )
                         if match: 
-                            true = true + 1
+                            true += 1
                             artist["distant_id"] = match.group(1)
                             recognized.append(artist)
                             artist_list.append(artist)
@@ -545,7 +537,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             artist_list.append(artist)
             pDialog.update(percent, (_(32049) % true))
             #Onscreen Dialog - Artists Matched: %
-            count=count+1
+            count += 1
             if ( pDialog.iscanceled() ):
                 break
         xbmc.log( "[script.cdartmanager] - #  Total Artists Matched: %s" % true, xbmc.LOGNOTICE )
@@ -766,16 +758,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
         count_artist_local = len(recognized_artists)
         percent = 0
         for artist in recognized_artists:
-            artist_count = artist_count + 1
+            artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             xbmc.log( "[script.cdartmanager] - #    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"]), xbmc.LOGNOTICE )
             local_album_list = self.get_local_albums_db( artist["name"] )
             remote_cdart_url = self.remote_cdart_list( artist, 2 )
             for album in local_album_list:
-                if remote_cdart_url == []:
+                if not remote_cdart_url:
                     xbmc.log( "[script.cdartmanager] - #    No cdARTs found", xbmc.LOGNOTICE )
                     break
-                album_count = album_count + 1
+                album_count += 1
                 pDialog.update( percent , "%s%s" % (_(32038) , repr(artist["name"]) )  , "%s%s" % (_(32039) , repr(album["title"] )) )
                 name = artist["name"]
                 title = album["title"]
@@ -787,7 +779,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGNOTICE )
                         message, d_success = self.download_cdart( test_album , album )
                         if d_success == 1:
-                            download_count = download_count + 1
+                            download_count += 1
                             album["cdart"] = "TRUE"
                         else:
                             xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGNOTICE )
@@ -796,7 +788,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     else :
                         xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGNOTICE )
                 else:
-                    cdart_existing = cdart_existing + 1
+                    cdart_existing += 1
                     xbmc.log( "[script.cdartmanager] - #            cdART file already exists, skipped..."    , xbmc.LOGNOTICE )
                 if ( pDialog.iscanceled() ):
                     break
@@ -825,13 +817,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
         local_artist = self.get_local_artists_db()
         count_artist_local = len(local_artist)
         for artist in local_artist:
-            artist_count = artist_count + 1
+            artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             xbmc.log( "[script.cdartmanager] - #    Artist: %-40s Local ID: %s" % (repr(artist["name"]), artist["local_id"]), xbmc.LOGNOTICE )
             local_album_list = self.get_local_albums_db( artist["name"] )
             for album in local_album_list:
                 temp_album = {}
-                album_count = album_count + 1
+                album_count += 1
                 temp_album["artist"] = artist["name"]
                 temp_album["title"] = album["title"]
                 temp_album["path"] = album["path"]
@@ -843,10 +835,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if not test_album == [] : 
                     xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH FOUND", xbmc.LOGNOTICE )
                     temp_album["distant"] = "TRUE"
-                    distant_count = distant_count + 1
+                    distant_count += 1
                     if album["cdart"] == "TRUE" :
                         temp_album["local"] = "TRUE"
-                        local_count = local_count + 1
+                        local_count += 1
                         xbmc.log( "[script.cdartmanager] - #                Local & Distant cdART image exists...", xbmc.LOGNOTICE )
                     else:
                         temp_album["local"] = "FALSE"
@@ -855,7 +847,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGNOTICE )
                     temp_album["distant"] = "FALSE"
                     if album["cdart"] == "TRUE" :
-                        local_count = local_count + 1
+                        local_count += 1
                         temp_album["local"] = "TRUE"
                         xbmc.log( "[script.cdartmanager] - #                Local cdART image exists...", xbmc.LOGNOTICE )
                     else:
@@ -1035,7 +1027,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent = 0 
         for album in local_album_list:
             pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
-            album_count = album_count + 1
+            album_count += 1
             xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGNOTICE )
             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album["local_id"], xbmc.LOGNOTICE )
             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGNOTICE )
@@ -1044,7 +1036,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr(album["path"]).replace("\\\\" , "\\"), xbmc.LOGNOTICE )
             xbmc.log( "[script.cdartmanager] - cdART Exist?: %s" % album["cdart"], xbmc.LOGNOTICE )
             if album["cdart"] == "TRUE" :
-                cdart_existing = cdart_existing + 1
+                cdart_existing += 1
             try:
                 c.execute("insert into alblist(album_id, title, artist, path, cdart) values (?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"]))
             except UnicodeDecodeError:
@@ -1078,7 +1070,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         db=c.fetchall()
         for item in db:
             if item[1] == "TRUE":
-                cdart_existing = cdart_existing + 1
+                cdart_existing += 1
         c.close()
         return cdart_existing
         
@@ -1089,7 +1081,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         artist_count = 0
         for artist in local_artist_list:
             c.execute("insert into lalist(local_id, name) values (?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8')))
-            artist_count = artist_count + 1
+            artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             if (pDialog.iscanceled()):
                 break
@@ -1163,6 +1155,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         album_artist = self.retrieve_distinct_album_artists()               # then retrieve distinct album artists
         local_artist_list = self.get_all_local_artists()         # retrieve local artists(to get idArtist)
         percent = 0
+        found = False
         for artist in album_artist:        # match album artist to local artist id
             pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
             if (pDialog.iscanceled()):
@@ -1171,14 +1164,22 @@ class GUI( xbmcgui.WindowXMLDialog ):
             album_artist_1 = {}
             name = ""
             name = artist["name"]
-            artist_count = artist_count + 1
+            artist_count += 1
             for local in local_artist_list:
                 if name == local["name"]:
                     id = local["local_id"]
+                    found = True
                     break
-            album_artist_1["name"] = name                                   # store name and
-            album_artist_1["local_id"] = id                                 # local id
-            local_album_artist_list.append(album_artist_1)
+            if found:
+                album_artist_1["name"] = name                                   # store name and
+                album_artist_1["local_id"] = id                                 # local id
+                local_album_artist_list.append(album_artist_1)
+            else:
+                try:
+                    print artist["name"]
+                except:
+                    print_exc()
+            
         #xbmc.log( local_album_artist_list, xbmc.LOGNOTICE )
         count = self.store_lalist( local_album_artist_list, artist_count )         # then store in database
         if (pDialog.iscanceled()):
@@ -1431,7 +1432,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - #        Destination: %s" % repr(fn), xbmc.LOGNOTICE )
                     if os.path.isfile(fn):
                         xbmc.log( "[script.cdartmanager] - ################## cdART Not being copied, File exists: %s" % repr(fn), xbmc.LOGNOTICE )
-                        duplicates = duplicates + 1
+                        duplicates += 1
                     else:
                         try:
                             if resize:
@@ -1464,10 +1465,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                                 c = conn.cursor()
                                 c.execute("insert into unqlist(title, artist, path, cdart) values (?, ?, ?, ?)", ( unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), repr(album["path"]), album["local"]))
                                 c.commit
-                            count=count + 1
+                            count += 1
                         except:
                             xbmc.log( "[script.cdartmanager] - #  Copying error, check path and file permissions", xbmc.LOGNOTICE )
-                            count=count + 1
+                            count += 1
                         c.close()
                         pDialog.update( percent, _(32064) % unique_folder , "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                 else:
@@ -1544,7 +1545,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     shutil.copy(fn, destination)
                     if not from_folder == __addon__.getSetting("backup_path"):
                         os.remove(fn)  # remove file
-                    count = count + 1
+                    count += 1
                 except:
                     xbmc.log( "[script.cdartmanager] - ######  Copying error, check path and file permissions", xbmc.LOGNOTICE )
                 try:
@@ -1554,7 +1555,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 pass
             pDialog.update( percent , "From Folder: %s" % from_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
-            total_count = total_count + 1
+            total_count += 1
         pDialog.close()
         conn.commit()
         c.close()
@@ -1602,11 +1603,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - #        Filename: %s" % fn, xbmc.LOGNOTICE )
                     if os.path.isfile(fn):
                         xbmc.log( "[script.cdartmanager] - ################## cdART Not being copied, File exists: %s" % fn, xbmc.LOGNOTICE )
-                        duplicates = duplicates + 1
+                        duplicates += 1
                     else:
                         try:
                             shutil.copy(source, fn)
-                            count = count + 1
+                            count += 1
                             pDialog.update( percent , "backup folder: %s" % bkup_folder, "Filename: %s" % fn, "%s: %s" % ( _(32056) , count ) )
                         except:
                             xbmc.log( "[script.cdartmanager] - ######  Copying error, check path and file permissions", xbmc.LOGNOTICE )
@@ -1615,7 +1616,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 pass
             percent = int(total/float(len(albums))*100)
-            total = total + 1        
+            total += 1
         pDialog.close()
         xbmc.log( "[script.cdartmanager] - #     Duplicate cdARTs: %s" % duplicates, xbmc.LOGNOTICE )
         xbmcgui.Dialog().ok( _(32057), "%s: %s" % ( _(32058), bkup_folder), "%s %s" % ( count , _(32059)), "%s Duplicates Found" % duplicates)
@@ -1642,7 +1643,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("---------------------\n")
             missing.write("\n")
             for album in albums:
-                count = count + 1
+                count += 1
                 if album["cdart"] == "FALSE":
                     artist = repr(album["artist"]) 
                     title = repr(album["title"])
@@ -1654,7 +1655,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("---------------------\n")
             missing.write("\n")
             for album in albums:
-                count = count + 1
+                count += 1
                 if album["cdart"] == "FALSE":
                     artist = repr(album["artist"]) 
                     title = repr(album["title"])
@@ -1788,7 +1789,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             xbmcgui.Dialog().ok( "There are no unique local cdARTs")        
         
-    def setup_artist_list( self, artist):
+    def setup_artist_list( self, artist ):
         xbmc.log( "[script.cdartmanager] - ##### Setting up artist list", xbmc.LOGNOTICE )
         self.artist_menu = {}
         self.artist_menu["local_id"] = str(artist[self.getControl( 120 ).getSelectedPosition()]["local_id"])
@@ -2017,7 +2018,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     distant_artist = str.lower(self.get_html_source( artist_url ))
                     d_art = self.get_distant_artists(distant_artist)
                     self.artist_menu["distant_id"] = self.search_distant( self.artist_menu["name"], d_art )
-                if self.artist_menu["distant_id"]==None:
+                if not self.artist_menu["distant_id"]:
                     self.remote_cdart_url = None
                 else:
                     xbmc.log( "[script.cdartmanager] - # %s" % self.artist_menu, xbmc.LOGNOTICE )
@@ -2107,7 +2108,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 130 : #cdART Backup Menu
             self.setFocusId( 135 )
         if controlId == 140 : #Local cdART selection
-            self.cdart_icon
+            self.cdart_icon()
             self.setFocusId( 142 )
             artist_album = self.getControl(140).getSelectedItem().getLabel()
             artist_album = self.remove_color(artist_album)
@@ -2182,5 +2183,5 @@ def onAction( self, action ):
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
     if ( action.getButtonCode() in CANCEL_DIALOG ):
-	xbmc.log( "[script.cdartmanager] - # Closing", xbmc.LOGNOTICE )
-	self.close()
+	    xbmc.log( "[script.cdartmanager] - # Closing", xbmc.LOGNOTICE )
+	    self.close()
