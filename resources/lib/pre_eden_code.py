@@ -1,7 +1,7 @@
 # script.cdart.manager 
 # pre-eden code
 
-import xbmc, xbmcaddon
+import xbmc, xbmcaddon, xbmcvfs
 import os
 from json_utils import retrieve_json_dict
 
