@@ -1,3 +1,11 @@
+import xbmc, xbmcgui
+import sys, os, traceback, re
+
+try:
+    from sqlite3 import dbapi2 as sqlite3
+except:
+    from pysqlite2 import dbapi2 as sqlite3
+
 _              = sys.modules[ "__main__" ].__language__
 __scriptname__ = sys.modules[ "__main__" ].__scriptname__
 __scriptID__   = sys.modules[ "__main__" ].__scriptID__
@@ -10,9 +18,8 @@ __addon__      = sys.modules[ "__main__" ].__addon__
 safe_db_version = "1.3.2"
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-
-import xbmc
-from pysqlite2 import dbapi2 as sqlite3
+pDialog = xbmcgui.DialogProgress()
+from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
 
 try:
     from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
@@ -42,58 +49,75 @@ def retrieve_album_details_full( album_list, total ):
     album_count = 0
     percent = 0
     previous_path =""
-    for detail in album_list:
-        try:
+    try:
+        for detail in album_list:
+            if (pDialog.iscanceled()):
+                break
             album_count += 1
             percent = int((album_count/float(total)) * 100)
             pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail['albumid']
             albumdetails = retrieve_album_details( album_id )
             for albums in albumdetails:
+                if (pDialog.iscanceled()):
+                    break
+                album_artist = {}
                 previous_path = ""
                 paths = get_album_path( album_id )
                 for path in paths:
                     if (pDialog.iscanceled()):
                         break
-                        album_artist = {}
+                    album_artist = {}
                     if not path == previous_path:
                         if exists(path):
                             xbmc.log( "[script.cdartmanager] - Path Exists", xbmc.LOGDEBUG )
                             album_artist["local_id"] = detail['albumid']
                             title = detail['title']
-                            album_artist["artist"] = albums['artist']
+                            try:
+                                a_title = albums['artist'].encode("utf-8")
+                                album_artist["artist"] = a_title
+                            except:
+                                album_artist["artist"] = albums['artist'].decode("utf-8")
                             album_artist["path"] = path
                             album_artist["cdart"] = get_album_cdart( album_artist["path"] )
-                            name, album_artist["musicbrainz_artistid"], sortname = get_musicbrainz_artist_id( album_artist["artist"] )
                             previous_path = path
-                            path_match = re.search( "(.*)\s(?:[\(].*|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)." , path, re.I)
-                            title_match = re.search( "(.*)\s(?:[\(].*|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)" , title, re.I)
+                            path_match = re.search( "(.*)[\s](?:[\(]disc|[\(]part|[\(]cd|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)." , path, re.I)
+                            title_match = re.search( "(.*)[\s](?:[\(]disc|[\(]part|[\(]cd|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)" , title, re.I)
                             if title_match:
                                 xbmc.log( "[script.cdartmanager] - #     Title has CD count", xbmc.LOGDEBUG )
                                 xbmc.log( "[script.cdartmanager] - #        Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
-                                album_artist["title"] = "%s (disc %s)" % ( title_match.group(1), title_match.group(2) )
+                                album_artist["disc"] = int( title_match.group(2) )
+                                album_artist["title"] = title_match.group( 1 )
                             else:
                                 if path_match:
                                     xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
                                     xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 2 ), xbmc.LOGDEBUG )
-                                    album_artist["title"] = "%s (disc %s)" % ( path_match.group(1), path_match.group(2) )
-                                    xbmc.log( "[script.cdartmanager] - #     New Album Title: %s" % repr( album_artist["title"] ), xbmc.LOGDEBUG )
-                                else:
-                                    album_artist["title"] = title
-                            album_artist["musicbrainz_albumid"] = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
-                            xbmc.log( "[script.cdartmanager] - Album Title: %s" % album_artist["title"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - Album Artist: %s" % album_artist["artist"], xbmc.LOGDEBUG )
+                                    album_artist["disc"] = int( path_match.group(2) )
+.                                else:                                    
+                                    album artist["disc"] = 1
+                                album_artist["title"] = title
+                            try:
+                                album_artist["title"] = ( album_artist["title"].encode("utf-8") ).replace(" - ", " ")
+                            except:
+                                album_artist["title"] = ( album_artist["title"].decode("utf-8") ).replace(" - ", " ")
+                            musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
+                            album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
+                            album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
+                            xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album_artist["title"]), xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(album_artist["artist"]), xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr(album_artist["path"]), xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - cdART Exists?: %s" % album_artist["cdart"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album_artist["musicbrainzalbumid"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album_artist["musicbrainzartistid"], xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - Disc #: %s" % album_artist["disc"], xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
                             album_detail_list.append(album_artist)
                         else:
                             break
-        except:
-            xbmc.log( "[script.cdartmanager] - Error Occured", xbmc.LOGNOTICE )
-            traceback.print_exc()
+    except:
+        xbmc.log( "[script.cdartmanager] - Error Occured", xbmc.LOGNOTICE )
+        traceback.print_exc()
+        pDialog.close()
     return album_detail_list
     
 def get_album_cdart( album_path ):
@@ -102,7 +126,6 @@ def get_album_cdart( album_path ):
         return "TRUE"
     else:
         return "FALSE"
-
     
 def store_alblist( local_album_list ):
     xbmc.log( "[script.cdartmanager] - #  Storing alblist", xbmc.LOGDEBUG )
@@ -111,39 +134,43 @@ def store_alblist( local_album_list ):
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
     percent = 0 
-    for album in local_album_list:
-        pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
-        album_count += 1
-        xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Album ID: %s" % album["local_id"], xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(album["artist"]), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(unicode(album["artist"], 'utf-8')), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr(album["path"]).replace("\\\\" , "\\"), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - cdART Exist?: %s" % album["cdart"], xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album["musicbrainzalbumid"], xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album["musicbrainzartistid"], xbmc.LOGDEBUG )
-        if album["cdart"] == "TRUE" :
-            cdart_existing += 1
-        try:
-            c.execute("insert into alblist(album_id, title, artist, path, cdart, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["musicbrainzalbumid"], album["musicbrainzartistid"]))
-        except UnicodeDecodeError:
+    try:
+        for album in local_album_list:
+            pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
+            album_count += 1
+            xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Album ID: %s" % album["local_id"], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(album["artist"]), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr(album["path"]).replace("\\\\" , "\\"), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - cdART Exist?: %s" % album["cdart"], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Disc #: %s" % album["disc"], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album["musicbrainz_albumid"], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album["musicbrainz_artistid"], xbmc.LOGDEBUG )
+            if album["cdart"] == "TRUE" :
+                cdart_existing += 1
             try:
-                temp_title = album["title"].decode('latin-1')
-                album["title"] = temp_title.encode('utf-8')
-                c.execute("insert into alblist(album_id, title, artist, path, cdart, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["musicbrainzalbumid"], album["musicbrainzartistid"]))
+                c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
             except UnicodeDecodeError:
                 try:
-                    temp_title = album["title"].decode('cp850')
+                    temp_title = album["title"].decode('latin-1')
                     album["title"] = temp_title.encode('utf-8')
-                    c.execute("insert into alblist(album_id, title, artist, path, cdart, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'cp850'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["musicbrainzalbumid"], album["musicbrainzartistid"]))
-                except:
-                    xbmc.log( "[script.cdartmanager] - # Error Saving to Database"            , xbmc.LOGNOTICE )
-        except StandardError, e:
-            xbmc.log( "[script.cdartmanager] - # Error Saving to Database", xbmc.LOGNOTICE )
-            xbmc.log( "[script.cdartmanager] - # Error: ",e.__class__.__name__, xbmc.LOGNOTICE )
-        if (pDialog.iscanceled()):
-            break
+                    c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
+                except UnicodeDecodeError:
+                    try:
+                        temp_title = album["title"].decode('cp850')
+                        album["title"] = temp_title.encode('utf-8')
+                        c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'cp850'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
+                    except:
+                        xbmc.log( "[script.cdartmanager] - # Error Saving to Database"            , xbmc.LOGNOTICE )
+            except StandardError, e:
+                xbmc.log( "[script.cdartmanager] - # Error Saving to Database", xbmc.LOGNOTICE )
+                traceback.print_exc()
+            if (pDialog.iscanceled()):
+                break
+    except:
+        xbmc.log( "[script.cdartmanager] - # Error Saving to Database", xbmc.LOGNOTICE )
+        traceback.print_exc()
     conn.commit()
     c.close()
     xbmc.log( "[script.cdartmanager] - # Finished Storing ablist", xbmc.LOGDEBUG )
@@ -168,11 +195,14 @@ def store_lalist( local_artist_list, count_artist_local ):
     c = conn.cursor()
     artist_count = 0
     for artist in local_artist_list:
-        c.execute("insert into lalist(local_id, name, musicbrainz_artistid) values (?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainzartistid"]))
-        artist_count += 1
-        percent = int((artist_count / float(count_artist_local)) * 100)
-        if (pDialog.iscanceled()):
-            break
+        try:
+            c.execute("insert into lalist(local_id, name, musicbrainz_artistid) values (?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"]))
+            artist_count += 1
+            percent = int((artist_count / float(count_artist_local)) * 100)
+            if (pDialog.iscanceled()):
+                break
+        except:
+            traceback.print_exe()
     conn.commit()
     c.close()
     xbmc.log( "[script.cdartmanager] - # Finished Storing lalist", xbmc.LOGDEBUG )
@@ -183,12 +213,13 @@ def retrieve_distinct_album_artists():
     album_artists = []
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
-    c.execute("""SELECT DISTINCT artist FROM alblist""")
+    c.execute("""SELECT DISTINCT artist, musicbrainz_artistid FROM alblist""")
     db=c.fetchall()
     #xbmc.log( db, xbmc.LOGNOTICE )
     for item in db:
         artist = {}
         artist["name"] = ( item[0].encode('utf-8') ).lstrip("'u").rstrip("'")
+        artist["musicbrainz_artistid"] = item[1]
         xbmc.log( repr(artist["name"]), xbmc.LOGNOTICE )
         album_artists.append(artist)
     #xbmc.log( repr(album_artists), xbmc.LOGNOTICE )
@@ -235,8 +266,8 @@ def new_database_setup():
     c = conn.cursor()
     c.execute('''create table counts(artists, albums, cdarts, version)''') 
     c.execute('''create table lalist(local_id, name, musicbrainz_artistid)''')   # create local album artists database
-    c.execute('''create table alblist(album_id, title, artist, path, cdart, musicbrainz_albumid, musicbrainz_artistid)''')  # create local album database
-    c.execute('''create table unqlist(title, artist, path, cdart)''')  # create unique database
+    c.execute('''create table alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid)''')  # create local album database
+    c.execute('''create table unqlist(title, disc, artist, path, cdart)''')  # create unique database
     conn.commit()
     c.close()
     album_count, cdart_existing = store_alblist( local_album_list ) # store album details first
@@ -261,6 +292,7 @@ def new_database_setup():
         if found:
             album_artist_1["name"] = name                                   # store name and
             album_artist_1["local_id"] = id                                 # local id
+            album_artist_1["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
             local_album_artist_list.append(album_artist_1)
         else:
             try:
@@ -287,9 +319,9 @@ def get_local_albums_db( artist_name ):
     query = ""
     if artist_name == "all artists":
         pDialog.create( _(32102), _(20186) )
-        query="SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist ORDER BY artist"
+        query="SELECT DISTINCT album_id, title, artist, path, cdart,musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
     else:
-        query='SELECT DISTINCT album_id, title, artist, path, cdart FROM alblist WHERE artist="%s"' % artist_name
+        query='SELECT DISTINCT album_id, title, artist, path, cdart,musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
     c.execute(query)
@@ -302,6 +334,9 @@ def get_local_albums_db( artist_name ):
         album["artist"] = ( item[2].encode("utf-8")).lstrip("'u")
         album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u").rstrip("'")
         album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
+        album["disc"] = ( item[5] )
+        album["musicbrainz_albumid"] = item[6
+        album["musicbrainz_artistid"] = item[7]
         #xbmc.log( repr(album), xbmc.LOGNOTICE )
         local_album_list.append(album)
     c.close
@@ -314,18 +349,24 @@ def get_local_artists_db():
     xbmc.log( "[script.cdartmanager] - #  Retrieving Local Artists Database", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
     local_artist_list = []    
-    query = "SELECT DISTINCT local_id, name FROM lalist ORDER BY name"
+    query = "SELECT DISTINCT local_id, name, musicbrainz_artistid FROM lalist ORDER BY name"
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
-    c.execute(query)
-    db=c.fetchall()
-    for item in db:
-        #xbmc.log( item, xbmc.LOGNOTICE )
-        artists = {}
-        artists["local_id"] = ( item[0] )
-        artists["name"] = ( item[1].encode("utf-8")).lstrip("'u")
-        #xbmc.log( repr(artists), xbmc.LOGNOTICE )
-        local_artist_list.append(artists)
+    try:
+        c.execute(query)
+        db=c.fetchall()
+        count = 0
+        for item in db:
+            count += 1
+            #print item
+            artists = {}
+            artists["local_id"] = ( item[0] )
+            artists["name"] = ( item[1].encode("utf-8")).lstrip("'u")
+            artists["musicbrainz_artistid"] = item[2]
+            #xbmc.log( repr(artists), xbmc.LOGNOTICE )
+            local_artist_list.append(artists)
+    except:
+        traceback.print_exc()
     c.close
     #xbmc.log( local_artist_list, xbmc.LOGNOTICE )
     return local_artist_list
