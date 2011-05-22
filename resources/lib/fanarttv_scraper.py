@@ -1,12 +1,10 @@
 # fanart.tv artist artwork scraper
-
+ 
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin
 import os, sys, traceback, re
 import urllib
 from traceback import print_exc
 from urllib import quote_plus, unquote_plus
-from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError
-
 
 _                 = sys.modules[ "__main__" ].__language__
 __scriptname__    = sys.modules[ "__main__" ].__scriptname__
