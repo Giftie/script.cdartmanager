@@ -20,16 +20,10 @@ __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-try:
-    from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from xbmcvfs import delete as delete_file
-    from xbmcvfs import exists as exists
-    from xbmcvfs import copy as file_copy
-except:
-    from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from os import remove as delete_file
-    exists = os.path.exists
-    from shutil import copy as file_copy
+from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from xbmcvfs import delete as delete_file
+from xbmcvfs import exists as exists
+from xbmcvfs import copy as file_copy
 
 pDialog = xbmcgui.DialogProgress()
 

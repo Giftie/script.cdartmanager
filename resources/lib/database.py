@@ -21,16 +21,10 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 pDialog = xbmcgui.DialogProgress()
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
 
-try:
-    from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from xbmcvfs import delete as delete_file
-    from xbmcvfs import exists as exists
-    from xbmcvfs import copy as file_copy
-except:
-    from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from os import remove as delete_file
-    exists = os.path.exists
-    from shutil import copy as file_copy
+from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from xbmcvfs import delete as delete_file
+from xbmcvfs import exists as exists
+from xbmcvfs import copy as file_copy
 
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db") 
