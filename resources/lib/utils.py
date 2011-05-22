@@ -25,6 +25,13 @@ from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
 
+# remove comments to save as dharma
+#from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+#from os import remove as delete_file
+#exists = os.path.exists
+#from shutil import copy as file_copy
+
+
 pDialog = xbmcgui.DialogProgress()
 
 def get_html_source( url ):

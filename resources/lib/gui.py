@@ -72,16 +72,16 @@ usehttpapi = __addon__.getSetting("usingdharma")
 #usehttpapi = "true"
 safe_db_version = "1.3.2"
 
-try:
-    from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from xbmcvfs import delete as delete_file
-    from xbmcvfs import exists as exists
-    from xbmcvfs import copy as file_copy
-except:
-    from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-    from os import remove as delete_file
-    exists = os.path.exists
-    from shutil import copy as file_copy
+from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from xbmcvfs import delete as delete_file
+from xbmcvfs import exists as exists
+from xbmcvfs import copy as file_copy
+
+# remove comments to save as dharma
+#from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+#from os import remove as delete_file
+#exists = os.path.exists
+#from shutil import copy as file_copy
 
 CHAR_REPLACEMENT = {
     # latin-1 characters that don't have a unicode decomposition

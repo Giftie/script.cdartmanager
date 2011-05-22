@@ -19,12 +19,11 @@ try:
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
-try:
-    from xbmcvfs import delete as delete_file
-    from xbmcvfs import exists as exists
-except:
-    from os import remove as delete_file
-    exists = os.path.exists
+from xbmcvfs import delete as delete_file
+from xbmcvfs import exists as exists
+# remove comments to save as dharma
+#from os import remove as delete_file
+#exists = os.path.exists
  
 __addon__ = xbmcaddon.Addon(__scriptID__)
 __language__ = __addon__.getLocalizedString
