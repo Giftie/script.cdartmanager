@@ -18,13 +18,13 @@ addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 
 def get_musicbrainz_album( album_title, artist ):
     album = {}
-    artist=artist.replace(" ", "+")
-    album_title = album_title.replace(" ", "+")
+    xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
+    artist=artist.replace("&","&amp;")
+    album_title = album_title.replace("&","&amp;")
     try:
-        # The result should include all official albums.
-        #
         #inc = ReleaseFilter(artistName=artist, title=album_title )
-        inc = ReleaseGroupFilter(artistName=artist, title=album_title )
+        inc = ReleaseGroupFilter( artistName=artist, title=album_title )
         #album_result = Query().getReleases( inc )
         album_result = Query().getReleaseGroups( inc )
         if len( album_result ) == 0:
@@ -83,7 +83,7 @@ def get_musicbrainz_artist_id( artist ):
         name = ""
         id = ""
         sortname = ""
-        artist=artist.replace(" ", "+")  
+        artist=artist.replace(" ", "+").replace("&","&amp;")
         f = ArtistFilter( name=artist, limit=1 )
         artistResults = Query().getArtists(f)
         for result in artistResults:

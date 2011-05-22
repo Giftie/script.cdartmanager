@@ -48,14 +48,13 @@ def retrieve_album_details_full( album_list, total ):
     album_detail_list = []
     album_count = 0
     percent = 0
-    previous_path =""
     try:
         for detail in album_list:
             if (pDialog.iscanceled()):
                 break
             album_count += 1
             percent = int((album_count/float(total)) * 100)
-            pDialog.update( percent, _(20186), "" , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+            pDialog.update( percent, _(20186), "Album: %s" % detail['title'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail['albumid']
             albumdetails = retrieve_album_details( album_id )
             for albums in albumdetails:
@@ -81,25 +80,40 @@ def retrieve_album_details_full( album_list, total ):
                             album_artist["path"] = path
                             album_artist["cdart"] = get_album_cdart( album_artist["path"] )
                             previous_path = path
-                            path_match = re.search( "(.*)[\s](?:[\(]disc|[\(]part|[\(]cd|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)." , path, re.I)
-                            title_match = re.search( "(.*)[\s](?:[\(]disc|[\(]part|[\(]cd|disc|part|cd)\s([0-9]{1,3})(?:[\)]?.*)" , title, re.I)
+                            path_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)." , path, re.I)
+                            title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
                             if title_match:
-                                xbmc.log( "[script.cdartmanager] - #     Title has CD count", xbmc.LOGDEBUG )
-                                xbmc.log( "[script.cdartmanager] - #        Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
-                                album_artist["disc"] = int( title_match.group(2) )
-                                album_artist["title"] = title_match.group( 1 )
+                                if title_match.group(2):
+                                    xbmc.log( "[script.cdartmanager] - #     Title has CD count", xbmc.LOGDEBUG )
+                                    xbmc.log( "[script.cdartmanager] - #        Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
+                                    album_artist["disc"] = int( title_match.group(2) )
+                                    album_artist["title"] = ( title_match.group( 1 ).replace(" -", "") ).rstrip()
+                                else:
+                                    if path_match:
+                                        if path_match.group(2):
+                                            xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
+                                            xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 2 ), xbmc.LOGDEBUG )
+                                            album_artist["disc"] = int( path_match.group(2) )
+                                        else:
+                                            album_artist["disc"] = 1
+                                    else:
+                                        album_artist["disc"] = 1
+                                    album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             else:
                                 if path_match:
-                                    xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
-                                    xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 2 ), xbmc.LOGDEBUG )
-                                    album_artist["disc"] = int( path_match.group(2) )
-.                                else:                                    
-                                    album artist["disc"] = 1
-                                album_artist["title"] = title
+                                    if path_match.group(2):
+                                        xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
+                                        xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 2 ), xbmc.LOGDEBUG )
+                                        album_artist["disc"] = int( path_match.group(2) )
+                                    else:
+                                        album_artist["disc"] = 1
+                                else:
+                                    album_artist["disc"] = 1
+                                album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             try:
-                                album_artist["title"] = ( album_artist["title"].encode("utf-8") ).replace(" - ", " ")
+                                album_artist["title"] = ( album_artist["title"].encode("utf-8") )
                             except:
-                                album_artist["title"] = ( album_artist["title"].decode("utf-8") ).replace(" - ", " ")
+                                album_artist["title"] = ( album_artist["title"].decode("utf-8") )
                             musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
                             album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                             album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
@@ -150,17 +164,17 @@ def store_alblist( local_album_list ):
             if album["cdart"] == "TRUE" :
                 cdart_existing += 1
             try:
-                c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], unicode(album["title"], 'utf-8'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
+                c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], album["title"], album["artist"], album["path"].replace("\\\\" , "\\"), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
             except UnicodeDecodeError:
                 try:
                     temp_title = album["title"].decode('latin-1')
                     album["title"] = temp_title.encode('utf-8')
-                    c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'latin-1'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
+                    c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], album["title"], album["artist"], album["path"].replace("\\\\" , "\\"), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
                 except UnicodeDecodeError:
                     try:
                         temp_title = album["title"].decode('cp850')
                         album["title"] = temp_title.encode('utf-8')
-                        c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?)", (album["local_id"], unicode(album["title"], 'cp850'), unicode(album["artist"], 'utf-8'), unicode(album["path"].replace("\\\\" , "\\"), 'utf-8'), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"]))
+                        c.execute("insert into alblist(album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], album["title"], album["artist"], album["path"].replace("\\\\" , "\\"), album["cdart"], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
                     except:
                         xbmc.log( "[script.cdartmanager] - # Error Saving to Database"            , xbmc.LOGNOTICE )
             except StandardError, e:
@@ -319,9 +333,9 @@ def get_local_albums_db( artist_name ):
     query = ""
     if artist_name == "all artists":
         pDialog.create( _(32102), _(20186) )
-        query="SELECT DISTINCT album_id, title, artist, path, cdart,musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
+        query="SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
     else:
-        query='SELECT DISTINCT album_id, title, artist, path, cdart,musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
+        query='SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
     c.execute(query)
@@ -335,7 +349,7 @@ def get_local_albums_db( artist_name ):
         album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u").rstrip("'")
         album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
         album["disc"] = ( item[5] )
-        album["musicbrainz_albumid"] = item[6
+        album["musicbrainz_albumid"] = item[6]
         album["musicbrainz_artistid"] = item[7]
         #xbmc.log( repr(album), xbmc.LOGNOTICE )
         local_album_list.append(album)

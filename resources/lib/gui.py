@@ -382,8 +382,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     album["local_name"] = album["artist"] = artist_menu["name"]
                     album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
                     for cdart in artwork["cdart"]:
-                        album["picture"][cdart["disc"]-1] = cdart["cdart"]
-                        album["thumb"][cdart["disc"]-1] = cdart["cdart"]
+                        album["picture"] = cdart["cdart"]
+                        album["thumb"] = cdart["cdart"]
                     cdart_url.append(album)
                     #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
         except:
@@ -428,7 +428,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 #check to see if there is a thumb
                 if cdart:
                     label1 = "%s * %s" % (album["artist"] , album["title"])
-                    url = cdart[album["disc"]-1]["picture"]
+                    print cdart
+                    print album["disc"]
+                    #url = cdart["picture"][album["disc"]-1]
+                    url = cdart["picture"]
                     #check to see if cdart already exists
                     # set the matched colour local and distant colour
                     #colour the label to the matched colour if not
