@@ -26,7 +26,7 @@
                 <posy>0</posy>
                 <width>1280</width>
                 <height>720</height>
-                <texture border="40">default-black.png</texture>
+                <texture>speakergrill.png</texture>
             </control>
             <!-- ** Required ** Do not change <id> or <type> -->
 
@@ -38,8 +38,20 @@
                 <posy>12</posy>
                 <width>300</width>
                 <height>300</height>
+                <aspectratio scalediffuse="false">keep</aspectratio>
                 <texture>cdart-icon.png</texture>
                 <visible>!Control.HasFocus(122) + !Control.HasFocus(140) + !ControlGroup(9011).HasFocus</visible>
+            </control>
+            
+            <control type="image" id="211">  <!-- Album Cover Art -->
+                <description>page header tab icon</description>
+                <posx>20</posx>
+                <posy>12</posy>
+                <width>300</width>
+                <height>300</height>
+                <aspectratio scalediffuse="false">keep</aspectratio>
+                <texture>cdart-icon.png</texture>
+                <visible>SubString(Window(10001).Property(artwork),cover)</visible>
             </control>
 
             <control type="image" id="210"> <!-- cdART image for album List -->
@@ -50,7 +62,7 @@
                 <width>300</width>
                 <height>300</height>
                 <aspectratio scalediffuse="false">keep</aspectratio>
-                <visible>Control.HasFocus(122) | Control.HasFocus(140) | ControlGroup(9011).HasFocus</visible>
+                <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
             </control>
 
             <control type="group" id="9003"> <!-- Artist List -->
@@ -80,7 +92,8 @@
                     <posy>0</posy>
                     <width>1013</width>
                     <height>570</height>
-                    <texture border="40">default-black.png</texture>
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    <texture>speakergrill.png</texture>
                 </control>
 
                 <control type="list" id="120">
@@ -89,7 +102,7 @@
                     <posy>20</posy>
                     <width>400</width>
                     <height>450</height>
-                    <onleft>9001</onleft>
+                    <onleft>9000</onleft>
                     <onright>121</onright>
                     <onup>120</onup>
                     <ondown>120</ondown>
@@ -175,7 +188,7 @@
 
             <control type="group" id="9004"> <!-- Album List -->
                 <posx>125</posx>
-                <posy>0</posy>
+                <posy>130</posy>
 
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9004).HasFocus + !Control.HasFocus(122)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
@@ -199,9 +212,10 @@
                 <control type="image" id = "201">
                     <posx>-10</posx>
                     <posy>0</posy>
-                    <width>850</width>
-                    <height>700</height>
-                    <texture border="40">default-black.png</texture>
+                    <width>1013</width>
+                    <height>570</height>
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    <texture>speakergrill.png</texture>
                 </control>
 
                 <control type="list" id="122">
@@ -314,7 +328,7 @@
 
             <control type="group" id="9007"> <!-- Local cdART List -->
                 <posx>125</posx>
-                <posy>0</posy>
+                <posy>130</posy>
 
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9007).HasFocus + !Control.HasFocus(140) + !ControlGroup(9011).HasFocus + !ControlGroup(9012).HasFocus">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus | ControlGroup(9011).HasFocus | ControlGroup(9012).HasFocus">conditional</animation>
@@ -338,9 +352,10 @@
                 <control type="image" id = "220">
                     <posx>-10</posx>
                     <posy>0</posy>
-                    <width>850</width>
-                    <height>700</height>
-                    <texture border="40">default-black.png</texture>
+                    <width>1017</width>
+                    <height>570</height>
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    <texture>speakergrill.png</texture>
                 </control>
 
                 <control type="list" id="140">
@@ -567,7 +582,7 @@
                     <posy>0</posy>
                     <width>600</width>
                     <height>100</height>
-                    <texture border="40">default-black.png</texture>
+                    <texture border="40">default-menu.png</texture>
 
                 </control>                    
                 <control type="label" id="400">
@@ -658,7 +673,7 @@
                     <posy>0</posy>
                     <width>280</width>
                     <height>110</height>
-                    <texture border="40">default-black.png</texture>
+                    <texture border="40">default-menu.png</texture>
                 </control>
 
                 <control type="button" id="135"> <!-- Backup cdART -->
@@ -735,7 +750,7 @@
                     <posy>5</posy>
                     <width>300</width>
                     <height>270</height>
-                    <texture border="40">default-black.png</texture>
+                    <texture border="40">default-menu.png</texture>
                 </control>
 
                 <control type="radiobutton" id="130"> <!-- cdART Backup -->
@@ -882,17 +897,17 @@
             <control type="image"> <!-- Count panel -->
                 <description>Count panel</description>
                 <posx>0</posx>
-                <posy>550</posy>
-                <width>350</width>
-                <height>150</height>
+                <posy>670</posy>
+                <width>1280</width>
+                <height>50</height>
                 <texture border="40">default-black.png</texture>
             </control>
 
             <control type="label" id="109"> <!-- Local Artist Count -->
                 <description>Local Artist Count</description>
                 <posx>10</posx>
-                <posy>560</posy>
-                <width>335</width>
+                <posy>680</posy>
+                <width>416</width>
                 <height>30</height>
                 <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
@@ -904,9 +919,9 @@
 
             <control type="label" id="110"> <!-- Local Album Count -->
                 <description>Local Album Count</description>
-                <posx>10</posx>
-                <posy>600</posy>
-                <width>335</width>
+                <posx>427</posx>
+                <posy>680</posy>
+                <width>416</width>
                 <height>30</height>
                 <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
@@ -919,9 +934,9 @@
 
             <control type="label" id="112"> <!-- cdART count -->
                 <description>Local CDArt Count</description>
-                <posx>10</posx>
-                <posy>640</posy>
-                <width>335</width>
+                <posx>853</posx>
+                <posy>680</posy>
+                <width>416</width>
                 <height>30</height>
                 <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
@@ -931,9 +946,9 @@
                 <align>center</align>
             </control>
 
-            <control type="group" id="9001"> <!-- Search Artist Menu -->
+            <control type="group" id="9001"> <!-- cdART Menu -->
                 <posx>120</posx>
-                <posy>340</posy>
+                <posy>420</posy>
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9001).HasFocus + !Control.HasFocus(100)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(100) | ControlGroup(9001).HasFocus">WindowClose</animation>
@@ -958,11 +973,11 @@
                     <posy>0</posy>
                     <width>250</width>
                     <height>110</height>
-                    <texture border="40">default-black.png</texture>
+                    <texture border="40">default-menu.png</texture>
                 </control>
 
-                <control type="button" id="105"> <!-- Recognized Artist -->
-                    <description>Recognized Artists</description>
+                <control type="button" id="105"> <!-- Search Artists -->
+                    <description>Search Artists</description>
                     <posx>10</posx>
                     <posy>5</posy>
                     <height>40</height>
@@ -973,7 +988,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <label>$ADDON[script.cdartmanager 32000]</label>
+                    <label>$ADDON[script.cdartmanager 32002]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
@@ -983,8 +998,8 @@
                     <ondown>106</ondown>
                 </control>
 
-                <control type="button" id="106"> <!-- All Artists -->
-                    <description>All Artists</description>
+                <control type="button" id="106"> <!-- Automatic Download -->
+                    <description>Automatic Download</description>
                     <posx>10</posx>
                     <posy>45</posy>
                     <height>40</height>
@@ -995,7 +1010,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <label>$ADDON[script.cdartmanager 32001]</label>
+                    <label>$ADDON[script.cdartmanager 32004]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
@@ -1006,9 +1021,84 @@
                 </control>
             </control>
 
+            <control type="group" id="9002"> <!-- Cover Art Menu -->
+                <posx>120</posx>
+                <posy>420</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9002).HasFocus + !Control.HasFocus(101)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(101) | ControlGroup(9002).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(101) | ControlGroup(9002).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(101) | ControlGroup(9002).HasFocus">conditional</animation>
+                <!--<visible>Control.HasFocus(105) | Control.HasFocus(100) | Control.HasFocus(106)</visible>-->
+                <visible>true</visible>
+                <control type="button">
+                    <description>Fake button for mouse control</description>
+                    <posx>-50</posx>
+                    <posy>-50</posy>
+                    <width>1190</width>
+                    <height>700</height>
+                    <label>-</label>
+                    <font>-</font>
+                    <texturenofocus>-</texturenofocus>
+                    <texturefocus>-</texturefocus>
+                    <visible>true</visible>
+                </control>
+
+                <control type="image"> <!-- Box image -->
+                    <posx>-5</posx>
+                    <posy>0</posy>
+                    <width>250</width>
+                    <height>110</height>
+                    <texture border="40">default-menu.png</texture>
+                </control>
+
+                <control type="button" id="150"> <!-- Search Artists -->
+                    <description>Search Artists</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32002]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9000</onleft>
+                    <onright>9002</onright>
+                    <onup>151</onup>
+                    <ondown>151</ondown>
+                </control>
+
+                <control type="button" id="151"> <!-- Automatic Download -->
+                    <description>Automatic Download</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32004]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9000</onleft>
+                    <onright>9002</onright>
+                    <onup>150</onup>
+                    <ondown>150</ondown>
+                </control>
+            </control>
+            
             <control type="group" id="9000"> <!-- Main Menu -->
                 <posx>12</posx>
-                <posy>350</posy>
+                <posy>380</posy>
 
                 <control type="button">
                     <description>Fake button for mouse control</description>
@@ -1028,12 +1118,12 @@
                     <posx>-12</posx>
                     <posy>-10</posy>
                     <width>350</width>
-                    <height>230</height>
-                    <texture border="40">default-black.png</texture>
+                    <height>320</height>
+                    <texture border="40">default-menu.png</texture>
                 </control>
 
-                <control type="radiobutton" id="100"> <!-- Search by Artist -->
-                    <description>Search By Artists</description>
+                <control type="radiobutton" id="100"> <!-- cdARTs -->
+                    <description>cdARTs</description>
                     <posx>0</posx>
                     <posy>-5</posy>
                     <height>40</height>
@@ -1044,7 +1134,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <label>$ADDON[script.cdartmanager 32002]</label>
+                    <label>$ADDON[script.cdartmanager 32001]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
@@ -1058,10 +1148,11 @@
                     <onleft>9000</onleft>
                     <onright>105</onright>
                     <onup>111</onup>
-                    <ondown>102</ondown>
+                    <ondown>101</ondown>
                 </control>
-                <control type="button" id="102">  <!-- Automatic Download -->
-                    <description>Automatic Download</description>
+                
+                <control type="radiobutton" id="101"> <!-- Cover Art -->
+                    <description>Cover Art</description>
                     <posx>0</posx>
                     <posy>35</posy>
                     <height>40</height>
@@ -1072,20 +1163,71 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <label>$ADDON[script.cdartmanager 32004]</label>
+                    <label>$ADDON[script.cdartmanager 32003]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <radioposx>305</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
+                    <onclick>150</onclick>
+                    <onleft>9000</onleft>
+                    <onright>150</onright>
+                    <onup>100</onup>
+                    <ondown>102</ondown>
+                </control>
+
+                <control type="button" id="102">  <!-- FanArt -->
+                    <description>FanArt</description>
+                    <posx>0</posx>
+                    <posy>75</posy>
+                    <height>40</height>
+                    <width>335</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>315</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32006]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
                     <onleft>9000</onleft>
                     <onright>9000</onright>
-                    <onup>100</onup>
+                    <onup>101</onup>
+                    <ondown>152</ondown>				
+                </control>
+                
+                <control type="button" id="152">  <!-- Clear Art -->
+                    <description>ClearArt</description>
+                    <posx>0</posx>
+                    <posy>115</posy>
+                    <height>40</height>
+                    <width>335</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>315</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32009]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9000</onleft>
+                    <onright>9000</onright>
+                    <onup>102</onup>
                     <ondown>103</ondown>				
                 </control>
 
                 <control type="radiobutton" id="103"> <!-- Advanced -->
                     <description>Advanced</description>
                     <posx>0</posx>
-                    <posy>75</posy>
+                    <posy>155</posy>
                     <height>40</height>
                     <width>335</width>
                     <textoffsetx>10</textoffsetx>
@@ -1107,14 +1249,14 @@
                     <onclick>130</onclick>
                     <onleft>9000</onleft>
                     <onright>130</onright>
-                    <onup>102</onup>
+                    <onup>152</onup>
                     <ondown>104</ondown>
                 </control>
 
                 <control type="button" id="104"> <!-- Settings -->
                     <description>Settings</description>
                     <posx>0</posx>
-                    <posy>115</posy>
+                    <posy>195</posy>
                     <height>40</height>
                     <width>335</width>
                     <textoffsetx>10</textoffsetx>
@@ -1137,7 +1279,7 @@
                 <control type="button" id="111"> <!-- Exit -->
                     <description>Exit</description>
                     <posx>0</posx>
-                    <posy>155</posy>
+                    <posy>235</posy>
                     <height>40</height>
                     <width>335</width>
                     <textoffsetx>10</textoffsetx>
@@ -1169,7 +1311,7 @@
                     <posy>0</posy>
                     <width>330</width>
                     <height>330</height>
-                    <texture border="40">default-black.png</texture>
+                    <texture border="40">default-menu.png</texture>
                 </control>
 
                 <control type="label">

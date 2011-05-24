@@ -7,7 +7,6 @@
     <import addon="xbmc.python" version="2.0"/>
     <import addon="script.module.pysqlite" version="2.5.6"/>
     <import addon="script.module.pil" version="1.1.7"/>
-    <import addon="script.module.musicbrainz2" version="0.7.3"/>
   </requires>
   <extension point="xbmc.python.script"
              library="default.py">

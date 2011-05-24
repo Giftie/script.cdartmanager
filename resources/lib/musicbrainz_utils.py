@@ -1,13 +1,6 @@
-from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter
 import xbmc
-import sys
+import sys, os
 from traceback import print_exc
-
-try:
-    from sqlite3 import dbapi2 as sqlite3
-except:
-    from pysqlite2 import dbapi2 as sqlite3
-    
 _                 = sys.modules[ "__main__" ].__language__
 __scriptname__    = sys.modules[ "__main__" ].__scriptname__
 __scriptID__      = sys.modules[ "__main__" ].__scriptID__
@@ -16,12 +9,21 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 
+try:
+    from sqlite3 import dbapi2 as sqlite3
+except:
+    from pysqlite2 import dbapi2 as sqlite3
+
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter
+
 def get_musicbrainz_album( album_title, artist ):
     album = {}
     xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
-    artist=artist.replace("&","&amp;")
-    album_title = album_title.replace("&","&amp;")
+    artist = artist.replace(" & "," ")
+    album_title = album_title.replace(" & "," ")
     try:
         #inc = ReleaseFilter(artistName=artist, title=album_title )
         inc = ReleaseGroupFilter( artistName=artist, title=album_title )
@@ -58,8 +60,8 @@ def update_musicbrainzid( type, info ):
             name, artist_id, sortname = get_musicbrainz_artist_id( info["name"] )
             conn = sqlite3.connect(addon_db)
             c = conn.cursor()
-            c.execute("""UPDATE alblist SET musicbrainz_artistid='%s' WHERE artist='%s'""" % (artist_id, info["name"]) )
-            c.execute("""UPDATE lalist SET musicbrainz_artistid='%s' WHERE name='%s'""" % (artist_id, info["name"]) )
+            c.execute('UPDATE alblist SET musicbrainz_artistid="%s" WHERE artist="%s"' % (artist_id, info["name"]) )
+            c.execute('UPDATE lalist SET musicbrainz_artistid="%s" WHERE name="%s"' % (artist_id, info["name"]) )
             conn.commit
             c.close()
             return artist_id
@@ -83,10 +85,15 @@ def get_musicbrainz_artist_id( artist ):
         name = ""
         id = ""
         sortname = ""
-        artist=artist.replace(" ", "+").replace("&","&amp;")
+        try:
+            artist = artist.encode("utf-8")
+        except:
+            artist = artist.decode("utf-8")
+        artist=artist.replace(" ", "+").replace(" & "," ")
         f = ArtistFilter( name=artist, limit=1 )
-        artistResults = Query().getArtists(f)
-        for result in artistResults:
+        q_result = Query().getArtists(f)
+        if not len(q_result) == 0:
+            result = q_result[0]
             artist = result.artist
             xbmc.log( "[script.cdartmanager] - Score     : %s" % result.score, xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Id        : %s" % artist.id, xbmc.LOGDEBUG )
@@ -95,6 +102,9 @@ def get_musicbrainz_artist_id( artist ):
             id = ( artist.id ).replace( "http://musicbrainz.org/artist/", "" )
             name = artist.name
             sortname = artist.sortName
+        else: 
+            xbmc.log( "[script.cdartmanager] - No Artist ID found for Artist: %s" % repr( artist ), xbmc.LOGDEBUG )
+        xbmc.sleep(900) # sleep for allowing proper use of webserver
         return name, id, sortname
     except WebServiceError, e:
         xbmc.log( "[script.cdartmanager] - Error: %s" % e, xbmc.LOGERROR )

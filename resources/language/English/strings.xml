@@ -2,15 +2,15 @@
 <strings>
   <!-- Script Strings -->
   <string id="32000">Recognized Artists</string>
-  <string id="32001">All Artists</string>
+  <string id="32001">cdARTs</string>
   <string id="32002">Search Artists</string>
-  <string id="32003">Search Albums</string>
+  <string id="32003">Cover Arts</string>
   <string id="32004">Automatic Download</string>
   <string id="32005">Save Local cdART List</string>
-  <string id="32006"></string>
+  <string id="32006">Fan Arts</string>
   <string id="32007">Local Artists: %s</string>
   <string id="32008">Local cdARTs: %s</string>
-  <string id="32009"></string>
+  <string id="32009">ClearART</string>
   <string id="32010">Local Albums: %s</string>
   <string id="32011">Advanced</string>
   <string id="32012">Refresh Addon Database</string>

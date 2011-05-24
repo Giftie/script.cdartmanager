@@ -21,11 +21,11 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('p
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source, unescape
 from musicbrainz_utils import get_musicbrainz_album, get_musicbrainz_artist_id, update_musicbrainzid
-from utils import unescape
+
 
 music_url = "http://fanart.tv/api/music.php?id="
 artist_url = "http://fanart.tv/api/music.php?all=true"
-lookup_id = False
+lookup_id = True
 
 pDialog = xbmcgui.DialogProgress()
 
@@ -71,19 +71,18 @@ def retrieve_fanarttv_xml( id ):
                             album_artwork["cdart"].append(cdart)
                             xbmc.log( "[script.cdartmanager] - cdart: %s" % cdart_match.group( 1 ), xbmc.LOGDEBUG )
                         else:
-			    for disc in cdart_multi_match:
-		                cdart = {}
-			        cdart["disc"] = int(disc[0])
-			        cdart["cdart"] = disc[1]
-			        album_artwork["cdart"].append(cdart)
+                            for disc in cdart_multi_match:
+                                cdart = {}
+                                cdart["disc"] = int(disc[0])
+                                cdart["cdart"] = disc[1]
+                                album_artwork["cdart"].append(cdart)
                         if cover_match:
                             album_artwork["cover"] = cover_match.group( 1 )
                             xbmc.log( "[script.cdartmanager] - cover: %s" % cover_match.group( 1 ), xbmc.LOGDEBUG )
                         
                     except:
-                        print "No Album Artwork found"
+                        xbmc.log( "[script.cdartmanager] - No Album Artwork found", xbmc.LOGDEBUG )
                         print_exc()
-                    print album_artwork
                     a_art.append(album_artwork)
                 album_art["artwork"] = a_art
                 artist_artwork.append(album_art)
@@ -126,7 +125,7 @@ def get_recognized( distant, local ):
         for d_artist in distant:
             if ( pDialog.iscanceled() ):
                 break
-            if artist["musicbrainz_artistid"] == d_artist["id"]:
+            if artist["musicbrainz_artistid"] == d_artist["id"] and d_artist["name"]:
                 true += 1
                 artist["distant_id"] = d_artist["id"]
                 break                
@@ -141,8 +140,7 @@ def get_recognized( distant, local ):
     if true == 0:
         xbmc.log( "[script.cdartmanager] - #  No Matches found.  Compare Artist and Album names with xbmcstuff.com", xbmc.LOGDEBUG )
     pDialog.close()   
-    return recognized, artist_list
-    
+    return recognized, artist_list    
     
 def match_library( local_artist_list ):
     available_artwork = []

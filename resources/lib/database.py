@@ -1,25 +1,30 @@
 import xbmc, xbmcgui
 import sys, os, traceback, re
+from traceback import print_exc
 
 try:
     from sqlite3 import dbapi2 as sqlite3
 except:
     from pysqlite2 import dbapi2 as sqlite3
 
-_              = sys.modules[ "__main__" ].__language__
-__scriptname__ = sys.modules[ "__main__" ].__scriptname__
-__scriptID__   = sys.modules[ "__main__" ].__scriptID__
-__author__     = sys.modules[ "__main__" ].__author__
-__credits__    = sys.modules[ "__main__" ].__credits__
-__credits2__   = sys.modules[ "__main__" ].__credits2__
-__version__    = sys.modules[ "__main__" ].__version__
-__addon__      = sys.modules[ "__main__" ].__addon__
+_                 = sys.modules[ "__main__" ].__language__
+__scriptname__    = sys.modules[ "__main__" ].__scriptname__
+__scriptID__      = sys.modules[ "__main__" ].__scriptID__
+__author__        = sys.modules[ "__main__" ].__author__
+__credits__       = sys.modules[ "__main__" ].__credits__
+__credits2__      = sys.modules[ "__main__" ].__credits2__
+__version__       = sys.modules[ "__main__" ].__version__
+__addon__         = sys.modules[ "__main__" ].__addon__
+addon_db          = sys.modules[ "__main__" ].addon_db
+addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+
 
 safe_db_version = "1.3.2"
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 pDialog = xbmcgui.DialogProgress()
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
+from fanarttv_scraper import retrieve_fanarttv_xml
 
 from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
@@ -32,9 +37,32 @@ from xbmcvfs import copy as file_copy
 #exists = os.path.exists
 #from shutil import copy as file_copy
 
-
-addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
-addon_db = os.path.join(addon_work_folder, "l_cdart.db") 
+def remote_cdart_list( artist_menu ):
+    xbmc.log( "[script.cdartmanager] - #   Finding Remote cdARTs", xbmc.LOGNOTICE )
+    cdart_url = []
+    #If there is something in artist_menu["distant_id"] build cdart_url
+    try:
+        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        if not len(art) < 2:
+            album_artwork = art[1]["artwork"]
+            print album_artwork
+            if album_artwork:
+                for artwork in album_artwork:
+                    album = {'artistl_id': "", 'artistd_id': "", 'local_name': "", 'musicbrainz_albumid': "", 'picture': {}, 'thumb_cdart': {}, 'cover': "", 'thumb_cover': "" }
+                    album["artistl_id"] = artist_menu["local_id"]
+                    album["artistd_id"] = artist_menu["distant_id"]
+                    album["local_name"] = album["artist"] = artist_menu["name"]
+                    album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
+                    for cdart in artwork["cdart"]:
+                        album[cdart["disc"]-1]["picture"] = cdart["cdart"]
+                        album[cdart["disc"]-1]["thumb_cdart"] = cdart["cdart"]
+                    album["cover"] = artwork["cover"]
+                    album["thumb_cover"] = artwork["cover"]
+                    cdart_url.append(album)
+                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
+    except:
+        print_exc()
+    return cdart_url
 
 def get_xbmc_database_info():
     xbmc.log( "[script.cdartmanager] - #  Retrieving Album Info from XBMC's Music DB", xbmc.LOGDEBUG )
@@ -329,35 +357,38 @@ def new_database_setup():
 #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
 def get_local_albums_db( artist_name ):
     xbmc.log( "[script.cdartmanager] - #  Retrieving Local Albums Database", xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
     local_album_list = []
     query = ""
-    if artist_name == "all artists":
-        pDialog.create( _(32102), _(20186) )
-        query="SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
-    else:
-        query='SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
-    conn_l = sqlite3.connect(addon_db)
-    c = conn_l.cursor()
-    c.execute(query)
-    db=c.fetchall()
-    for item in db:
-        #xbmc.log( item, xbmc.LOGNOTICE )
-        album = {}
-        album["local_id"] = ( item[0] )
-        album["title"] = ( item[1].encode("utf-8")).lstrip("'u")
-        album["artist"] = ( item[2].encode("utf-8")).lstrip("'u")
-        album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u").rstrip("'")
-        album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
-        album["disc"] = ( item[5] )
-        album["musicbrainz_albumid"] = item[6]
-        album["musicbrainz_artistid"] = item[7]
-        #xbmc.log( repr(album), xbmc.LOGNOTICE )
-        local_album_list.append(album)
-    c.close
+    try:
+        if artist_name == "all artists":
+            pDialog.create( _(32102), _(20186) )
+            query="SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
+        else:
+            query='SELECT DISTINCT album_id, title, artist, path, cdart, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
+        conn_l = sqlite3.connect(addon_db)
+        c = conn_l.cursor()
+        c.execute(query)
+        db=c.fetchall()
+        for item in db:
+            #xbmc.log( item, xbmc.LOGNOTICE )
+            album = {}
+            album["local_id"] = ( item[0] )
+            album["title"] = ( item[1].encode("utf-8")).lstrip("'u")
+            album["artist"] = ( item[2].encode("utf-8")).lstrip("'u")
+            album["path"] = ((item[3]).encode("utf-8")).replace('"','').lstrip("'u").rstrip("'")
+            album["cdart"] = ( item[4].encode("utf-8")).lstrip("'u")
+            album["disc"] = ( item[5] )
+            album["musicbrainz_albumid"] = item[6]
+            album["musicbrainz_artistid"] = item[7]
+            #xbmc.log( repr(album), xbmc.LOGNOTICE )
+            local_album_list.append(album)
+        c.close
+    except:
+        print_exc()
     #xbmc.log( local_album_list, xbmc.LOGNOTICE )
     if artist_name == "all artists":
         pDialog.close()
+    xbmc.log( "[script.cdartmanager] - #  Finished Retrieving Local Albums Database", xbmc.LOGNOTICE )
     return local_album_list
         
 def get_local_artists_db():

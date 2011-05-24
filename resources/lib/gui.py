@@ -55,9 +55,11 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from convert import set_entity_or_charref
 from folder import dirEntries
 from fanarttv_scraper import match_library, get_distant_artists, retrieve_fanarttv_xml, get_recognized
-from utils import get_html_source, download_cdart, auto_download
-from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db
+from utils import get_html_source, clear_image_cache
+from download import download_cdart, auto_download
+from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, remote_cdart_list
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
+from file_item import Thumbnails
 
 #variables
 intab = ""
@@ -233,29 +235,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         clean_text = ((clean_text.replace("[COLOR=FF00FF00]","")).replace("[COLOR=FFFFFF00]","")).replace("[COLOR=FFFF4500]","")
         return clean_text
         
-###### Remove
-    def cdart_search( self, cdart_url, title ):
-        s_title = ""
-        rms_title = ""
-        s_title = self.remove_special( title )
-        cdart_find = {}
-        for album in cdart_url:
-            r_title1 = str.lower( album["title"] )
-            r_title2 = str.lower( album["title"].split(" (")[0] )
-            r_title3 = str.lower(self.remove_special( album["title"] ))
-            r_title4 = str.lower(self.remove_special( album["title"].split(" (")[0] ))
-            if title == r_title1 or title == r_title2 or title == r_title3 or title == r_title4 or s_title == r_title1 or s_title == r_title2 or s_title == r_title3 or s_title == r_title4:
-                cdart_find = album
-                break
-            else:
-                cdart_find["picture"]=""
-                cdart_find["thumb"]=""
-                cdart_find["title"]=""
-                cdart_find["artistd_id"]=""
-                cdart_find["artistl_id"]=""
-                cdart_find["local_name"]=""
-                cdart_find["artist_name"]=""
-        return cdart_find        
 #####   Remove 
     # finds the cdart for the album list    
     def find_cdart( self , aname , atitle, remote_cdart_url ):
@@ -364,37 +343,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmcgui.Dialog().ok( "There are %s cdARTs that only exist locally" % (local_count - distant_count), "Local cdARTs: %s" % local_count, "Distant cdARTs: %s" % distant_count )
             difference = 1
         else:
-            xbmcgui.Dialog().ok( "There are %s new cdARTs on XBMCSTUFF.COM" % (distant_count - local_count), "Local cdARTs: %s" % local_count, "Distant cdARTs: %s" % distant_count )
+            xbmcgui.Dialog().ok( "There are %s new cdARTs on FanArt.TV" % (distant_count - local_count), "Local cdARTs: %s" % local_count, "Distant cdARTs: %s" % distant_count )
             differnece = 0
         return cdart_lvd, difference
 
-    def remote_cdart_list( self, artist_menu ):
-        xbmc.log( "[script.cdartmanager] - #   Finding Remote cdARTs", xbmc.LOGNOTICE )
-        cdart_url = []
-        #If there is something in artist_menu["distant_id"] build cdart_url
-        try:
-            album_artwork = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )[1]["artwork"]
-            if album_artwork:
-                for artwork in album_artwork:
-                    album = {'artistl_id': "", 'artistd_id': "", 'local_name': "", 'musicbrainz_albumid': "", 'picture': {}, 'thumb': {} }
-                    album["artistl_id"] = artist_menu["local_id"]
-                    album["artistd_id"] = artist_menu["distant_id"]
-                    album["local_name"] = album["artist"] = artist_menu["name"]
-                    album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
-                    for cdart in artwork["cdart"]:
-                        album["picture"] = cdart["cdart"]
-                        album["thumb"] = cdart["cdart"]
-                    cdart_url.append(album)
-                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
-        except:
-            print_exc()
-        return cdart_url
-    
-    def cdart_search( self, cdart_url, id ):
+    def artwork_search( self, cdart_url, id ):
+        xbmc.log( "[script.cdartmanager] - #  Finding Artwork", xbmc.LOGNOTICE )
         cdart = {}
-        #print id
         for item in cdart_url:
-            #print item
+            print id
+            print item
             if item["musicbrainz_albumid"] == id:
                 cdart = item
                 break
@@ -403,7 +361,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
     #creates the album list on the skin
     def populate_album_list(self, artist_menu, cdart_url):
         xbmc.log( "[script.cdartmanager] - #  Populating Album List", xbmc.LOGNOTICE )
-        xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
         self.getControl( 122 ).reset()
         if not cdart_url:
             #no cdart found
@@ -419,63 +376,104 @@ class GUI( xbmcgui.WindowXMLDialog ):
             label1 = ""
             label2 = ""
             album_list= {}
-            #xbmc.log( local_album_list, xbmc.LOGNOTICE )
-            for album in local_album_list:
-                name = cdart_url[0]["artist"]
-                musicbrainz_albumid = album["musicbrainz_albumid"]
-                cdart = self.cdart_search( cdart_url, musicbrainz_albumid )
-                #xbmc.log( album, xbmc.LOGNOTICE )
-                #check to see if there is a thumb
-                if cdart:
-                    label1 = "%s * %s" % (album["artist"] , album["title"])
-                    print cdart
-                    print album["disc"]
-                    #url = cdart["picture"][album["disc"]-1]
-                    url = cdart["picture"]
-                    #check to see if cdart already exists
-                    # set the matched colour local and distant colour
-                    #colour the label to the matched colour if not
-                    if album["cdart"] == "TRUE":
-                        cdart_img = os.path.join(album["path"], "cdart.png")
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"] , cdart_img)
-                        label1 = "%s * %s     ***Local & fanart.tv cdART Exists***" % (album["artist"] , album["title"])
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"], "cdart.png")) )
-                        self.getControl( 122 ).addItem( listitem )
-                        listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
-                        listitem.setLabel2( label2 )                        
-                    else :
-                        label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
-                        cdart_img=url
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
-                        self.getControl( 122 ).addItem( listitem )
-                        listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
-                        listitem.setLabel2( label2 )
-                    listitem.setThumbnailImage( cdart_img )                                   
-                else :
-                    url = ""
-                    if album["cdart"] == "TRUE":
-                        cdart_img = os.path.join(album["path"] , "cdart.png")
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
-                        label1 = "%s * %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
-                        self.getControl( 122 ).addItem( listitem )
-                        listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
-                        listitem.setLabel2( label2 )
-                        listitem.setThumbnailImage( cdart_img )
-                    else:
-                        label1 = "choose for %s * %s" % (album["artist"] , album["title"] )
-                        cdart_img = ""
-                        label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
-                        #xbmc.log( "[script.cdartmanager] - #  labe2: %s" % repr(label2), xbmc.LOGNOTICE )
-                        listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
-                        self.getControl( 122 ).addItem( listitem )
-                        listitem.setLabel( self.coloring( label1 , self.unmatched_color , label1 ) )
-                        listitem.setLabel2( label2 )
-                        listitem.setThumbnailImage( cdart_img )            
-                self.cdart_url=cdart_url
+            xbmc.log( "[script.cdartmanager] - #  Building album list", xbmc.LOGNOTICE )
+            try:
+                for album in local_album_list:
+                    name = cdart_url[0]["artist"]
+                    musicbrainz_albumid = album["musicbrainz_albumid"]
+                    if not musicbrainz_albumid:
+                        continue
+                    cdart = self.artwork_search( cdart_url, musicbrainz_albumid )
+                    #xbmc.log( album, xbmc.LOGNOTICE )
+                    #check to see if there is a thumb
+                    if self.menu_mode == 1:
+                        if cdart:
+                            if cdart["picture"]:
+                                label1 = "%s * %s" % (album["artist"] , album["title"])
+                                url = cdart["picture"]
+                                #check to see if cdart already exists
+                                # set the matched colour local and distant colour
+                                #colour the label to the matched colour if not
+                                if album["cdart"] == "TRUE":
+                                    cdart_img = os.path.join(album["path"], "cdart.png")
+                                    label2 = "%s&&%s&&&&%s" % (url, album["path"] , cdart_img)
+                                    label1 = "%s * %s     ***Local & fanart.tv cdART Exists***" % (album["artist"] , album["title"])
+                                    listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=(os.path.join(album["path"], "cdart.png")) )
+                                    self.getControl( 122 ).addItem( listitem )
+                                    listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
+                                    listitem.setLabel2( label2 )                        
+                                else:
+                                    label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
+                                    cdart_img=url
+                                    listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
+                                    self.getControl( 122 ).addItem( listitem )
+                                    listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                                    listitem.setLabel2( label2 )
+                                listitem.setThumbnailImage( cdart_img )
+                            else:
+                                url = ""
+                                if album["cdart"] == "TRUE":
+                                    cdart_img = os.path.join(album["path"] , "cdart.png")
+                                    label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
+                                    label1 = "%s * %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
+                                    listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
+                                    self.getControl( 122 ).addItem( listitem )
+                                    listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
+                                    listitem.setLabel2( label2 )
+                                    listitem.setThumbnailImage( cdart_img )
+                                else:
+                                    label1 = "choose for %s * %s" % (album["artist"] , album["title"] )
+                                    cdart_img = ""
+                                    label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
+                                    #xbmc.log( "[script.cdartmanager] - #  labe2: %s" % repr(label2), xbmc.LOGNOTICE )
+                                    listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
+                                    self.getControl( 122 ).addItem( listitem )
+                                    listitem.setLabel( self.coloring( label1 , self.unmatched_color , label1 ) )
+                                    listitem.setLabel2( label2 )
+                                    listitem.setThumbnailImage( cdart_img ) 
+                            self.cdart_url=cdart_url
+                        else:
+                            url = ""
+                            if album["cdart"] == "TRUE":
+                                cdart_img = os.path.join(album["path"] , "cdart.png")
+                                label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
+                                label1 = "%s * %s     ***Local only cdART Exists***" % (album["artist"] , album["title"])
+                                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
+                                self.getControl( 122 ).addItem( listitem )
+                                listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
+                                listitem.setLabel2( label2 )
+                                listitem.setThumbnailImage( cdart_img )
+                            else:
+                                label1 = "choose for %s * %s" % (album["artist"] , album["title"] )
+                                cdart_img = ""
+                                label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
+                                #xbmc.log( "[script.cdartmanager] - #  labe2: %s" % repr(label2), xbmc.LOGNOTICE )
+                                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
+                                self.getControl( 122 ).addItem( listitem )
+                                listitem.setLabel( self.coloring( label1 , self.unmatched_color , label1 ) )
+                                listitem.setLabel2( label2 )
+                                listitem.setThumbnailImage( cdart_img )            
+                            self.cdart_url=cdart_url
+                        clear_image_cache( cdart_img )
+                    elif self.menu_mode == 3:
+                        if cdart:
+                            if cdart["cover"]:
+                                label1 = "%s * %s" % (album["artist"] , album["title"])
+                                url = cdart["cover"]
+                                label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
+                                cover_img=url
+                                listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
+                                self.getControl( 122 ).addItem( listitem )
+                                listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                                listitem.setLabel2( label2 )
+                                listitem.setThumbnailImage( cover_img )     
+                            self.cdart_url=cdart_url
+                            clear_image_cache( cover_img )                            
+            except:
+                print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             self.setFocus( self.getControl( 122 ) )
-            self.getControl( 122 ).selectItem( 0 )
+            self.getControl( 122 ).selectItem( 0 )            
         return
        
     #creates the artist list on the skin        
@@ -832,128 +830,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.log( "[script.cdartmanager] - #### Error saving missing.txt file", xbmc.LOGNOTICE )
         pDialog.close()
         
-    def upload_missing_list( self ):
-        # Nothing here yet.
-        # 
-        # Here the script will upload the missing list stored in backup folder
-        # and wait for a response from the website(a file) that will either initiate 
-        # a batch download or a dialog stating that there are not any matches
-        xbmc.log( "[script.cdartmanager] - #    Saving Missing cdART list to backup folder", xbmc.LOGNOTICE )
-        count = 0
-        percent = 0
-        line = ""
-        zip_filename = ""
-        bkup_folder = __addon__.getSetting("backup_path")
-        pDialog.create( _(32104), _(20186) )
-        if bkup_folder =="":
-            __addon__.openSettings()
-            bkup_folder = __addon__.getSetting("backup_path")
-        filename=os.path.join(addon_work_folder, "missing.txt")
-        return zip_filename
-        
-    def download_from_website( self, zip_filename ):
-        # Nothing really here yet
-        #
-        # Here the script will download the zip file that the website
-        # will create which stores the cdARTs matching the missing.txt file
-        # The file will be stored in addon_data/script.cdartmanager/temp
-        # 
-        # 
-        zip_file = ""
-        
-    def extract_zip( self, filename ):
-        # Here the script will extract the cdARTs store in the zip file downloaded from
-        # the website and delete file after extraction is complete(no wasted space)
-        # files will be stored in addon_data/script.cdartmanager/temp/extracted_cdarts
-        xbmc.log( "[script.cdartmanager] - #  Decompressing unique cdARTs", xbmc.LOGNOTICE )
-        xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
-        source = os.path.join(addon_work_folder, 'filename')
-        destination = os.path.join(addon_work_folder, 'temp')
-        xbmc.log( "[script.cdartmanager] - #    Source: %s ", source, xbmc.LOGNOTICE )
-        xbmc.log( "[script.cdartmanager] - #    Destination: %s ", destination, xbmc.LOGNOTICE )
-        output = tarfile.TarFile.open(destination, 'r:gz2')
-        try:
-            output = tarfile.TarFile.open(destination, 'r:gz2')
-            try: 
-                file.extractall()
-            finally:
-                file.close()
-        except:
-            xbmc.log( "[script.cdartmanager] - # Problem extracting file", xbmc.LOGNOTICE )
-            
-    def download_missing_cdarts( self ):
-        # Nothing really here yet
-        #
-        # Here the script will call each of the steps for downloading the missing cdARTs
-        # and extracting.  It will also recheck the local database and update counts for display
-        local_album_count = 0
-        local_artist_count = 0
-        local_cdart_count = 0
-        zip_file = ""
-        zip_filename = ""
-        zip_file=self.upload_missing_list()
-        if zip_file == "":
-            xbmc.log( "[script.cdartmanager] - # Sorry no matching cdARTs", xbmc.LOGNOTICE )
-        else:
-            zip_filename = os.path.join(download_temp_folder, zip_file)
-            self.download_from_website(zip_filename)
-            self.extract_zip(zip_filename)
-            delete_file(zip_filename)
-            extracted_cdarts_folder = os.path.join(download_temp_folder, "extracted_cdarts")
-            self.copy_cdarts(extracted_cdarts_folder)
-            # refresh local database
-            delete_file(addon_db)
-            local_album_count, local_artist_count, local_cdart_count = new_database_setup()
-            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-            
-    def upload_to_website( self ):
-        # Nothing really here yet
-        # 
-        # open ftp and send a zip file to the website
-        source = os.path.join(addon_work_folder, 'unique.tar.gz')
-        cmd = "STOR unique.tar.gz"
-        try:
-            ftp_upload = FTP('192.168.2.9')
-            ftp_upload.login('giftie61', 'gmracing')
-            upload = open(source, 'rb')
-            ftp_upload.storbinary(cmd, upload)
-            upload.close()
-            ftp_upload.close()
-        except StandardError, e:
-            xbmc.log( "[script.cdartmanager] - Error uploading file: %s" % e, xbmc.LOGNOTICE )
-
-    def compress_cdarts( self, unique_folder ):
-        xbmc.log( "[script.cdartmanager] - #  Compressing unique cdARTs", xbmc.LOGNOTICE )
-        xbmc.log( "[script.cdartmanager] - #"        , xbmc.LOGNOTICE )
-        source = unique_folder
-        destination = os.path.join(addon_work_folder, 'unique.tar.gz')
-        xbmc.log( "[script.cdartmanager] - #    Source: %s " % source, xbmc.LOGNOTICE )
-        xbmc.log( "[script.cdartmanager] - #    Destination: %s " % destination, xbmc.LOGNOTICE )
-        fileList = dirEntries(source, media_type="files", recursive="TRUE", contains="")
-        try:
-            output = tarfile.TarFile.open(destination, 'w:gz')
-            for f in fileList:
-                xbmc.log( "[script.cdartmanager] - archiving file %s" % (f), xbmc.LOGNOTICE )
-                output.add(f)
-            output.close()
-            self.upload_to_website()
-        except:
-            xbmc.log( "[script.cdartmanager] - # Problem Compressing Unique cdARTs", xbmc.LOGNOTICE )
-    
-    def upload_unique_cdarts( self ):
-        # Nothing really here yet
-        # 
-        # Here the script will call each step for uploading unique cdARTs
-        zip_file = ""
-        unique, difference = self.local_vs_distant()
-        if difference == 1:
-            self.unique_cdart_copy( unique )
-            unique_folder = __addon__.getSetting("unique_path")
-            zip_file = self.compress_cdarts( unique_folder )
-            self.upload_to_website()
-        else:
-            xbmcgui.Dialog().ok( "There are no unique local cdARTs")        
-        
     def setup_artist_list( self, artist ):
         xbmc.log( "[script.cdartmanager] - ##### Setting up artist list", xbmc.LOGNOTICE )
         self.artist_menu = {}
@@ -999,31 +875,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
     # This selects which cdART image shows up in the display box (image id 210) 
     def cdart_icon( self ):
         #xbmc.log( "[script.cdartmanager] - # Displaying cdART icon", xbmc.LOGNOTICE )
-        try:   # If there is information in label 2 of list id 122(album list)
-            local_cdart = ""
-            url = ""
-            cdart_path ={}
-            local_cdart = (self.getControl(122).getSelectedItem().getLabel2()).split("&&&&")[1]
-            url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
-            cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
-            #xbmc.log( "[script.cdartmanager] - # cdART url: %s" % repr(url), xbmc.LOGNOTICE )
-            #xbmc.log( "[script.cdartmanager] - # cdART path: %s" % repr(cdart_path["path"]), xbmc.LOGNOTICE )
-            if not local_cdart == "": #Test to see if there is a path in local_cdart
-                image = (local_cdart.replace("\\\\" , "\\"))
-                self.getControl( 210 ).setImage( image )
-            else:
-                if not cdart_path["path"] =="": #Test to see if there is an url in cdart_path["path"]
-                    image = (cdart_path["path"].replace("\\\\" , "\\"))
-                    self.getControl( 210 ).setImage( image )
-                else:
-                    image =""                    
-        except:  
-            try: # If there is information in label 2 of list id 140(local album list)
-                local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
-                url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
-                cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
-                xbmc.log( "[script.cdartmanager] - # cdART url: %s" % url, xbmc.LOGNOTICE )
-                xbmc.log( "[script.cdartmanager] - # cdART path: %s" % cdart_path["path"], xbmc.LOGNOTICE )
+        if self.menu_mode == 1:
+            try:   # If there is information in label 2 of list id 122(album list)
+                local_cdart = ""
+                url = ""
+                cdart_path ={}
+                local_cdart = (self.getControl(122).getSelectedItem().getLabel2()).split("&&&&")[1]
+                url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
+                cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+                #xbmc.log( "[script.cdartmanager] - # cdART url: %s" % repr(url), xbmc.LOGNOTICE )
+                #xbmc.log( "[script.cdartmanager] - # cdART path: %s" % repr(cdart_path["path"]), xbmc.LOGNOTICE )
                 if not local_cdart == "": #Test to see if there is a path in local_cdart
                     image = (local_cdart.replace("\\\\" , "\\"))
                     self.getControl( 210 ).setImage( image )
@@ -1032,14 +893,38 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         image = (cdart_path["path"].replace("\\\\" , "\\"))
                         self.getControl( 210 ).setImage( image )
                     else:
-                        image =""
-                        #image = addon_img
+                        image =""                    
+            except:  
+                try: # If there is information in label 2 of list id 140(local album list)
+                    local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
+                    url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
+                    cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+                    xbmc.log( "[script.cdartmanager] - # cdART url: %s" % url, xbmc.LOGNOTICE )
+                    xbmc.log( "[script.cdartmanager] - # cdART path: %s" % cdart_path["path"], xbmc.LOGNOTICE )
+                    if not local_cdart == "": #Test to see if there is a path in local_cdart
+                        image = (local_cdart.replace("\\\\" , "\\"))
+                        self.getControl( 210 ).setImage( image )
+                    else:
+                        if not cdart_path["path"] =="": #Test to see if there is an url in cdart_path["path"]
+                            image = (cdart_path["path"].replace("\\\\" , "\\"))
+                            self.getControl( 210 ).setImage( image )
+                        else:
+                            image =""
+                            #image = addon_img
             
-            except: # If there is not any information in any of those locations, no image.
-                image =""
-                #image=addon_img
-        self.getControl( 210 ).setImage( image )
-
+                except: # If there is not any information in any of those locations, no image.
+                    image =""
+                    #image=addon_img
+            self.getControl( 210 ).setImage( image )
+        elif self.menu_mode == 3:
+            url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
+            if url:
+                print Thumbnails().get_cached_picture_thumb( url )
+                image = url
+            else:
+                image = ""
+            self.getControl( 211 ).setImage( image ) 
+            
     def popup(self, header, line1, line2, line3):        
         #self.getControl( 400 ).setLabel( header )
         #self.getControl( 150 ).setLabel( line1 )
@@ -1064,6 +949,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.label_1 = ""
         self.label_2 = addon_img
         self.cdartimg = ""
+        self.artwork_type = ""
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)
@@ -1080,12 +966,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def onClick( self, controlId ):
         #xbmc.log( "[script.cdartmanager] - Control ID: %s " % controlId, xbmc.LOGNOTICE )
-        if controlId == 102 : #Automatic Download
-            self.menu_mode = 3
-            download_count = auto_download()
-            local_album_count, local_artist_count, local_cdart_count = new_local_count()
-            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-        if controlId in [105, 106]: #Get Artists List
+        if controlId == 105 : #cdARTs Search Artists 
+            self.menu_mode = 1
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
@@ -1094,17 +976,20 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_artists = get_local_artists_db()
             if distant_artist:
                 self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
-        if controlId == 105 : #Recognized Artists
-            self.menu_mode = 1
             #print self.recognized_artists
             self.populate_artist_list( self.recognized_artists )
-        if controlId == 106 : #All Artists
+        if controlId == 106 : #cdARTs Automatic Download
             self.menu_mode = 2
-            #print self.local_artists
-            self.populate_artist_list( self.local_artists )   
+            download_count = auto_download()
+            local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 120 : #Retrieving information from Artists List
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
-            if self.menu_mode == 1: #information pulled from recognized list
+            if self.menu_mode == 1 or self.menu_mode == 3: #information pulled from recognized list
+                if self.menu_mode == 1:
+                    xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
+                else:
+                    xbmcgui.Window(10001).setProperty( "artwork", "cover" )
                 self.artist_menu = {}
                 self.artist_menu["local_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
                 self.artist_menu["name"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
@@ -1112,20 +997,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.artist_menu["distant_id"] = str(self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
                 #xbmc.log( "[script.cdartmanager] - # %s" % self.artist_menu, xbmc.LOGNOTICE )
                 #xbmc.log( artist_menu, xbmc.LOGNOTICE )
-            elif self.menu_mode == 2: #information pulled from All Artist List
-                self.artist_menu = {}
-                self.artist_menu["local_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"])
-                xbmc.log( self.artist_menu["local_id"], xbmc.LOGNOTICE )
-                self.artist_menu["name"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"])
-                xbmc.log( self.artist_menu["name"], xbmc.LOGNOTICE )
-                self.artist_menu["musicbrainz_artistid"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["musicbrainz_artistid"])
-                xbmc.log( self.artist_menu["musicbrainz_artistid"], xbmc.LOGNOTICE )
-                self.artist_menu["distant_id"] = str(self.local_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"])
-                xbmc.log( self.artist_menu["distant_id"], xbmc.LOGNOTICE )
             if not self.artist_menu["musicbrainz_artistid"]:
                 self.artist_menu["musicbrainz_artistid"] = update_musicbrainzid( "artist", self.artist_menu )
             xbmc.log( "[script.cdartmanager] - # %s" % self.artist_menu, xbmc.LOGNOTICE )
-            self.remote_cdart_url = self.remote_cdart_list( self.artist_menu )
+            self.remote_cdart_url = remote_cdart_list( self.artist_menu )
             #xbmc.log( artist_menu, xbmc.LOGNOTICE )
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
         if controlId == 122 : #Retrieving information from Album List
@@ -1154,22 +1029,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
             #xbmc.log( "[script.cdartmanager] - #   url: %s" % url, xbmc.LOGNOTICE )
             #xbmc.log( "[script.cdartmanager] - #   local_cdart: %s" % local_cdart, xbmc.LOGNOTICE )
             if not url =="" : # If it is a recognized Album...
-                message, d_success = download_cdart( url, cdart_path )
+                if self.menu_mode == 1:
+                    message, d_success = download_cdart( url, cdart_path, "cdart" )
+                elif self.menu_mode == 3:
+                    message, d_success = download_cdart( url, cdart_path, "cover" )
                 xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
                 pDialog.close()
             else : # If it is not a recognized Album...
-                for elem in self.cdart_url:
-                    album["search_name"] = elem["title"]
-                    album["search_url"] = elem["picture"]
-                    album_search.append(album["search_name"])
-                    album_selection.append(album["search_url"])
-                select = xbmcgui.Dialog().select( _(32022), album_search)
-                #xbmc.log( select, xbmc.LOGNOTICE )
-                if not select == -1:
-                    cdart_url = album_selection[select]
-                    message, d_success = download_cdart( cdart_url, cdart_path )
-                    xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
-                    pDialog.close()
+                xbmc.log( "[script.cdartmanager] - Oops --  Some how I go here... - ControlID(122)", xbmc.LOGDEBUG )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             self.populate_album_list( self.artist_menu, self.remote_cdart_url )
@@ -1190,6 +1057,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
             refresh_db()
             pDialog.close()
+            local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
@@ -1197,13 +1066,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 137 : #Local cdART List
             self.getControl( 122 ).reset()
             self.populate_local_cdarts()
-        if controlId == 104 : #Settings
-            self.menu_mode = 5
-            __addon__.openSettings()
-            self.setup_colors()
-        if controlId == 111 : #Exit
-            self.menu_mode = 0
-            self.close()
         if controlId == 107 :
             self.setFocusId( 200 )
         if controlId == 108 :
@@ -1258,13 +1120,57 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.popup(_(32076),self.getControl(140).getSelectedItem().getLabel(), "", path)
             self.setFocusId( 140 )
             self.populate_local_cdarts()
-        if controlId == 100 : #Search Artist
+        if controlId == 100 : #cdARTS
+            self.artwork_type = "cdart"
+            self.setFocusId( 105 )
+        if controlId == 101 : #Cover Arts
+            self.artwork_type = "cover"
+            self.setFocusId( 150 )
+        if controlId == 102 : #Fan Art
             self.setFocusId( 105 )
         if controlId == 103 : #Advanced
             self.setFocusId( 130 )
+        if controlId == 145 : #Settings
+            self.menu_mode = 5
+            __addon__.openSettings()
+            self.setup_colors()
+        if controlId == 111 : #Exit
+            self.menu_mode = 0
+            self.close()
+        if controlId == 150 : #Cover Art Search Artists 
+            self.menu_mode = 3
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+            self.getControl( 120 ).reset()
+            distant_artist = get_distant_artists()
+            #xbmc.log( "[script.cdartmanager] - Distant Artists:", xbmc.LOGNOTICE )
+            #xbmc.log( distant_artist, xbmc.LOGNOTICE )
+            local_artists = get_local_artists_db()
+            if distant_artist:
+                self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
+            #print self.recognized_artists
+            self.populate_artist_list( self.recognized_artists )
+        if controlId == 151 : #Cover Art Automatic Download
+            self.menu_mode = 4
+            download_count = auto_download()
+            local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
+        if controlId == 102 : #Fan Art Search Artists 
+            self.menu_mode = 5
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+            self.getControl( 120 ).reset()
+            distant_artist = get_distant_artists()
+            #xbmc.log( "[script.cdartmanager] - Distant Artists:", xbmc.LOGNOTICE )
+            #xbmc.log( distant_artist, xbmc.LOGNOTICE )
+            local_artists = get_local_artists_db()
+            if distant_artist:
+                self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
+            #print self.recognized_artists
+            self.populate_artist_list( self.recognized_artists )
             	
 
     def onFocus( self, controlId ):
+        if not ( controlId == 122 or controlId == 140 ):
+            xbmcgui.Window(10001).clearProperty( "artwork" )
         if controlId == 122 or controlId == 140:
             self.cdart_icon()
             
