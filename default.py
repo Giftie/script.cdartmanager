@@ -86,14 +86,7 @@ if ( __name__ == "__main__" ):
             c.execute(query)
             version=c.fetchall()
             for item in version:
-                if item[0] == __dbversionold__:
-                    # add update database columns, brings it to 1.3.2 version
-                    c.execute('''alter table lalist add column musicbrainz_artistid''')
-                    c.execute('''alter table alblist add column musicbrainz_albumid''')
-                    c.execute('''alter table alblist add column musicbrainz_artistid''')
-                    c.execute('''UPDATE counts SET version=1.3.2 WHERE version=1.1.8''')
-                    break
-                elif item[0] == __dbversion__:
+                if item[0] == __dbversion__:
                     xbmc.log( "[script.cdartmanager] - Database matched", xbmc.LOGNOTICE )
                     break
                 else:

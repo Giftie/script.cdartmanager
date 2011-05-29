@@ -25,9 +25,7 @@ def get_musicbrainz_album( album_title, artist ):
     artist = artist.replace(" & "," ")
     album_title = album_title.replace(" & "," ")
     try:
-        #inc = ReleaseFilter(artistName=artist, title=album_title )
         inc = ReleaseGroupFilter( artistName=artist, title=album_title )
-        #album_result = Query().getReleases( inc )
         album_result = Query().getReleaseGroups( inc )
         if len( album_result ) == 0:
             xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGNOTICE )
@@ -36,14 +34,15 @@ def get_musicbrainz_album( album_title, artist ):
             album["id"] = ""
             album["title"] = ""
         else:
-#            album["artist"] = album_result[ 0 ].release.artist.name
-#            album["artist_id"] = (album_result[ 0 ].release.artist.id).replace( "http://musicbrainz.org/artist/", "" )
-#            album["id"] = (album_result[ 0 ].release.id).replace("http://musicbrainz.org/release/", "")
-#            album["title"] = album_result[ 0 ].release.title
             album["artist"] = album_result[ 0 ].releaseGroup.artist.name
             album["artist_id"] = (album_result[ 0 ].releaseGroup.artist.id).replace( "http://musicbrainz.org/artist/", "" )
             album["id"] = (album_result[ 0 ].releaseGroup.id).replace("http://musicbrainz.org/release-group/", "")
             album["title"] = album_result[ 0 ].releaseGroup.title
+        # if album and artist are not matched on MusicBrainz, look up Artist for ID
+        if not album["artist_id"]:
+            name, id, sortname = get_musicbrainz_artist_id( album["artist"] )
+            if id:
+                album["artist_id"] = id
     except WebServiceError, e:
         xbmc.log( "[script.cdartmanager] - Error: %s" % e, xbmc.LOGERROR )
         album["artist"] = ""

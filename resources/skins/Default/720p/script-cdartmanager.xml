@@ -1,13 +1,7 @@
 <window>
     <defaultcontrol>1001</defaultcontrol>
-    <coordinates>
-        <system>1</system>
-        <posx>0</posx>
-        <posy>0</posy>
-    </coordinates>
     <animation effect="fade" time="250">WindowOpen</animation>
     <animation effect="fade" time="250">WindowClose</animation>
-
     <controls>
         <control type="group">
             <posx>0</posx>
@@ -30,12 +24,11 @@
             </control>
             <!-- ** Required ** Do not change <id> or <type> -->
 
-
             <control type="image" id="200">  <!-- script Icon -->
                 <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=Control.HasFocus(122)>conditional</animation> -->
                 <description>page header tab icon</description>
-                <posx>20</posx>
-                <posy>12</posy>
+                <posx>0</posx>
+                <posy>0</posy>
                 <width>300</width>
                 <height>300</height>
                 <aspectratio scalediffuse="false">keep</aspectratio>
@@ -45,8 +38,19 @@
             
             <control type="image" id="211">  <!-- Album Cover Art -->
                 <description>page header tab icon</description>
-                <posx>20</posx>
-                <posy>12</posy>
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>300</width>
+                <height>300</height>
+                <aspectratio scalediffuse="false">keep</aspectratio>
+                <texture>cdart-icon.png</texture>
+                <visible>SubString(Window(10001).Property(artwork),cover)</visible>
+            </control>
+            
+            <control type="image" id="212">  <!-- Distant Album Cover Art -->
+                <description>page header tab icon</description>
+                <posx>980</posx>
+                <posy>0</posy>
                 <width>300</width>
                 <height>300</height>
                 <aspectratio scalediffuse="false">keep</aspectratio>
@@ -54,11 +58,22 @@
                 <visible>SubString(Window(10001).Property(artwork),cover)</visible>
             </control>
 
+            <control type="image" id="209"> <!-- Distant cdART image -->
+                <animation effect="rotate" end="-360" center="auto" time="8000" loop="true" reversible="false" condition="Control.HasFocus(122) | Control.HasFocus(140)">conditional</animation> 
+                <description>page header tab icon</description>
+                <posx>980</posx>
+                <posy>0</posy>
+                <width>300</width>
+                <height>300</height>
+                <aspectratio scalediffuse="false">keep</aspectratio>
+                <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
+            </control>
+
             <control type="image" id="210"> <!-- cdART image for album List -->
                 <animation effect="rotate" end="-360" center="auto" time="8000" loop="true" reversible="false" condition="Control.HasFocus(122) | Control.HasFocus(140)">conditional</animation> 
                 <description>page header tab icon</description>
-                <posx>20</posx>
-                <posy>12</posy>
+                <posx>0</posx>
+                <posy>0</posy>
                 <width>300</width>
                 <height>300</height>
                 <aspectratio scalediffuse="false">keep</aspectratio>
@@ -66,12 +81,12 @@
             </control>
 
             <control type="group" id="9003"> <!-- Artist List -->
-                <posx>125</posx>
-                <posy>130</posy>            
+                <posx>0</posx>
+                <posy>0</posy>            
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9003).HasFocus + !Control.HasFocus(120)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
+                <animation effect="slide" end="302,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
                 <visible>Control.HasFocus(120) | Control.HasFocus(121) | ControlGroup(9004).HasFocus</visible>
                 <!--
                 <control type="button">
@@ -88,20 +103,22 @@
                 </control>
                 -->
                 <control type="image" id ="220">
-                    <posx>-10</posx>
+                    <!--
+                    <posx>0</posx>
                     <posy>0</posy>
-                    <width>1013</width>
-                    <height>570</height>
-                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    -->
+                    <width>680</width>
+                    <height>670</height>
+                    <!--<aspectratio scalediffuse="false">keep</aspectratio>-->
                     <texture>speakergrill.png</texture>
                 </control>
 
                 <control type="list" id="120">
                     <description>Artist List</description>
                     <posx>0</posx>
-                    <posy>20</posy>
-                    <width>400</width>
-                    <height>450</height>
+                    <posy>25</posy>
+                    <width>606</width>
+                    <height>670</height>
                     <onleft>9000</onleft>
                     <onright>121</onright>
                     <onup>120</onup>
@@ -109,18 +126,18 @@
                     <viewtype label="Artist List">list</viewtype>
                     <pagecontrol>121</pagecontrol>
                     <scrolltime>200</scrolltime>
-                    <itemlayout width="400" height="36">
+                    <itemlayout width="606" height="36">
                         <control type="image">
                             <posx>30</posx>
                             <posy>36</posy>
-                            <width>380</width>
+                            <width>606</width>
                             <height>38</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
                         <control type="label">
                             <posx>40</posx>
                             <posy>0</posy>
-                            <width>360</width>
+                            <width>560</width>
                             <height>38</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -131,18 +148,18 @@
                             <info>ListItem.Label</info>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="400" height="36">
+                    <focusedlayout width="670" height="36">
                         <control type="image">
                             <posx>30</posx>
                             <posy>36</posy>
-                            <width>380</width>
+                            <width>670</width>
                             <height>38</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
                         <control type="image">
                             <posx>30</posx>
                             <posy>0</posy>
-                            <width>380</width>
+                            <width>670</width>
                             <height>38</height>
                             <texture>cdman-button-focus.png</texture>
                             <visible>Control.HasFocus(120)</visible>
@@ -150,7 +167,7 @@
                         <control type="label">
                             <posx>40</posx>
                             <posy>0</posy>
-                            <width>360</width>
+                            <width>660</width>
                             <height>38</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -164,14 +181,14 @@
                     </focusedlayout>
                 </control>
                 <control type="group">
-                    <posx>850</posx>
-                    <posy>20</posy>
+                    <posx>640</posx>
+                    <posy>10</posy>
                     <control type="scrollbar" id="121">
                         <description>scroll bar indicator for lists</description>
                         <posx>0</posx>
                         <posy>0</posy>
                         <width>12</width>
-                        <height>470</height>
+                        <height>650</height>
                         <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
                         <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
                         <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
@@ -187,15 +204,15 @@
             </control>
 
             <control type="group" id="9004"> <!-- Album List -->
-                <posx>125</posx>
-                <posy>130</posy>
+                <posx>0</posx>
+                <posy>0</posy>
 
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9004).HasFocus + !Control.HasFocus(122)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
+                <animation effect="slide" end="300,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(122) | ControlGroup(9004).HasFocus">conditional</animation>
                 <visible>Control.HasFocus(122) | Control.HasFocus(122) | Control.HasFocus(123)</visible>
-
+<!--
                 <control type="button">
                     <description>Fake button for mouse control</description>
                     <posx>-50</posx>
@@ -208,12 +225,12 @@
                     <texturefocus>-</texturefocus>
                     <visible>true</visible>
                 </control>
-
+-->
                 <control type="image" id = "201">
-                    <posx>-10</posx>
+                    <posx>0</posx>
                     <posy>0</posy>
-                    <width>1013</width>
-                    <height>570</height>
+                    <width>680</width>
+                    <height>670</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
                     <texture>speakergrill.png</texture>
                 </control>
@@ -222,8 +239,8 @@
                     <description>Album List</description>
                     <posx>0</posx>
                     <posy>25</posy>
-                    <width>800</width>
-                    <height>550</height>
+                    <width>606</width>
+                    <height>670</height>
                     <onleft>9003</onleft>
                     <onright>123</onright>
                     <onup>122</onup>
@@ -235,7 +252,7 @@
                         <control type="image">
                             <posx>50</posx>
                             <posy>40</posy>
-                            <width>750</width>
+                            <width>550</width>
                             <height>40</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
@@ -252,7 +269,7 @@
                         <control type="label">
                             <posx>70</posx>
                             <posy>0</posy>
-                            <width>720</width>
+                            <width>530</width>
                             <height>40</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -267,7 +284,7 @@
                         <control type="image">
                             <posx>50</posx>
                             <posy>40</posy>
-                            <width>750</width>
+                            <width>550</width>
                             <height>40</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
@@ -283,7 +300,7 @@
                         <control type="image">
                             <posx>50</posx>
                             <posy>0</posy>
-                            <width>750</width>
+                            <width>550</width>
                             <height>40</height>
                             <texture>cdman-button-focus.png</texture>
                             <visible>Control.HasFocus(122)</visible>
@@ -291,7 +308,7 @@
                         <control type="label">
                             <posx>70</posx>
                             <posy>0</posy>
-                            <width>720</width>
+                            <width>530</width>
                             <height>40</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -304,14 +321,14 @@
                     </focusedlayout>
                 </control>
                 <control type="group">
-                    <posx>815</posx>
-                    <posy>20</posy>
-                    <control type="scrollbar" id="123">
+                    <posx>640</posx>
+                    <posy>10</posy>
+                    <control type="scrollbar" id="121">
                         <description>scroll bar indicator for lists</description>
                         <posx>0</posx>
                         <posy>0</posy>
                         <width>12</width>
-                        <height>540</height>
+                        <height>650</height>
                         <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
                         <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
                         <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
@@ -327,15 +344,15 @@
             </control>
 
             <control type="group" id="9007"> <!-- Local cdART List -->
-                <posx>125</posx>
-                <posy>130</posy>
-
+                <posx>20</posx>
+                <posy>0</posy>
+                
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9007).HasFocus + !Control.HasFocus(140) + !ControlGroup(9011).HasFocus + !ControlGroup(9012).HasFocus">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus | ControlGroup(9011).HasFocus | ControlGroup(9012).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="220,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus | ControlGroup(9011).HasFocus | ControlGroup(9012).HasFocus">conditional</animation>
+                <animation effect="slide" end="300,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(140) | ControlGroup(9007).HasFocus | ControlGroup(9011).HasFocus | ControlGroup(9012).HasFocus">conditional</animation>
                 <visible>Control.HasFocus(140) | Control.HasFocus(141) | ControlGroup(9011).HasFocus | ControlGroup(9012).HasFocus</visible>
-
+<!--
                 <control type="button">
                     <description>Fake button for mouse control</description>
                     <posx>-50</posx>
@@ -348,12 +365,12 @@
                     <texturefocus>-</texturefocus>
                     <visible>true</visible>
                 </control>
-
+-->
                 <control type="image" id = "220">
-                    <posx>-10</posx>
+                    <posx>0</posx>
                     <posy>0</posy>
-                    <width>1017</width>
-                    <height>570</height>
+                    <width>680</width>
+                    <height>670</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
                     <texture>speakergrill.png</texture>
                 </control>
@@ -362,8 +379,8 @@
                     <description>Local cdART List</description>
                     <posx>0</posx>
                     <posy>25</posy>
-                    <width>800</width>
-                    <height>550</height>
+                    <width>606</width>
+                    <height>670</height>
                     <onleft>137</onleft>
                     <onright>141</onright>
                     <onup>140</onup>
@@ -1097,13 +1114,13 @@
             </control>
             
             <control type="group" id="9000"> <!-- Main Menu -->
-                <posx>12</posx>
-                <posy>380</posy>
-
+                <posx>0</posx>
+                <posy>300</posy>
+<!--
                 <control type="button">
                     <description>Fake button for mouse control</description>
-                    <posx>-50</posx>
-                    <posy>-50</posy>
+                    <posx>0</posx>
+                    <posy>0</posy>
                     <width>1190</width>
                     <height>700</height>
                     <label>-</label>
@@ -1112,12 +1129,10 @@
                     <texturefocus>-</texturefocus>
                     <visible>true</visible>
                 </control>
-
+-->
                 <control type="image">  <!-- Menu Panel -->
                     <description>Menu panel</description>
-                    <posx>-12</posx>
-                    <posy>-10</posy>
-                    <width>350</width>
+                    <width>300</width>
                     <height>320</height>
                     <texture border="40">default-menu.png</texture>
                 </control>
@@ -1125,11 +1140,11 @@
                 <control type="radiobutton" id="100"> <!-- cdARTs -->
                     <description>cdARTs</description>
                     <posx>0</posx>
-                    <posy>-5</posy>
+                    <posy>0</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1138,7 +1153,7 @@
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
-                    <radioposx>305</radioposx>
+                    <radioposx>275</radioposx>
                     <radioposy>10</radioposy>
                     <radiowidth>18</radiowidth>
                     <radioheight>18</radioheight>
@@ -1154,11 +1169,11 @@
                 <control type="radiobutton" id="101"> <!-- Cover Art -->
                     <description>Cover Art</description>
                     <posx>0</posx>
-                    <posy>35</posy>
+                    <posy>40</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1167,7 +1182,7 @@
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
-                    <radioposx>305</radioposx>
+                    <radioposx>275</radioposx>
                     <radioposy>10</radioposy>
                     <radiowidth>18</radiowidth>
                     <radioheight>18</radioheight>
@@ -1183,11 +1198,11 @@
                 <control type="button" id="102">  <!-- FanArt -->
                     <description>FanArt</description>
                     <posx>0</posx>
-                    <posy>75</posy>
+                    <posy>80</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1205,11 +1220,11 @@
                 <control type="button" id="152">  <!-- Clear Art -->
                     <description>ClearArt</description>
                     <posx>0</posx>
-                    <posy>115</posy>
+                    <posy>120</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1227,11 +1242,11 @@
                 <control type="radiobutton" id="103"> <!-- Advanced -->
                     <description>Advanced</description>
                     <posx>0</posx>
-                    <posy>155</posy>
+                    <posy>160</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1240,7 +1255,7 @@
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
-                    <radioposx>305</radioposx>
+                    <radioposx>275</radioposx>
                     <radioposy>10</radioposy>
                     <radiowidth>18</radiowidth>
                     <radioheight>18</radioheight>
@@ -1256,11 +1271,11 @@
                 <control type="button" id="104"> <!-- Settings -->
                     <description>Settings</description>
                     <posx>0</posx>
-                    <posy>195</posy>
+                    <posy>200</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1279,11 +1294,11 @@
                 <control type="button" id="111"> <!-- Exit -->
                     <description>Exit</description>
                     <posx>0</posx>
-                    <posy>235</posy>
+                    <posy>240</posy>
                     <height>40</height>
-                    <width>335</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>315</textwidth>
+                    <textwidth>265</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>

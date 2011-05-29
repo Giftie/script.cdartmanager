@@ -32,7 +32,6 @@ from xbmcvfs import copy as file_copy
 #exists = os.path.exists
 #from shutil import copy as file_copy
 
-
 pDialog = xbmcgui.DialogProgress()
 
 def clear_image_cache( url ):
@@ -84,50 +83,6 @@ def unescape(text):
                 pass
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
-    
-def download_cdart( url_cdart , album ):
-    xbmc.log( "[script.cdartmanager] - #    Downloading cdART... ", xbmc.LOGDEBUG )
-    xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
-    path = album["path"].replace("\\\\" , "\\")
-    destination = os.path.join( addon_work_folder , "cdart.png") # download to work folder first
-    download_success = False
-    pDialog.create( _(32047))
-    #Onscreen Dialog - "Downloading...."
-    conn = sqlite3.connect(addon_db)
-    c = conn.cursor()
-    try:
-        #this give the ability to use the progress bar by retrieving the downloading information
-        #and calculating the percentage
-        def _report_hook( count, blocksize, totalsize ):
-            percent = int( float( count * blocksize * 100 ) / totalsize )
-            strProgressBar = str( percent )
-            pDialog.update( percent, _(32035) )
-            #Onscreen Dialog - *DOWNLOADING CDART*
-            if ( pDialog.iscanceled() ):
-                pass  
-        if exists( path ):
-            fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
-            message = [_(32023), _(32024), "File: %s" % path , "Url: %s" % url_cdart]
-            success = file_copy( destination, os.path.join( path, "cdart.png" ) ) # copy it to album folder
-            #message = ["Download Sucessful!"]
-            # update database
-            c.execute('''UPDATE alblist SET cdart="TRUE" WHERE title="%s"''' % album["title"])
-            download_success = True
-        else:
-            xbmc.log( "[script.cdartmanager] - #  Path error", xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - #    file path: %s" % repr(destination), xbmc.LOGDEBUG )
-            message = [ _(32026),  _(32025) , "File: %s" % path , "Url: %s" % url_cdart]
-            #message = Download Problem, Check file paths - cdART Not Downloaded]           
-        if ( pDialog.iscanceled() ):
-            pDialog.close()            
-    except:
-        xbmc.log( "[script.cdartmanager] - #  General download error", xbmc.LOGDEBUG )
-        message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
-        #message = [Download Problem, Check file paths - cdART Not Downloaded]           
-        print_exc()
-    conn.commit()
-    c.close()
-    return message, download_success  # returns one of the messages built based on success or lack of
     
 def upload_missing_list():
     # Nothing here yet.

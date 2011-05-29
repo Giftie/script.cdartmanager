@@ -31,7 +31,7 @@
         <setting label="Extra Settings" type="lsep" />
         <setting type="sep" />
         <setting label="" type="lsep" />
-        <setting label="32106" type="bool" id="usingdharma" default="true" />
+        <setting label="32106" type="bool" id="resizeondownload" default="true" />
         <setting type="sep" />
     </category>
 </settings>

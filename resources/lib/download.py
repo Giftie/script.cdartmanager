@@ -1,6 +1,7 @@
 import xbmc, xbmcgui
 import urllib, sys, re, os
 from traceback import print_exc
+from PIL import Image
 try:
     from sqlite3 import dbapi2 as sqlite3
 except:
@@ -16,11 +17,12 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+resizeondownload = __addon__.getSetting("resizeondownload")
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-from fanarttv_scraper import get_distant_artists, get_recognized
-from database import get_local_artists_db, remote_cdart_list, get_local_albums_db
+from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list
+from database import get_local_artists_db, get_local_albums_db, artwork_search
 
 from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
@@ -33,14 +35,30 @@ from xbmcvfs import copy as file_copy
 #exists = os.path.exists
 #from shutil import copy as file_copy
 
-
 pDialog = xbmcgui.DialogProgress()
  
+def check_size( path ):
+    # first copy from source to work directory since Python does not support SMB://
+    destination = os.path.join( addon_work_folder, "temp", "cdart.png" )
+    source = os.path.join( path, "cdart.png" )
+    if exists( source ):
+        file_copy( source, destination )
+    else:
+        return True
+    artwork = Image.open( destination )
+    if artwork.size[0] < 1000 and artwork.size[1] < 1000:  # if image is smaller than 1000 x 1000
+        delete_file( source ) 
+        delete_file( destination )
+        return True
+    else:
+        delete_file( destination )
+        return False
+        
 def download_cdart( url_cdart, album, type ):
     xbmc.log( "[script.cdartmanager] - #    Downloading artwork... ", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
     path = album["path"].replace("\\\\" , "\\")
-    print type
+    print album
     pDialog.create( _(32047))
     #Onscreen Dialog - "Downloading...."
     if type == "cdart":
@@ -76,7 +94,9 @@ def download_cdart( url_cdart, album, type ):
             #message = ["Download Sucessful!"]
             # update database
             if type == "cdart":
-                c.execute('''UPDATE alblist SET cdart="TRUE" WHERE title="%s"''' % album["title"])
+                c.execute('''UPDATE alblist SET cdart="True" WHERE title="%s" and path="%s"''' % ( album["title"], album["path"]  ) )
+            elif type == "cover":
+                c.execute('''UPDATE alblist SET cover="True" WHERE title="%s" and path="%s"''' % ( album["title"], album["path"] ) )
             download_success = True
         else:
             xbmc.log( "[script.cdartmanager] - #  Path error", xbmc.LOGDEBUG )
@@ -94,10 +114,10 @@ def download_cdart( url_cdart, album, type ):
     c.close()
     return message, download_success  # returns one of the messages built based on success or lack of
 
-def cdart_search( cdart_url, id ):
+def cdart_search( cdart_url, id, disc ):
     cdart = {}
     for item in cdart_url:
-        if item["musicbrainz_albumid"] == id:
+        if item["musicbrainz_albumid"] == id and item["disc"] == disc:
             cdart = item
             print cdart
             break
@@ -130,6 +150,7 @@ def auto_download():
             local_album_list = get_local_albums_db( artist["name"] )
             remote_cdart_url = remote_cdart_list( artist )
             for album in local_album_list:
+                low_res = False
                 if ( pDialog.iscanceled() ):
                     break
                 if not remote_cdart_url:
@@ -140,22 +161,27 @@ def auto_download():
                 name = artist["name"]
                 title = album["title"]
                 xbmc.log( "[script.cdartmanager] - #     Album: %s" % repr(album["title"]), xbmc.LOGNOTICE )
-                if album["cdart"] == "FALSE":
+                if album["cdart"] and resizeondownload == "true":
+                    low_res = check_size( album["path"].replace( "\\\\", "\\" ) )
+                if not album["cdart"] or low_res:
                     musicbrainz_albumid = album["musicbrainz_albumid"]
                     if not musicbrainz_albumid:
                         continue
-                    cdart = cdart_search( remote_cdart_url, musicbrainz_albumid )
-                    if cdart["picture"]: 
-                        xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH FOUND", xbmc.LOGNOTICE )
-                        #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGNOTICE )
-                        message, d_success = download_cdart( cdart["picture"] , album, "cdart" )
-                        if d_success == 1:
-                            download_count += 1
-                            album["cdart"] = "TRUE"
-                        else:
-                            xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGNOTICE )
-                            xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGNOTICE )
-                            d_error = True
+                    cdart = artwork_search( remote_cdart_url, musicbrainz_albumid, album["disc"], "cdart" )
+                    if cdart:
+                        if cdart["picture"]: 
+                            xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH FOUND", xbmc.LOGNOTICE )
+                            #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGNOTICE )
+                            message, d_success = download_cdart( cdart["picture"] , album, "cdart" )
+                            if d_success == 1:
+                                download_count += 1
+                                album["cdart"] = True
+                            else:
+                                xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGNOTICE )
+                                xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGNOTICE )
+                                d_error = True
+                        else :
+                            xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGNOTICE )
                     else :
                         xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGNOTICE )
                 else:
