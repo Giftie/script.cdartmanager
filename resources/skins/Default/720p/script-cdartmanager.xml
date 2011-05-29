@@ -1142,9 +1142,9 @@
                     <posx>0</posx>
                     <posy>0</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1171,9 +1171,9 @@
                     <posx>0</posx>
                     <posy>40</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1200,9 +1200,9 @@
                     <posx>0</posx>
                     <posy>80</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1222,9 +1222,9 @@
                     <posx>0</posx>
                     <posy>120</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1244,9 +1244,9 @@
                     <posx>0</posx>
                     <posy>160</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1273,9 +1273,9 @@
                     <posx>0</posx>
                     <posy>200</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1296,9 +1296,9 @@
                     <posx>0</posx>
                     <posy>240</posy>
                     <height>40</height>
-                    <width>285</width>
+                    <width>270</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>265</textwidth>
+                    <textwidth>250</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
