@@ -60,7 +60,10 @@ def update_musicbrainzid( type, info ):
             conn = sqlite3.connect(addon_db)
             c = conn.cursor()
             c.execute('UPDATE alblist SET musicbrainz_artistid="%s" WHERE artist="%s"' % (artist_id, info["name"]) )
-            c.execute('UPDATE lalist SET musicbrainz_artistid="%s" WHERE name="%s"' % (artist_id, info["name"]) )
+            try:
+                c.execute('UPDATE lalist SET musicbrainz_artistid="%s" WHERE name="%s"' % (artist_id, info["name"]) )
+            except:
+                pass
             conn.commit
             c.close()
             return artist_id
@@ -68,7 +71,7 @@ def update_musicbrainzid( type, info ):
             album_id = get_musicbrainz_album( info["title"], info["artist"] )["id"] 
             conn = sqlite3.connect(addon_db)
             c = conn.cursor()
-            c.execute("""UPDATE alblist SET musicbrainz_albumid='%s' WHERE title='%s'""" % (artist_id, info["title"]) )
+            c.execute("""UPDATE alblist SET musicbrainz_albumid='%s' WHERE title='%s'""" % (album_id, info["title"]) )
             conn.commit
             c.close()
             return album_id

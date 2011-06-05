@@ -85,6 +85,7 @@ if ( __name__ == "__main__" ):
             c = conn_l.cursor()
             c.execute(query)
             version=c.fetchall()
+            c.close
             for item in version:
                 if item[0] == __dbversion__:
                     xbmc.log( "[script.cdartmanager] - Database matched", xbmc.LOGNOTICE )
@@ -97,7 +98,6 @@ if ( __name__ == "__main__" ):
                     xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
                     __addon__.openSettings()
                     break
-            c.close    
         except StandardError, e:
             traceback.print_exc()
             xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )

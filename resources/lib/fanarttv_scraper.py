@@ -34,10 +34,8 @@ def remote_cdart_list( artist_menu ):
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
-        print art
         if not len(art) < 2:
             album_artwork = art[2]["artwork"]
-            print album_artwork
             if album_artwork:
                 for artwork in album_artwork:
                     for cdart in artwork["cdart"]:
@@ -56,7 +54,7 @@ def remote_cdart_list( artist_menu ):
     except:
         print_exc()
     return cdart_url
-    
+
 def remote_fanart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGNOTICE )
     #If there is something in artist_menu["distant_id"] build cdart_url
@@ -64,7 +62,6 @@ def remote_fanart_list( artist_menu ):
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             backgrounds = art[0]["backgrounds"]
-            print backgrounds
             if backgrounds:
                 return backgrounds
             else:
@@ -72,7 +69,7 @@ def remote_fanart_list( artist_menu ):
     except:
         print_exc()
         return ""
-        
+
 def remote_clearart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGNOTICE )
     #If there is something in artist_menu["distant_id"] build cdart_url
@@ -80,7 +77,6 @@ def remote_clearart_list( artist_menu ):
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             clearart = art[ 1 ]["clearart"]
-            print clearart
             if clearart:
                 return clearart
             else:
@@ -132,7 +128,7 @@ def retrieve_fanarttv_xml( id ):
                     try:
                         cdart_match = re.search( '<cdart>(.*?)</cdart>' , album_sort[ 1 ] )
                         cover_match = re.search( '<cover>(.*?)</cover>' , album_sort[ 1 ] )
-                        cdart_multi_match = re.findall( '<cdart disc=(.*?)>(.*?)</cdart>' , album_sort[ 1 ] )
+                        cdart_multi_match = re.findall( '<cdart disc="(.*?)">(.*?)</cdart>' , album_sort[ 1 ] )
                         if cdart_match:
                             cdart = {}
                             cdart["disc"] = 1
@@ -174,7 +170,7 @@ def get_distant_artists():
         distant["id"] = ( item.group(1) )
         distant_artists.append(distant)
     return distant_artists
-    
+
 def get_recognized( distant, local ):
     xbmc.log( "[script.cdartmanager] - #  Retrieving Recognized Artists from fanart.tv", xbmc.LOGDEBUG )
     true = 0
@@ -210,7 +206,7 @@ def get_recognized( distant, local ):
         xbmc.log( "[script.cdartmanager] - #  No Matches found.  Compare Artist and Album names with xbmcstuff.com", xbmc.LOGDEBUG )
     pDialog.close()   
     return recognized, artist_list    
-    
+
 def match_library( local_artist_list ):
     available_artwork = []
     try:
