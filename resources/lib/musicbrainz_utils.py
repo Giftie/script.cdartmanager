@@ -16,7 +16,8 @@ except:
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter
+from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter, ReleaseGroupIncludes
+from musicbrainz2.model import Release
 
 def get_musicbrainz_album( album_title, artist ):
     album = {}
@@ -25,8 +26,11 @@ def get_musicbrainz_album( album_title, artist ):
     artist = artist.replace(" & "," ")
     album_title = album_title.replace(" & "," ")
     try:
-        inc = ReleaseGroupFilter( artistName=artist, title=album_title )
-        album_result = Query().getReleaseGroups( inc )
+        q = """'"%s" AND artist:"%s" NOT type:"Single"'""" % (album_title, artist)
+        print q
+        filter = ReleaseGroupFilter( query=q, limit=1)
+        #filter = ReleaseGroupFilter( artistName=artist, title=album_title, releaseTypes=Release.TYPE_ALBUM)
+        album_result = Query().getReleaseGroups( filter )
         if len( album_result ) == 0:
             xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGNOTICE )
             album["artist"] = ""

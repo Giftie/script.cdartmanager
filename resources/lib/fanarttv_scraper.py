@@ -47,13 +47,35 @@ def remote_cdart_list( artist_menu ):
                         album["disc"] = cdart["disc"]
                         album["picture"] = cdart["cdart"]
                         album["thumb_cdart"] = cdart["cdart"]
-                        album["cover"] = artwork["cover"]
-                        album["thumb_cover"] = artwork["cover"]
                         cdart_url.append(album)
                     #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
     except:
         print_exc()
     return cdart_url
+
+def remote_coverart_list( artist_menu ):
+    xbmc.log( "[script.cdartmanager] - #   Finding remote Cover ARTs", xbmc.LOGNOTICE )
+    coverart_url = []
+    #If there is something in artist_menu["distant_id"] build cdart_url
+    try:
+        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        if not len(art) < 2:
+            album_artwork = art[2]["artwork"]
+            if album_artwork:
+                for artwork in album_artwork:
+                    if artwork["cover"]:
+                        album = {}
+                        album["artistl_id"] = artist_menu["local_id"]
+                        album["artistd_id"] = artist_menu["distant_id"]
+                        album["local_name"] = album["artist"] = artist_menu["name"]
+                        album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
+                        album["cover"] = artwork["cover"]
+                        album["thumb_cover"] = artwork["cover"]
+                        coverart_url.append(album)
+                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
+    except:
+        print_exc()
+    return coverart_url
 
 def remote_fanart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGNOTICE )

@@ -43,23 +43,25 @@ def artwork_search( cdart_url, id, disc, type ):
     xbmc.log( "[script.cdartmanager] - #  Finding Artwork", xbmc.LOGNOTICE )
     art = {}
     for item in cdart_url:
-        if item["musicbrainz_albumid"] == id and item["disc"] == disc and type == "cdart":
+        if item["musicbrainz_albumid"] == id and type == "cover":
+            print item
             art = item
             break
-        elif item["musicbrainz_albumid"] == id and type == "cover":
+        elif item["musicbrainz_albumid"] == id and item["disc"] == disc and type == "cdart":
             art = item
             break
     return art
 
-def get_xbmc_database_info():
+def get_xbmc_database_info( background ):
     xbmc.log( "[script.cdartmanager] - #  Retrieving Album Info from XBMC's Music DB", xbmc.LOGDEBUG )
-    pDialog.create( _(32021), _(32105) )
+    if not background:
+        pDialog.create( _(32021), _(32105) )
     album_list, total = retrieve_album_list()
     album_detail_list = retrieve_album_details_full( album_list, total )
     pDialog.close()
     return album_detail_list 
 
-def retrieve_album_details_full( album_list, total ):
+def retrieve_album_details_full( album_list, total, background ):
     xbmc.log( "[script.cdartmanager] - # Retrieving Album Details", xbmc.LOGDEBUG )
     album_detail_list = []
     album_count = 0
@@ -70,7 +72,8 @@ def retrieve_album_details_full( album_list, total ):
                 break
             album_count += 1
             percent = int((album_count/float(total)) * 100)
-            pDialog.update( percent, _(20186), "Album: %s" % detail['title'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+            if not background:
+                pDialog.update( percent, _(20186), "Album: %s" % detail['title'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail['albumid']
             albumdetails = retrieve_album_details( album_id )
             for albums in albumdetails:
@@ -150,24 +153,25 @@ def retrieve_album_details_full( album_list, total ):
     except:
         xbmc.log( "[script.cdartmanager] - Error Occured", xbmc.LOGNOTICE )
         print_exc()
-        pDialog.close()
+        if not background:
+            pDialog.close()
     return album_detail_list
     
 def get_album_cdart( album_path ):
     xbmc.log( "[script.cdartmanager] - ## Retrieving cdART status", xbmc.LOGNOTICE )
     if exists( os.path.join( album_path , "cdart.png").replace("\\\\" , "\\") ):
-        return "TRUE"
+        return True
     else:
-        return "FALSE"
+        return False
         
 def get_album_coverart( album_path ):
-    xbmc.log( "[script.cdartmanager] - ## Retrieving cdART status", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - ## Retrieving cover art status", xbmc.LOGNOTICE )
     if exists( os.path.join( album_path , "folder.jpg").replace("\\\\" , "\\") ):
-        return "TRUE"
+        return True
     else:
-        return "FALSE"
+        return False
     
-def store_alblist( local_album_list ):
+def store_alblist( local_album_list, background ):
     xbmc.log( "[script.cdartmanager] - #  Storing alblist", xbmc.LOGDEBUG )
     album_count = 0
     cdart_existing = 0
@@ -176,7 +180,8 @@ def store_alblist( local_album_list ):
     percent = 0 
     try:
         for album in local_album_list:
-            pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
+            if not background:
+                pDialog.update( percent, _(20186), "" , "%s:%6s" % ( _(32100), album_count ) )
             album_count += 1
             if not album["musicbrainz_artistid"]:
                 try:
@@ -235,9 +240,10 @@ def recount_cdarts():
         if eval( item[1] ):
             cdart_existing += 1
     c.close()
+    print "Finished Recount cdarts"
     return cdart_existing
         
-def store_lalist( local_artist_list, count_artist_local ):
+def store_lalist( local_artist_list, count_artist_local, background ):
     xbmc.log( "[script.cdartmanager] - #  Storing lalist", xbmc.LOGNOTICE )
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
@@ -247,8 +253,9 @@ def store_lalist( local_artist_list, count_artist_local ):
             c.execute("insert into lalist(local_id, name, musicbrainz_artistid) values (?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"]))
             artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
-            if (pDialog.iscanceled()):
-                break
+            if not background:
+                if (pDialog.iscanceled()):
+                    break
         except:
             print_exe()
     conn.commit()
@@ -287,7 +294,7 @@ def store_counts( artist_count, album_count, cdart_existing ):
     c.close()
     xbmc.log( "[script.cdartmanager] - # Finished Storing Counts", xbmc.LOGNOTICE )
     
-def new_database_setup():
+def new_database_setup( background ):
     global local_artist
     artist_count = 0
     download_count = 0
@@ -300,13 +307,15 @@ def new_database_setup():
     album_artist = []
     xbmc.log( "[script.cdartmanager] - #  Setting Up Database", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    addon_work_path: %s" % addon_work_folder, xbmc.LOGNOTICE )
-    if not exists( os.path.join( addon_work_folder, "settings.xml") ):
-        xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
-        xbmc.log( "[script.cdartmanager] - #  Settings not set, aborting database creation", xbmc.LOGNOTICE )
-        return album_count, artist_count, cdart_existing
+    if not background:
+        if not exists( os.path.join( addon_work_folder, "settings.xml") ):
+            xbmcgui.Dialog().ok( _(32071), _(32072), _(32073) )
+            xbmc.log( "[script.cdartmanager] - #  Settings not set, aborting database creation", xbmc.LOGNOTICE )
+            return album_count, artist_count, cdart_existing
     local_album_list = get_xbmc_database_info()
     #xbmc.log( local_album_list, xbmc.LOGNOTICE )
-    pDialog.create( _(32021), _(20186) )
+    if not background:
+        pDialog.create( _(32021), _(20186) )
     #Onscreen Dialog - Creating Addon Database
     #                      Please Wait....
     xbmc.log( addon_db, xbmc.LOGNOTICE )
@@ -318,13 +327,14 @@ def new_database_setup():
     c.execute('''create table unqlist(title, disc, artist, path, cdart)''')  # create unique database
     conn.commit()
     c.close()
-    album_count, cdart_existing = store_alblist( local_album_list ) # store album details first
+    album_count, cdart_existing = store_alblist( local_album_list, background ) # store album details first
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
     percent = 0
     found = False
     for artist in album_artist:        # match album artist to local artist id
-        pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
+        if not background:
+            pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
         if (pDialog.iscanceled()):
             break
         #xbmc.log( artist, xbmc.LOGNOTICE )
@@ -349,18 +359,20 @@ def new_database_setup():
                 print_exc()
             
     #xbmc.log( local_album_artist_list, xbmc.LOGNOTICE )
-    count = store_lalist( local_album_artist_list, artist_count )         # then store in database
-    if (pDialog.iscanceled()):
-        pDialog.close()
-        ok=xbmcgui.Dialog().ok(_(32050), _(32051), _(32052), _(32053))
-        xbmc.log( ok, xbmc.LOGNOTICE )
+    count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
+    if not background:
+        if (pDialog.iscanceled()):
+            pDialog.close()
+            ok=xbmcgui.Dialog().ok(_(32050), _(32051), _(32052), _(32053))
+            xbmc.log( ok, xbmc.LOGNOTICE )
     store_counts( artist_count, album_count, cdart_existing )
     xbmc.log( "[script.cdartmanager] - # Finished Storing Database", xbmc.LOGNOTICE )
-    pDialog.close()
+    if not background:
+        pDialog.close()
     return album_count, artist_count, cdart_existing
     
 #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
-def get_local_albums_db( artist_name ):
+def get_local_albums_db( artist_name, background ):
     xbmc.log( "[script.cdartmanager] - #  Retrieving Local Albums Database", xbmc.LOGNOTICE )
     local_album_list = []
     query = ""
@@ -368,7 +380,8 @@ def get_local_albums_db( artist_name ):
     c = conn_l.cursor()
     try:
         if artist_name == "all artists":
-            pDialog.create( _(32102), _(20186) )
+            if not background:
+                pDialog.create( _(32102), _(20186) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
         else:
             query='SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
@@ -394,7 +407,8 @@ def get_local_albums_db( artist_name ):
         c.close
     #xbmc.log( local_album_list, xbmc.LOGNOTICE )
     if artist_name == "all artists":
-        pDialog.close()
+        if not background:
+            pDialog.close()
     xbmc.log( "[script.cdartmanager] - #  Finished Retrieving Local Albums Database", xbmc.LOGNOTICE )
     return local_album_list
         
@@ -440,9 +454,10 @@ def new_local_count():
             local_artist = item[0]
             album_count = item[1]
             cdart_existing = item[2]
-        cdart_existing = recount_cdarts()
-        pDialog.close()
         c.close
+        cdart_existing = recount_cdarts()
+        print "Finished New Local Count"
+        pDialog.close()
         return album_count, local_artist, cdart_existing
     except UnboundLocalError:
         xbmc.log( "[script.cdartmanager] - #  Counts Not Available in Local DB, Rebuilding DB", xbmc.LOGNOTICE )
@@ -451,6 +466,7 @@ def new_local_count():
     
 #user call from Advanced menu to refresh the addon's database
 def refresh_db():
+    background = False
     xbmc.log( "[script.cdartmanager] - #  Refreshing Local Database", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
     local_album_count = 0
@@ -474,12 +490,12 @@ def refresh_db():
                 c.execute('''DROP table unqlist''')  # create unique database
                 conn.commit()
                 c.close()
-            local_album_count, local_artist_count, local_cdart_count = new_database_setup()
+            local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
         else:
             pass            
     else :
         #If file does not exist and some how the program got here, create new database
-        local_album_count, local_artist_count, local_cdart_count = new_database_setup()
+        local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
     #update counts
     xbmc.log( "[script.cdartmanager] - # Finished Refeshing Database", xbmc.LOGNOTICE )
     return local_album_count, local_artist_count, local_cdart_count

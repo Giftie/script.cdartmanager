@@ -28,12 +28,40 @@
                 <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=Control.HasFocus(122)>conditional</animation> -->
                 <description>page header tab icon</description>
                 <posx>20</posx>
-                <posy>0</posy>
+                <posy>-70</posy>
                 <width>260</width>
                 <height>260</height>
                 <aspectratio scalediffuse="false">keep</aspectratio>
                 <texture>cdart-icon.png</texture>
                 <visible>!Control.HasFocus(122) + !Control.HasFocus(140) + !ControlGroup(9011).HasFocus</visible>
+            </control>
+            <control type="group" id="9024">
+                <visible>SubString(Window(10001).Property(artwork),fanart)</visible>
+                <control type="image" id="300">  <!-- Blank -->
+                    <description>Blank Image</description>
+                    <posx>20</posx>
+                    <posy>0</posy>
+                    <width>260</width>
+                    <height>260</height>
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    <visible>SubString(Window(10001).Property(artwork),fanart)</visible>
+                </control>
+                <control type="label" id="204">
+                    <description>Artist Label</description>
+                    <posx>20</posx>
+                    <posy>200</posy>
+                    <width>260</width>
+                    <height>40</height>
+                    <font>font13</font>
+                    <wrapmultiline>true</wrapmultiline>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <visible>true</visible>
+                    <visible>SubString(Window(10001).Property(artwork),fanart)</visible>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>Artist</label>
+                </control>
             </control>
             <control type="group" id="9020">
                 <visible>SubString(Window(10001).Property(artwork),cover)</visible>
@@ -44,7 +72,7 @@
                     <width>260</width>
                     <height>260</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
-                    <visible>SubString(Window(10001).Property(artwork),cover)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cover) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                 </control>
                 <control type="label" id="200">
                     <description>Local Cover</description>
@@ -55,7 +83,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),cover)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cover) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Local Cover Art</label>
@@ -69,7 +97,7 @@
                     <width>260</width>
                     <height>260</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
-                    <visible>SubString(Window(10001).Property(artwork),cover)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cover) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                 </control>
                 <control type="label" id="201">
                     <description>distant Cover Art</description>
@@ -80,7 +108,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),cover)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cover) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Distant Cover Art</label>
@@ -95,7 +123,7 @@
                     <width>260</width>
                     <height>260</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
-                    <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                 </control>
                 <control type="label" id="202">
                     <description>Distant cdART</description>
@@ -106,7 +134,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Distant cdART</label>
@@ -121,7 +149,7 @@
                     <width>260</width>
                     <height>260</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
-                    <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                 </control>
                 <control type="label" id="203">
                     <description>Local cdART</description>
@@ -132,12 +160,13 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),cdart)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Local cdART</label>
                 </control>
             </control>
+            
             <control type="group" id="9003"> <!-- Artist List -->
                 <posx>0</posx>
                 <posy>0</posy>            
@@ -168,7 +197,7 @@
                     <width>680</width>
                     <height>670</height>
                     <!--<aspectratio scalediffuse="false">keep</aspectratio>-->
-                    <texture>speakergrill.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="list" id="120">
@@ -292,7 +321,7 @@
                     <!--
                     <aspectratio scalediffuse="false">keep</aspectratio>
                     -->
-                    <texture>speakergrill.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="list" id="122">
@@ -431,7 +460,7 @@
                     <!--
                     <aspectratio scalediffuse="false">keep</aspectratio>
                     -->
-                    <texture>speakergrill.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="fixedlist" id="160">
@@ -573,7 +602,7 @@
                     <posy>0</posy>
                     <width>680</width>
                     <height>670</height>
-                    <texture>speakergrill.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="list" id="140">
@@ -1096,6 +1125,8 @@
                     <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
                     <label>$ADDON[script.cdartmanager 32098]</label>
                     <!--
                     <label>$ADDON[script.cdartmanager 32005]</label>
@@ -1264,7 +1295,7 @@
                 <control type="image"> <!-- Box image -->
                     <width>250</width>
                     <height>100</height>
-                    <texture border="40">default-menu.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="button" id="150"> <!-- Search Artists -->
@@ -1333,7 +1364,7 @@
                     <description>Menu panel</description>
                     <width>300</width>
                     <height>370</height>
-                    <texture border="40">default-menu.png</texture>
+                    <texture>default-menu.png</texture>
                 </control>
 
                 <control type="radiobutton" id="100"> <!-- cdARTs -->
@@ -1435,7 +1466,7 @@
                     <onleft>9000</onleft>
                     <onright>9000</onright>
                     <onup>102</onup>
-                    <ondown>103</ondown>				
+                    <ondown>103</ondown>
                 </control>
 
                 <control type="radiobutton" id="103"> <!-- Advanced -->

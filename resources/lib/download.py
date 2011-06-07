@@ -39,7 +39,7 @@ pDialog = xbmcgui.DialogProgress()
  
 def check_size( path, type ):
     # first copy from source to work directory since Python does not support SMB://
-    file_name = get_filename( type )
+    file_name = get_filename( type, path )
     destination = os.path.join( addon_work_folder, "temp", file_name )
     source = os.path.join( path, file_name )
     if exists( source ):
@@ -48,20 +48,19 @@ def check_size( path, type ):
         return True
     artwork = Image.open( destination )
     if artwork.size[0] < 1000 and artwork.size[1] < 1000:  # if image is smaller than 1000 x 1000
-        delete_file( source ) 
         delete_file( destination )
         return True
     else:
         delete_file( destination )
         return False
 
-def get_filename( type ):
+def get_filename( type, url ):
     if type == "cdart":
         file_name = "cdart.png"
     elif type == "cover":
         file_name = "folder.jpg"
     elif type == "fanart":
-        file_name = os.path.basename( url_cdart )
+        file_name = os.path.basename( url )
     elif type == "clearart":
         file_name = "clearart.png"
     else:
@@ -70,7 +69,7 @@ def get_filename( type ):
     
 def download_cdart( url_cdart, album, type ):
     xbmc.log( "[script.cdartmanager] - #    Downloading artwork... ", xbmc.LOGDEBUG )
-    file_name = get_filename( type )
+    file_name = get_filename( type, url_cdart )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - #    Unknown Type ", xbmc.LOGDEBUG )
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
@@ -162,7 +161,7 @@ def auto_download( type ):
             artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
             xbmc.log( "[script.cdartmanager] - #    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"]), xbmc.LOGNOTICE )
-            local_album_list = get_local_albums_db( artist["name"] )
+            local_album_list = get_local_albums_db( artist["name"], False )
             remote_cdart_url = remote_cdart_list( artist )
             for album in local_album_list:
                 low_res = False
