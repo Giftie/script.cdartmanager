@@ -51,73 +51,88 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - Addon Work Folder: %s" % addon_work_folder, xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - Addon Database: %s" % addon_db, xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
-    query = "SELECT version FROM counts"    
-    xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
-    if not exists(settings_file):
-        xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
-        __addon__.openSettings()
-        first_run = True
-    else:
-        xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
-    if not exists(addon_db):
-        xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
-        first_run = True
-    else:
-        xbmc.log( "[script.cdartmanager] - Addon Db Found, Checking Database Version", xbmc.LOGNOTICE )
-    if exists(addon_db_crash) and not first_run:
-        xbmc.log( "[script.cdartmanager] - Detected Database Crash, Trying to delete", xbmc.LOGNOTICE )
-        try:
-            delete_file(addon_db)
-            delete_file(addon_db_crash)
-            xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
+    try:
+        if sys.argv[ 1 ]:
+            if sys.argv[ 1 ] == "database":
+                from database import refresh_db
+                local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
+            elif sys.argv[ 1 ] == "autocdart":
+                pass
+            elif sys.argv[ 1 ] == "autocover":
+                pass
+            else:
+                xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv[ 1 ]: %s" % sys.argv[ 1 ], xbmc.LOGNOTICE )
+    except IndexError:
+        xbmc.log( "[script.cdartmanager] - Addon Work Folder: %s" % addon_work_folder, xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Addon Database: %s" % addon_db, xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
+        query = "SELECT version FROM counts"    
+        xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
+        if not exists(settings_file):
+            xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
             __addon__.openSettings()
-        except StandardError, e:
-            xbmc.log( "[script.cdartmanager] - Error Occurred: %s " % e.__class__.__name__, xbmc.LOGNOTICE )
-            traceback.print_exc()
-            script_fail = True
-    elif not first_run:
-        xbmc.log( "[script.cdartmanager] - Looking for database version: %s" % __dbversion__, xbmc.LOGNOTICE )
-        try:
-            conn_l = sqlite3.connect(addon_db)
-            c = conn_l.cursor()
-            c.execute(query)
-            version=c.fetchall()
-            c.close
-            for item in version:
-                if item[0] == __dbversion__:
-                    xbmc.log( "[script.cdartmanager] - Database matched", xbmc.LOGNOTICE )
-                    break
-                else:
-                    xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
-                    c.close
+            first_run = True
+        else:
+            xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
+        if not exists(addon_db):
+            xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
+            first_run = True
+        else:
+            xbmc.log( "[script.cdartmanager] - Addon Db Found, Checking Database Version", xbmc.LOGNOTICE )
+        if exists(addon_db_crash) and not first_run:
+            xbmc.log( "[script.cdartmanager] - Detected Database Crash, Trying to delete", xbmc.LOGNOTICE )
+            try:
+                delete_file(addon_db)
+                delete_file(addon_db_crash)
+                xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
+                __addon__.openSettings()
+            except StandardError, e:
+                xbmc.log( "[script.cdartmanager] - Error Occurred: %s " % e.__class__.__name__, xbmc.LOGNOTICE )
+                traceback.print_exc()
+                script_fail = True
+        elif not first_run:
+            xbmc.log( "[script.cdartmanager] - Looking for database version: %s" % __dbversion__, xbmc.LOGNOTICE )
+            try:
+                conn_l = sqlite3.connect(addon_db)
+                c = conn_l.cursor()
+                c.execute(query)
+                version=c.fetchall()
+                c.close
+                for item in version:
+                    if item[0] == __dbversion__:
+                        xbmc.log( "[script.cdartmanager] - Database matched", xbmc.LOGNOTICE )
+                        break
+                    else:
+                        xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
+                        c.close
+                        delete_file(addon_db)
+                        delete_file(settings_file)
+                        xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
+                        __addon__.openSettings()
+                        break
+            except StandardError, e:
+                traceback.print_exc()
+                xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
+                try:
+                    xbmc.log( "[script.cdartmanager] - Trying To Delete Database" , xbmc.LOGNOTICE )
                     delete_file(addon_db)
                     delete_file(settings_file)
                     xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
                     __addon__.openSettings()
-                    break
-        except StandardError, e:
-            traceback.print_exc()
-            xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
-            try:
-                xbmc.log( "[script.cdartmanager] - Trying To Delete Database" , xbmc.LOGNOTICE )
-                delete_file(addon_db)
-                delete_file(settings_file)
-                xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
-                __addon__.openSettings()
-            except StandardError, e:
-                traceback.print_exc()
-                xbmc.log( "[script.cdartmanager] - # unable to remove folder", xbmc.LOGNOTICE )
-                xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
-                script_fail = True
-    path = __addon__.getAddonInfo('path')   
-    if not script_fail:
-        import gui
-        ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
-        ui.doModal()
-        del ui
-    else:
-        xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
-        xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", 500, image) )
+                except StandardError, e:
+                    traceback.print_exc()
+                    xbmc.log( "[script.cdartmanager] - # unable to remove folder", xbmc.LOGNOTICE )
+                    xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
+                    script_fail = True
+        path = __addon__.getAddonInfo('path')   
+        if not script_fail:
+            import gui
+            ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
+            ui.doModal()
+            del ui
+        else:
+            xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
+            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", 500, image) )
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
+        raise

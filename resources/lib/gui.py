@@ -55,7 +55,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
 from convert import set_entity_or_charref
 from folder import dirEntries
-from fanarttv_scraper import match_library, get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearart_list, remote_coverart_list
+from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list
 from utils import get_html_source, clear_image_cache
 from download import download_cdart, auto_download
 from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search
@@ -376,6 +376,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     #xbmc.log( album, xbmc.LOGNOTICE )
                     #check to see if there is a thumb
                     if self.menu_mode == 1:
+                        print album["disc"]
                         cdart = artwork_search( cdart_url, musicbrainz_albumid, album["disc"], "cdart" )
                         if cdart:
                             if cdart["picture"]:
@@ -557,6 +558,30 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     self.getControl( 160 ).selectItem( 0 )
             else:
                 xbmc.log( "[script.cdartmanager - No Fanart for this artist", xbmc.LOGNOTICE )
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
+                #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
+                return
+        except:
+            print_exc()
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        
+    def populate_clearlogos( self, artist_menu ):
+        xbmc.log( "[script.cdartmanager] - #  Populating ClearLOGO List", xbmc.LOGNOTICE )
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        self.getControl( 167 ).reset()
+        try:
+            clearlogo = remote_clearlogo_list( artist_menu )
+            if clearlogo:
+                for artwork in clearlogo:
+                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork )
+                    self.getControl( 167 ).addItem( listitem )
+                    listitem.setLabel( os.path.basename( artwork ) )
+                    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                    self.setFocus( self.getControl( 167 ) )
+                    self.getControl( 167 ).selectItem( 0 )
+            else:
+                xbmc.log( "[script.cdartmanager - No ClearLOGO for this artist", xbmc.LOGNOTICE )
                 xbmc.executebuiltin( "Dialog.Close(busydialog)" )
                 xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
                 #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
@@ -904,7 +929,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("\n")
             for album in albums:
                 count += 1
-                if album["cdart"] == "FALSE":
+                if not album["cdart"]:
                     artist = repr(album["artist"]) 
                     title = repr(album["title"])
                     line = artist + " * " + title + "\n"
@@ -916,7 +941,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("\n")
             for album in albums:
                 count += 1
-                if album["cdart"] == "FALSE":
+                if not album["cdart"]:
                     artist = repr(album["artist"]) 
                     title = repr(album["title"])
                     line = artist + " * " + title + "\n"
@@ -1047,6 +1072,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #xbmc.log( "[script.cdartmanager] - Control ID: %s " % controlId, xbmc.LOGNOTICE )
         if controlId == 105 : #cdARTs Search Artists 
             self.menu_mode = 1
+            self.artwork_type = "cdart"
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
@@ -1059,6 +1085,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.populate_artist_list( self.recognized_artists )
         if controlId == 106 : #cdARTs Automatic Download
             self.menu_mode = 2
+            self.artwork_type = "cdart"
             download_count = auto_download( "cdart" )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
@@ -1086,9 +1113,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmcgui.Window(10001).setProperty( "artwork", "cover" )
                 self.populate_coverarts( self.artist_menu, self.remote_cdart_url )
             elif self.menu_mode == 6:
-                self.getControl( 204 ).setLabel( "Artist:[CR]%s" % self.artist_menu["name"] )
+                try:
+                    artist_name = self.artist_menu["name"].encode("utf-8")
+                    self.getControl( 204 ).setLabel( _(32038) + "[CR]%s" % artist_name )
+                except:
+                    artist_name = self.artist_menu["name"].decode("utf-8")
+                    self.getControl( 204 ).setLabel( _(32038) + "[CR]%s" % artist_name )
                 xbmcgui.Window(10001).setProperty( "artwork", "fanart" )
                 self.populate_fanarts( self.artist_menu )
+            elif self.menu_mode == 7:
+                self.getControl( 204 ).setLabel( _(32038) + "[CR]%s" % self.artist_menu["name"] )
+                xbmcgui.Window(10001).setProperty( "artwork", "clearlogo" )
+                self.populate_clearlogos( self.artist_menu )
         if controlId == 122 : #Retrieving information from Album List
             #xbmc.log( "[script.cdartmanager] - #  Setting up Album List", xbmc.LOGNOTICE )
             self.getControl( 140 ).reset()
@@ -1136,7 +1172,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 xbmcgui.Dialog().ok( "There are no unique local cdARTs")
         if controlId == 131 : #Refresh Local database selected from Advanced Menu
-            refresh_db()
+            refresh_db( False )
             pDialog.close()
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
@@ -1218,6 +1254,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.close()
         if controlId == 150 : #Cover Art Search Artists 
             self.menu_mode = 3
+            self.artwork_type = "cover"
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
@@ -1230,11 +1267,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.populate_artist_list( self.recognized_artists )
         if controlId == 151 : #Cover Art Automatic Download
             self.menu_mode = 4
+            self.artwork_type = "cover"
             download_count = auto_download( "cover" )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-        if controlId == 102 : #Fan Art Search Artists 
+        if controlId == 152 or controlId == 165: # Clear Logo Search Artists
+            self.menu_mode = 7
+        if controlId == 102 : # Fan Art Search Artists 
             self.menu_mode = 6
+        if controlId == 165 or controlId == 102:
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
@@ -1247,14 +1288,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.populate_artist_list( self.recognized_artists )
         if controlId == 160:
             artist = {}
-            url = ( self.getControl( 160 ).getSelectedItem().getLabel2() ).split("&&&&")[ 1 ]
-            artist["artist"] = ( self.getControl( 160 ).getSelectedItem().getLabel2() ).split("&&&&")[ 0 ]
-            artist["path"] = __addon__.getSetting("fanart_path")
-            if url:
-                download_cdart( url, artist, "fanart" )
-            else:
-                xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
-                
+            if self.menu_mode == 6:
+                url = ( self.getControl( 160 ).getSelectedItem().getLabel2() ).split("&&&&")[ 1 ]
+                artist["artist"] = ( self.getControl( 160 ).getSelectedItem().getLabel2() ).split("&&&&")[ 0 ]
+                artist["path"] = __addon__.getSetting("fanart_path")
+                if url:
+                    download_cdart( url, artist, "fanart" )
+                else:
+                    xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
+
     def onFocus( self, controlId ):
         if not ( controlId == 122 or controlId == 140 or controlId == 160 ):
             xbmcgui.Window(10001).clearProperty( "artwork" )

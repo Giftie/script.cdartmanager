@@ -10,7 +10,7 @@
   <string id="32006">Fan Arts</string>
   <string id="32007">Local Artists: %s</string>
   <string id="32008">Local cdARTs: %s</string>
-  <string id="32009">ClearART</string>
+  <string id="32009">ClearLOGOs</string>
   <string id="32010">Local Albums: %s</string>
   <string id="32011">Advanced</string>
   <string id="32012">Refresh Addon Database</string>
@@ -101,7 +101,7 @@
   <string id="32096">Duplicates Found</string>
   <string id="32097">    Resize Unique cdARTs?</string>
   <string id="32098">Local cdART List</string>
-  <string id="32099"></string>
+  <string id="32099">Build Database</string>
   <string id="32100">Local Album Count</string>
   <string id="32101">Sorting Album Artists</string>
   <string id="32102">Retrieving Local Database</string>

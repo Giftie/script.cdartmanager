@@ -32,7 +32,7 @@ def get_musicbrainz_album( album_title, artist ):
         #filter = ReleaseGroupFilter( artistName=artist, title=album_title, releaseTypes=Release.TYPE_ALBUM)
         album_result = Query().getReleaseGroups( filter )
         if len( album_result ) == 0:
-            xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGNOTICE )
+            xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
             album["artist"] = ""
             album["artist_id"] = ""
             album["id"] = ""
@@ -57,7 +57,7 @@ def get_musicbrainz_album( album_title, artist ):
     return album
 
 def update_musicbrainzid( type, info ):
-    xbmc.log( "[script.cdartmanager] - Updating MusicBrainz ID", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Updating MusicBrainz ID", xbmc.LOGDEBUG )
     try:
         if type == "artist":  # available data info["local_id"], info["name"], info["distant_id"]
             name, artist_id, sortname = get_musicbrainz_artist_id( info["name"] )

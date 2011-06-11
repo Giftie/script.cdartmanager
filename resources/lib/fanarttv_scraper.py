@@ -29,7 +29,7 @@ lookup_id = False
 pDialog = xbmcgui.DialogProgress()
 
 def remote_cdart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote cdARTs", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - #   Finding remote cdARTs", xbmc.LOGDEBUG )
     cdart_url = []
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
@@ -48,13 +48,13 @@ def remote_cdart_list( artist_menu ):
                         album["picture"] = cdart["cdart"]
                         album["thumb_cdart"] = cdart["cdart"]
                         cdart_url.append(album)
-                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
+                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGDEBUG )
     except:
         print_exc()
     return cdart_url
 
 def remote_coverart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote Cover ARTs", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - #   Finding remote Cover ARTs", xbmc.LOGDEBUG )
     coverart_url = []
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
@@ -72,13 +72,13 @@ def remote_coverart_list( artist_menu ):
                         album["cover"] = artwork["cover"]
                         album["thumb_cover"] = artwork["cover"]
                         coverart_url.append(album)
-                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGNOTICE )
+                    #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGDEBUG )
     except:
         print_exc()
     return coverart_url
 
 def remote_fanart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGDEBUG )
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
@@ -92,15 +92,15 @@ def remote_fanart_list( artist_menu ):
         print_exc()
         return ""
 
-def remote_clearart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGNOTICE )
+def remote_clearlogo_list( artist_menu ):
+    xbmc.log( "[script.cdartmanager] - #   Finding remote clearlogo", xbmc.LOGDEBUG )
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
-            clearart = art[ 1 ]["clearart"]
-            if clearart:
-                return clearart
+            clearlogo = art[ 1 ]["clearlogo"]
+            if clearlogo:
+                return clearlogo
             else:
                 return ""
     except:
@@ -116,7 +116,7 @@ def retrieve_fanarttv_xml( id ):
     artist_artwork = []
     blank = {}
     back = {}
-    clearart = {}
+    clearlogo = {}
     album_art = {}
     try:
         if match:
@@ -130,14 +130,16 @@ def retrieve_fanarttv_xml( id ):
                 xbmc.log( "[script.cdartmanager] - No FanART found", xbmc.LOGDEBUG )
                 back["backgrounds"] = blank
                 artist_artwork.append( back )
-            clear_art = re.search( '<clearart>(.*?)</clearart>', htmlsource )
-            if clear_art:
-                clearart["clearart"] = clear_art[ 1 ]
-                artist_artwork.append( clearart )
+            clearlogos = re.search( '<clearlogos>(.*?)</clearlogos>', htmlsource )
+            if clearlogos:
+                xbmc.log( "[script.cdartmanager] - Found ClearLOGOs", xbmc.LOGDEBUG )
+                _clearlogos = re.findall('<clearlogo>(.*?)</clearlogo>' , htmlsource )
+                clearlogo["clearlogo"] = _clearlogos
+                artist_artwork.append( clearlogo )
             else:
-                clearart["clearart"] = ""
-                artist_artwork.append( clearart )
-                xbmc.log( "[script.cdartmanager] - No Artist ClearART found", xbmc.LOGDEBUG )
+                clearlogo["clearlogo"] = ""
+                artist_artwork.append( clearlogo )
+                xbmc.log( "[script.cdartmanager] - No Artist ClearLOGO found", xbmc.LOGDEBUG )
             albums = re.search( "<albums>(.*?)</albums>", htmlsource )
             if albums:
                 album = re.findall( '<album id="(.*?)">(.*?)</album>', albums.group( 1 ) )
