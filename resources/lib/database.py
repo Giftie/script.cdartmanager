@@ -109,7 +109,7 @@ def retrieve_album_details_full( album_list, total, background ):
                             album_artist["cdart"] = exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
                             album_artist["cover"] = exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
                             previous_path = path
-                            path_match = re.search( "(?:[\/]|[\s])(?:disc|part|cd|pt)(?:[\s]|)([0-9]{0,3})" , path, re.I)
+                            path_match = re.search( "(?:[\/]|[\s]|[\\])(?:disc|part|cd|pt)(?:[\s]|)([0-9]{0,3})" , path, re.I)
                             title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
                             if title_match:
                                 print "Title Check - Title Matched"
@@ -147,9 +147,10 @@ def retrieve_album_details_full( album_list, total, background ):
                                 album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             try:
                                 album_artist["title"] = ( album_artist["title"].encode("utf-8") )
+                                musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
                             except:
-                                album_artist["title"] = ( album_artist["title"].decode("utf-8") )
-                            musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
+                                #album_artist["title"] = ( album_artist["title"].decode("utf-8") )
+                                musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
                             album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                             album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
                             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album_artist["title"]), xbmc.LOGDEBUG )

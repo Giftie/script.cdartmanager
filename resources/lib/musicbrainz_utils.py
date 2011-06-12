@@ -27,7 +27,6 @@ def get_musicbrainz_album( album_title, artist ):
     album_title = album_title.replace(" & "," ")
     try:
         q = """'"%s" AND artist:"%s" NOT type:"Single"'""" % (album_title, artist)
-        print q
         filter = ReleaseGroupFilter( query=q, limit=1)
         #filter = ReleaseGroupFilter( artistName=artist, title=album_title, releaseTypes=Release.TYPE_ALBUM)
         album_result = Query().getReleaseGroups( filter )

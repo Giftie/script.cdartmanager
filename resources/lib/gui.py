@@ -378,7 +378,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     cdart = artwork_search( cdart_url, musicbrainz_albumid, album["disc"], "cdart" )
                     if cdart:
                         if cdart["picture"]:
-                            label1 = album["title"]
+                            if album["disc"] > 1:
+                                label1 = "%s - %s %s" % ( album["title"], _( 32016 ), album["disc"] )
+                            else:
+                                label1 = album["title"]
                             url = cdart["picture"]
                             #check to see if cdart already exists
                             # set the matched colour local and distant colour
@@ -425,7 +428,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         if album["cdart"]:
                             cdart_img = os.path.join(album["path"] , "cdart.png")
                             label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
-                            label1 = album["title"]
+                            if album["disc"] > 1:
+                                label1 = "%s - %s %s" % ( album["title"], _( 32016 ), album["disc"] )
+                            else:
+                                label1 = album["title"]
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                             self.getControl( 122 ).addItem( listitem )
                             listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
