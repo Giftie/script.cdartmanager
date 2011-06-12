@@ -44,11 +44,11 @@ def artwork_search( cdart_url, id, disc, type ):
     art = {}
     for item in cdart_url:
         if item["musicbrainz_albumid"] == id and type == "cover":
-            print item
+            print "coverart found"
             art = item
             break
         elif item["musicbrainz_albumid"] == id and item["disc"] == disc and type == "cdart":
-            print item
+            print "cdART found"
             art = item
             break
     return art

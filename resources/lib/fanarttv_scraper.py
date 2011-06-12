@@ -177,7 +177,8 @@ def retrieve_fanarttv_xml( id ):
                 artist_artwork.append(album_art)
             else:
                 xbmc.log( "[script.cdartmanager] - No artwork found for artist_id: %s" % id, xbmc.LOGDEBUG )
-                artist_artwork.append( blank )
+                album_art["artwork"] = blank
+                artist_artwork.append( album_art )
     except:
         print_exc()
     return artist_artwork
