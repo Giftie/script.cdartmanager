@@ -16,6 +16,7 @@ __credits2__      = sys.modules[ "__main__" ].__credits2__
 __version__       = sys.modules[ "__main__" ].__version__
 __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
+addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 
 
@@ -109,7 +110,7 @@ def retrieve_album_details_full( album_list, total, background ):
                             album_artist["cdart"] = exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
                             album_artist["cover"] = exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
                             previous_path = path
-                            path_match = re.search( "(?:[\/]|[\s]|[\\])(?:disc|part|cd|pt)(?:[\s]|)([0-9]{0,3})" , path, re.I)
+                            path_match = re.search( "(?:[\/]|[\s]|[\\])(?:disc|part|cd|pt)(?:[\s]|)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
                             title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
                             if title_match:
                                 print "Title Check - Title Matched"
@@ -146,10 +147,12 @@ def retrieve_album_details_full( album_list, total, background ):
                                     album_artist["disc"] = 1
                                 album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             try:
-                                album_artist["title"] = ( album_artist["title"].encode("utf-8") )
+                                a_title = album_artist["title"].encode("utf-8")
+                                album_artist["title"] = a_title
                                 musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
                             except:
-                                #album_artist["title"] = ( album_artist["title"].decode("utf-8") )
+                                print_exc()
+                                album_artist["title"] = ( album_artist["title"].decode("utf-8") )
                                 musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
                             album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                             album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
@@ -486,8 +489,14 @@ def refresh_db( background ):
             db_delete = xbmcgui.Dialog().yesno( _(32042) , _(32015) )
         else:
             db_delete = True
-        if db_delete :
+        if db_delete:
             xbmc.log( "[script.cdartmanager] - #    Deleting Local Database", xbmc.LOGDEBUG )
+            try:
+                delete_file(addon_db_backup)
+                file_copy(addon_db,addon_db_backup)
+                xbmc.log( "[script.cdartmanager] - #    Backing up old Local Database", xbmc.LOGDEBUG )
+            except:
+                file_copy(addon_db,addon_db_backup)
             try:
                 delete_file(addon_db)
             except:

@@ -11,8 +11,7 @@ __dbversionold__  = "1.1.8"
 
 import sys
 import os, traceback
-import xbmcaddon
-import xbmc
+import xbmcaddon, xbmc, xbmcgui
 
 try:
     from sqlite3 import dbapi2 as sqlite3
@@ -34,10 +33,13 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
+addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak")
 addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
 settings_file = os.path.join(addon_work_folder, "settings.xml")
 script_fail = False
 first_run = False
+rebuild = False
+soft_exit = False
 image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
 if ( __name__ == "__main__" ):
@@ -104,11 +106,8 @@ if ( __name__ == "__main__" ):
                         break
                     else:
                         xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
-                        c.close
-                        delete_file(addon_db)
-                        delete_file(settings_file)
-                        xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
-                        __addon__.openSettings()
+                        rebuild = xbmcgui.Dialog().yesno( __language__(32108) , __language__(32109) )
+                        soft_exit = True
                         break
             except StandardError, e:
                 traceback.print_exc()
@@ -126,13 +125,17 @@ if ( __name__ == "__main__" ):
                     script_fail = True
         path = __addon__.getAddonInfo('path')   
         if not script_fail:
-            import gui
-            ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
-            ui.doModal()
-            del ui
+            if rebuild:
+                from database import refresh_db
+                local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
+            elif not rebuild and not soft_exit:
+                import gui
+                ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
+                ui.doModal()
+                del ui
         else:
             xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
-            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", 500, image) )
+            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )
     except:
         print "Unexpected error:", sys.exc_info()[0]
         raise

@@ -61,14 +61,15 @@ def get_filename( type, url ):
         file_name = "folder.jpg"
     elif type == "fanart":
         file_name = os.path.basename( url )
-    elif type == "clearart":
-        file_name = "clearart.png"
+    elif type == "clearlogo":
+        file_name = "logo.png"
     else:
         file_name = "unknown"
     return file_name
-    
+
 def download_cdart( url_cdart, album, type ):
     xbmc.log( "[script.cdartmanager] - #    Downloading artwork... ", xbmc.LOGDEBUG )
+    download_success = False 
     file_name = get_filename( type, url_cdart )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - #    Unknown Type ", xbmc.LOGDEBUG )
@@ -80,11 +81,15 @@ def download_cdart( url_cdart, album, type ):
         path = os.path.join( album["path"], album["artist"] ).replace("\\\\", "\\")
         if not exists( path ):
             os.mkdir( path ) # change this once xbmcvfs.mkdir() exists
+    elif type == "clearlogo":
+        path = album["path"]
+        if not exists( path ):
+            message = [ _(32026),  _(32025) , "File: %s" % path , "Url: %s" % url_cdart]
+            return message, download_success
     xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( path ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      Filename: %s" % repr( file_name ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      url: %s" % repr( url_cdart ), xbmc.LOGDEBUG )
     destination = os.path.join( addon_work_folder , file_name) # download to work folder first
-    download_success = False 
     try:
         pDialog.create( _(32047) )
         #Onscreen Dialog - "Downloading...."
@@ -123,7 +128,6 @@ def download_cdart( url_cdart, album, type ):
             #message = Download Problem, Check file paths - Artwork Not Downloaded]           
         if type == "fanart":
             delete_file( destination )
-        #pDialog.close()
     except:
         xbmc.log( "[script.cdartmanager] - #  General download error", xbmc.LOGDEBUG )
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]

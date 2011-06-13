@@ -37,7 +37,7 @@
   <string id="32033">Not Found on fanart.tv</string>
   <string id="32034">No Artwork found for</string>
   <string id="32035"> *DOWNLOADING Artwork* </string>
-  <string id="32036"></string>
+  <string id="32036">Path to Music Library</string>
   <string id="32037">Getting local artists</string>
   <string id="32038">Artist: </string>
   <string id="32039">Album: </string>
@@ -110,4 +110,7 @@
   <string id="32105">Retrieving Album Details</string>
   <string id="32106">Overwrite low-res existing cdARTs</string>
   <string id="32107">FanArt Folder</string>
+  <string id="32108">Database too old</string>
+  <string id="32109">Do you want to Rebuild?</string>
+  <string id="32110">Problem Accessing Folder, Script Exiting</string>
 </strings>
