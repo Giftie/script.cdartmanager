@@ -88,7 +88,6 @@ def retrieve_album_details_full( album_list, total, background ):
                 previous_path = ""
                 paths = get_album_path( album_id )
                 for path in paths:
-                    print path
                     if not background:
                         if (pDialog.iscanceled()):
                             break
@@ -116,29 +115,24 @@ def retrieve_album_details_full( album_list, total, background ):
                                     path_match = re.search( "(?:disc|part|cd|pt)(?: |_|-)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
                             title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
                             if title_match:
-                                print "Title Check - Title Matched"
                                 if title_match.group(2):
                                     xbmc.log( "[script.cdartmanager] - #     Title has CD count", xbmc.LOGDEBUG )
                                     xbmc.log( "[script.cdartmanager] - #        Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
                                     album_artist["disc"] = int( title_match.group(2) )
                                     album_artist["title"] = ( title_match.group( 1 ).replace(" -", "") ).rstrip()
                                 else:
-                                    print "Title Check - Title Not Matched"
                                     if path_match:
                                         if path_match.group(1):
-                                            print "Title Check - Path Matched"
                                             xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
                                             xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 1 ), xbmc.LOGDEBUG )
                                             album_artist["disc"] = int( path_match.group(1) )
                                         else:
-                                            print "Title Check - Path Not Matched"
                                             album_artist["disc"] = 1
                                     else:
                                         album_artist["disc"] = 1
                                     album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             else:
                                 if path_match:
-                                    print "Path Check - Path Matched"
                                     if path_match.group(1):
                                         xbmc.log( "[script.cdartmanager] - #     Path has CD count", xbmc.LOGDEBUG )
                                         xbmc.log( "[script.cdartmanager] - #        Disc %s" % path_match.group( 1 ), xbmc.LOGDEBUG )
@@ -146,7 +140,6 @@ def retrieve_album_details_full( album_list, total, background ):
                                     else:
                                         album_artist["disc"] = 1
                                 else:
-                                    print "Path Check - Path Not Matched"
                                     album_artist["disc"] = 1
                                 album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             try:
