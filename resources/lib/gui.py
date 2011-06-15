@@ -1134,7 +1134,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             cdart_path["artist"] = self.getControl( 204 ).getLabel().replace( _(32038) + "[CR]","")
             cdart_path["title"] = self.getControl( 122 ).getSelectedItem().getLabel()
             cdart_path["title"] = self.remove_color(cdart_path["title"])
-            selected_item = self.getControl( 122 ).getSelectedItem()
+            selected_item = self.getControl( 122 ).getSelectedPosition()
             if not url =="" : # If it is a recognized Album...
                 if self.menu_mode == 1:
                     message, d_success = download_cdart( url, cdart_path, "cdart" )
