@@ -110,7 +110,10 @@ def retrieve_album_details_full( album_list, total, background ):
                             album_artist["cdart"] = exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
                             album_artist["cover"] = exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
                             previous_path = path
-                            path_match = re.search( "(?:[\/]|[\s]|[\\])(?:disc|part|cd|pt)(?:[\s]|)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
+                            path_match = re.search( "(?:disc|part|cd|pt)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
+                            if path_match:
+                                if not path_match.group(1):
+                                    path_match = re.search( "(?:disc|part|cd|pt)(?: |_|-)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
                             title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|part|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
                             if title_match:
                                 print "Title Check - Title Matched"
