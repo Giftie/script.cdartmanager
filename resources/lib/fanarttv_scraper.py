@@ -110,7 +110,7 @@ def remote_clearlogo_list( artist_menu ):
 def retrieve_fanarttv_xml( id ):
     xbmc.log( "[script.cdartmanager] - Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )
     url = music_url + id
-    htmlsource = get_html_source( url )
+    htmlsource = get_html_source( url, id )
     music_id = '<music id="' + id + '" name="(.*?)">'
     match = re.search( music_id, htmlsource )
     artist_artwork = []
@@ -187,7 +187,7 @@ def get_distant_artists():
     """ This retrieve the distant artist list from fanart.tv """
     xbmc.log( "[script.cdartmanager] - Retrieving Distant Artists", xbmc.LOGDEBUG )
     distant_artists = []
-    htmlsource = get_html_source( artist_url )
+    htmlsource = get_html_source( artist_url, "distant" )
     match = re.compile( '<artist id="(.*?)" name="(.*?)"/>', re.DOTALL )
     for item in match.finditer( htmlsource ):
         distant = {}

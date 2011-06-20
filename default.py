@@ -42,6 +42,8 @@ rebuild = False
 soft_exit = False
 image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
+from utils import empty_tempxml_folder
+
 if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __scriptname__, xbmc.LOGNOTICE )
@@ -53,6 +55,7 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
+    empty_tempxml_folder()
     try:
         if sys.argv[ 1 ]:
             if sys.argv[ 1 ] == "database":

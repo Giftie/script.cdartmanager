@@ -332,10 +332,10 @@ def new_database_setup( background ):
     #                      Please Wait....
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
-    c.execute('''create table counts(artists, albums, cdarts, version)''') 
-    c.execute('''create table lalist(local_id, name, musicbrainz_artistid)''')   # create local album artists database
-    c.execute('''create table alblist(album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid)''')  # create local album database
-    c.execute('''create table unqlist(title, disc, artist, path, cdart)''')  # create unique database
+    c.execute('''create table counts(artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''') 
+    c.execute('''create table lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')   # create local album artists database
+    c.execute('''create table alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
+    c.execute('''create table unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
     conn.commit()
     c.close()
     album_count, cdart_existing = store_alblist( local_album_list, background ) # store album details first
@@ -396,6 +396,7 @@ def get_local_albums_db( artist_name, background ):
             query='SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
         c.execute(query)
         db=c.fetchall()
+        c.close
         for item in db:
             album = {}
             album["local_id"] = ( item[0] )
@@ -407,9 +408,7 @@ def get_local_albums_db( artist_name, background ):
             album["disc"] = ( item[6] )
             album["musicbrainz_albumid"] = item[7]
             album["musicbrainz_artistid"] = item[8]
-            #xbmc.log( repr(album), xbmc.LOGDEBUG )
             local_album_list.append(album)
-        c.close
     except:
         print_exc()
         c.close
@@ -430,6 +429,7 @@ def get_local_artists_db():
     try:
         c.execute(query)
         db=c.fetchall()
+        c.close
         count = 0
         for item in db:
             count += 1
@@ -442,7 +442,6 @@ def get_local_artists_db():
             local_artist_list.append(artists)
     except:
         print_exc()
-    c.close
     #xbmc.log( local_artist_list, xbmc.LOGDEBUG )
     return local_artist_list
     
@@ -458,11 +457,11 @@ def new_local_count():
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         c.execute(query)
         counts=c.fetchall()
+        c.close
         for item in counts:
             local_artist = item[0]
             album_count = item[1]
             cdart_existing = item[2]
-        c.close
         cdart_existing = recount_cdarts()
         print "Finished New Local Count"
         pDialog.close()
@@ -515,5 +514,3 @@ def refresh_db( background ):
     #update counts
     xbmc.log( "[script.cdartmanager] - # Finished Refeshing Database", xbmc.LOGDEBUG )
     return local_album_count, local_artist_count, local_cdart_count
-   
-    
