@@ -1265,10 +1265,16 @@ class GUI( xbmcgui.WindowXMLDialog ):
             download_count = auto_download( "cover" )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-        if controlId == 152: # Clear Logo Search Artists
-            self.menu_mode = 7
-        if controlId == 102 : # Fan Art Search Artists 
+        if controlId == 170: # fanart Search Artists
             self.menu_mode = 6
+        if controlId == 168: # Clear Logo Search Artists
+            self.menu_mode = 7
+        if controlId == 102:
+            self.artwork_type = "fanart"
+            self.setFocusId( 170 )
+        if controlId == 152:
+            self.artwork_type = "clearlogo"
+            self.setFocusId( 168 )
         if controlId == 168 or controlId == 170:
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()

@@ -164,9 +164,9 @@ def auto_download( type ):
         recognized_artists, artists_list = get_recognized( distant_artist, local_artist )
         count_artist_local = len(recognized_artists)
         percent = 0
+        pDialog.create( _(32046) )
+        #Onscreen Dialog - Automatic Downloading of cdART
         for artist in recognized_artists:
-            pDialog.create( _(32046) )
-            #Onscreen Dialog - Automatic Downloading of cdART
             if ( pDialog.iscanceled() ):
                 break
             artist_count += 1

@@ -1113,8 +1113,8 @@
             </control> 
 
             <control type="group" id="9006">  <!-- cdART Backup Menu -->
-                <posx>410</posx>
-                <posy>320</posy>
+                <posx>370</posx>
+                <posy>420</posy>
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9006).HasFocus + !Control.HasFocus(130)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">WindowClose</animation>
@@ -1191,7 +1191,7 @@
             <control type="group" id="9005"> <!-- Advanced Menu -->
                 <description>Advanced Menu</description>
                 <posx>0</posx>
-                <posy>300</posy>
+                <posy>420</posy>
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9005).HasFocus + !Control.HasFocus(103) + !Control.HasFocus(135) + !ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">WindowClose</animation>
