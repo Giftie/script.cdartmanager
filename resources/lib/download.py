@@ -173,6 +173,7 @@ def auto_download( type ):
             percent = int((artist_count / float(count_artist_local)) * 100)
             xbmc.log( "[script.cdartmanager] - #    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"]), xbmc.LOGNOTICE )
             if type == "fanart" or type == "clearlogo":
+                pDialog.update( percent , "%s%s" % (_(32038) , repr(artist["name"]) ) )
                 auto_art = {}
                 auto_art["musicbrainz_artistid"] = artist["distant_id"]
                 if not auto_art["musicbrainz_artistid"]:
