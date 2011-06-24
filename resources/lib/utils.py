@@ -1,5 +1,6 @@
 import xbmc, xbmcgui
 import urllib, sys, re, os
+import htmlentitydefs
 from traceback import print_exc
 try:
     from sqlite3 import dbapi2 as sqlite3
