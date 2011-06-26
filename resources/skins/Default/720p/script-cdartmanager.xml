@@ -44,7 +44,7 @@
                     <width>260</width>
                     <height>260</height>
                     <aspectratio scalediffuse="false">keep</aspectratio>
-                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo) + !Control.HasFocus(120)</visible>
                 </control>
                 <control type="label" id="204">
                     <description>Artist Label</description>
@@ -56,7 +56,7 @@
                     <wrapmultiline>true</wrapmultiline>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo) + !Control.HasFocus(120)</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Artist</label>
@@ -170,7 +170,7 @@
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus</visible>
+                    <visible>SubString(Window(10001).Property(artwork),cdart) + !Control.HasFocus(120) + !ControlGroup(9003).HasFocus + Control.HasFocus(140)</visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Local cdART</label>

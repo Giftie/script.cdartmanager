@@ -1,11 +1,11 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.3.6"
+__version__       = "1.3.7"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism"
 __XBMC_Revision__ = "35415"
-__date__          = "6-22-11"
+__date__          = "6-26-11"
 __dbversion__     = "1.3.2"
 __dbversionold__  = "1.1.8"
 

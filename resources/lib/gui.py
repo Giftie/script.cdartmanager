@@ -357,9 +357,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 122 ).reset()
         if not cdart_url:
             #no cdart found
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+            xbmcgui.Window(10001).clearProperty( "artwork" )
             xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
             #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
-            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             #return
         else:
             #xbmc.log( "[script.cdartmanager] - #  Building album list based on:", xbmc.LOGNOTICE )
@@ -369,8 +370,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             label2 = ""
             album_list= {}
             xbmc.log( "[script.cdartmanager] - #  Building album list", xbmc.LOGNOTICE )
+            empty_list = False
+            check = False
             try:
                 for album in local_album_list:
+                    empty_list = False
                     cdart_img = missing_cdart_image
                     if album["disc"] > 1:
                         label1 = "%s - %s %s" % ( album["title"], _( 32016 ), album["disc"] )
@@ -379,7 +383,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     name = cdart_url[0]["artist"]
                     musicbrainz_albumid = album["musicbrainz_albumid"]
                     if not musicbrainz_albumid:
+                        empty_list = True
                         continue
+                    else:
+                        check = True
                     #xbmc.log( album, xbmc.LOGNOTICE )
                     #check to see if there is a thumb
                     cdart = artwork_search( cdart_url, musicbrainz_albumid, album["disc"], "cdart" )
@@ -445,8 +452,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             except:
                 print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-            self.setFocus( self.getControl( 122 ) )
-            self.getControl( 122 ).selectItem( focus_item )            
+            if (not empty_list) or check:
+                self.setFocus( self.getControl( 122 ) )
+                self.getControl( 122 ).selectItem( focus_item )
+            else:
+                xbmcgui.Window(10001).clearProperty( "artwork" )
+                xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
+                #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
         return
        
     #creates the artist list on the skin        
@@ -474,6 +486,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 122 ).reset()
         if not coverart_url:
             #no cdart found
+            xbmcgui.Window(10001).clearProperty( "artwork" )
             xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
             #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -570,6 +583,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 xbmc.log( "[script.cdartmanager - No Fanart for this artist", xbmc.LOGNOTICE )
                 xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                xbmcgui.Window(10001).clearProperty( "artwork" )
                 xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
                 #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
                 return
@@ -594,6 +608,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 xbmc.log( "[script.cdartmanager - No ClearLOGO for this artist", xbmc.LOGNOTICE )
                 xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                xbmcgui.Window(10001).clearProperty( "artwork" )
                 xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
                 #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
                 return
@@ -1121,7 +1136,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_cdart = (self.getControl(122).getSelectedItem().getLabel2()).split("&&&&")[1]
             url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
             cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
-            cdart_path["artist"] = self.getControl( 204 ).getLabel().replace( _(32038) + "[CR]","")
+            try:
+                cdart_path["artist"] = ( self.getControl( 204 ).getLabel().encode('utf-8') ).replace( _(32038) + "[CR]","")
+            except:
+                cdart_path["artist"] = ( self.getControl( 204 ).getLabel().decode('utf-8') ).replace( _(32038) + "[CR]","")
             cdart_path["title"] = self.getControl( 122 ).getSelectedItem().getLabel()
             cdart_path["title"] = self.remove_color(cdart_path["title"])
             selected_item = self.getControl( 122 ).getSelectedPosition()

@@ -117,13 +117,13 @@ def download_cdart( url_cdart, album, type, mode ):
             if type == "cdart":
                 conn = sqlite3.connect(addon_db)
                 c = conn.cursor()
-                c.execute('''UPDATE alblist SET cdart="True" WHERE title="%s" and path="%s"''' % ( album["title"], album["path"]  ) )
+                c.execute('''UPDATE alblist SET cdart="True" WHERE path="%s"''' % ( album["path"]  ) )
                 conn.commit()
                 c.close()
             elif type == "cover":
                 conn = sqlite3.connect(addon_db)
                 c = conn.cursor()
-                c.execute('''UPDATE alblist SET cover="True" WHERE title="%s" and path="%s"''' % ( album["title"], album["path"] ) )
+                c.execute('''UPDATE alblist SET cover="True" WHERE path="%s"''' % ( album["path"] ) )
                 conn.commit()
                 c.close()
             download_success = True
