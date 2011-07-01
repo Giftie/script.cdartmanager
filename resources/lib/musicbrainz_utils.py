@@ -19,17 +19,16 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter, ReleaseGroupIncludes
 from musicbrainz2.model import Release
 
-def get_musicbrainz_album( album_title, artist ):
+def get_musicbrainz_with_singles( album_title, artist ):
     album = {}
+    xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
-    artist = artist.replace(" & "," ")
-    album_title = album_title.replace(" & "," ")
+    #artist = artist.replace(" & "," ")
+    #album_title = album_title.replace(" & "," ")
     try:
-        q = """'"%s" AND artist:"%s" NOT type:"Single"'""" % (album_title, artist)
-        print q
+        q = """'"%s" AND artist:"%s"'""" % (album_title, artist)
         filter = ReleaseGroupFilter( query=q, limit=1)
-        #filter = ReleaseGroupFilter( artistName=artist, title=album_title, releaseTypes=Release.TYPE_ALBUM)
         album_result = Query().getReleaseGroups( filter )
         if len( album_result ) == 0:
             xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
@@ -53,7 +52,37 @@ def get_musicbrainz_album( album_title, artist ):
         album["artist_id"] = ""
         album["id"] = ""
         album["title"] = ""
-    xbmc.sleep(900) # sleep for allowing proper use of webserver        
+    return album
+
+def get_musicbrainz_album( album_title, artist ):
+    album = {}
+    xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
+    #artist = artist.replace(" & "," ")
+    #album_title = album_title.replace(" & "," ")
+    try:
+        q = """'"%s" AND artist:"%s" NOT type:"Single"'""" % (album_title, artist)
+        filter = ReleaseGroupFilter( query=q, limit=1)
+        #filter = ReleaseGroupFilter( artistName=artist, title=album_title, releaseTypes=Release.TYPE_ALBUM)
+        album_result = Query().getReleaseGroups( filter )
+        if len( album_result ) == 0:
+            xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
+            album = get_musicbrainz_with_singles( album_title, artist )
+        else:
+            album["artist"] = album_result[ 0 ].releaseGroup.artist.name
+            album["artist_id"] = (album_result[ 0 ].releaseGroup.artist.id).replace( "http://musicbrainz.org/artist/", "" )
+            album["id"] = (album_result[ 0 ].releaseGroup.id).replace("http://musicbrainz.org/release-group/", "")
+            album["title"] = album_result[ 0 ].releaseGroup.title
+        # if album and artist are not matched on MusicBrainz, look up Artist for ID
+        if not album["artist_id"]:
+            name, id, sortname = get_musicbrainz_artist_id( album["artist"] )
+            if id:
+                album["artist_id"] = id
+    except WebServiceError, e:
+        xbmc.log( "[script.cdartmanager] - Error: %s" % e, xbmc.LOGERROR )
+        album = get_musicbrainz_with_singles( album_title, artist )
+    xbmc.sleep(900) # sleep for allowing proper use of webserver
     return album
 
 def update_musicbrainzid( type, info ):

@@ -1,26 +1,28 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.3.2"
+__version__       = "1.3.8"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
-__credits2__      = "Chaos_666, Magnatism"
+__credits2__      = "Chaos_666, Magnatism, Kode"
 __XBMC_Revision__ = "35415"
-__date__          = "5-2-11"
+__date__          = "6-26-11"
 __dbversion__     = "1.3.2"
 __dbversionold__  = "1.1.8"
 
 import sys
 import os, traceback
-import xbmcaddon
-import xbmc
+import xbmcaddon, xbmc, xbmcgui
 
 try:
     from sqlite3 import dbapi2 as sqlite3
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
-from os import remove as delete_file
-exists = os.path.exists
+from xbmcvfs import delete as delete_file
+from xbmcvfs import exists as exists
+# remove comments to save as dharma
+#from os import remove as delete_file
+#exists = os.path.exists
  
 __addon__ = xbmcaddon.Addon(__scriptID__)
 __language__ = __addon__.getLocalizedString
@@ -31,11 +33,16 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db")
+addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak")
 addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
 settings_file = os.path.join(addon_work_folder, "settings.xml")
 script_fail = False
 first_run = False
+rebuild = False
+soft_exit = False
 image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
+
+from utils import empty_tempxml_folder
 
 if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
@@ -48,6 +55,7 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
+    empty_tempxml_folder()
     try:
         if sys.argv[ 1 ]:
             if sys.argv[ 1 ] == "database":
@@ -101,11 +109,8 @@ if ( __name__ == "__main__" ):
                         break
                     else:
                         xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
-                        c.close
-                        delete_file(addon_db)
-                        delete_file(settings_file)
-                        xbmc.log( "[script.cdartmanager] - Opening Settings" , xbmc.LOGNOTICE )
-                        __addon__.openSettings()
+                        rebuild = xbmcgui.Dialog().yesno( __language__(32108) , __language__(32109) )
+                        soft_exit = True
                         break
             except StandardError, e:
                 traceback.print_exc()
@@ -123,13 +128,17 @@ if ( __name__ == "__main__" ):
                     script_fail = True
         path = __addon__.getAddonInfo('path')   
         if not script_fail:
-            import gui
-            ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
-            ui.doModal()
-            del ui
+            if rebuild:
+                from database import refresh_db
+                local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
+            elif not rebuild and not soft_exit:
+                import gui
+                ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
+                ui.doModal()
+                del ui
         else:
             xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
-            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ("cdART Manager", "Problem Accessing Folder, Script Exiting", 500, image) )
+            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )
     except:
         print "Unexpected error:", sys.exc_info()[0]
         raise

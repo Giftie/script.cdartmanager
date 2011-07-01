@@ -1,5 +1,6 @@
 import xbmc, xbmcgui
 import urllib, sys, re, os
+import htmlentitydefs
 from traceback import print_exc
 try:
     from sqlite3 import dbapi2 as sqlite3
@@ -15,42 +16,54 @@ __version__       = sys.modules[ "__main__" ].__version__
 __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+tempxml_folder    = os.path.join( addon_work_folder, "tempxml" )
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from file_item import Thumbnails
 
-from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-from xbmcvfs import delete as delete_file
-from xbmcvfs import exists as exists
-from xbmcvfs import copy as file_copy
-
-# remove comments to save as dharma
-#from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-#from os import remove as delete_file
-#exists = os.path.exists
-#from shutil import copy as file_copy
+from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from os import remove as delete_file
+exists = os.path.exists
+from shutil import copy as file_copy
 
 pDialog = xbmcgui.DialogProgress()
 
 def clear_image_cache( url ):
     if exists( Thumbnails().get_cached_picture_thumb( url ) ):
         delete_file( Thumbnails().get_cached_picture_thumb( url ) )
-
-def get_html_source( url ):
+def empty_tempxml_folder():
+    if exists( tempxml_folder ):
+        for file_name in os.listdir( tempxml_folder ):
+            delete_file( os.path.join( tempxml_folder, file_name ) )
+    else:
+        pass
+        
+def get_html_source( url, path ):
     """ fetch the html source """
     xbmc.log( "[script.cdartmanager] - Retrieving HTML Source", xbmc.LOGDEBUG )
     error = False
     htmlsource = ""
+    path = path.replace("http://fanart.tv/api/music.php?id=", "")
+    path = path + ".xml"
+    print path
+    if not exists( tempxml_folder ):
+        os.mkdir( tempxml_folder )
+    file_name = os.path.join( tempxml_folder, path )
     class AppURLopener(urllib.FancyURLopener):
         version = __useragent__
     urllib._urlopener = AppURLopener()
     for i in range(0, 4):
         try:
-            urllib.urlcleanup()
-            sock = urllib.urlopen( url )
+            if exists( file_name ):
+                sock = open( file_name, "r" )
+            else:
+                urllib.urlcleanup()
+                sock = urllib.urlopen( url )
             htmlsource = sock.read()
+            if not exists( file_name ):
+                file( file_name , "w" ).write( htmlsource )
             sock.close()
             break
         except:

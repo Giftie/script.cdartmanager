@@ -5,6 +5,7 @@
         <setting label="32095" type="lsep" />
         <setting type="sep" />
         <setting label="" type="lsep" />
+        <setting label="32036" type="folder" id="music_path" default="" source="auto" option="writeable" />
         <setting label="32107" type="folder" id="fanart_path" default="" source="auto" option="writeable" />
         <setting label="32018" type="folder" id="backup_path" default="" source="auto" option="writeable" />
         <setting label="32062" type="folder" id="unique_path" default="" source="auto" option="writeable" />
@@ -32,7 +33,7 @@
         <setting label="Extra Settings" type="lsep" />
         <setting type="sep" />
         <setting label="" type="lsep" />
-        <setting label="32106" type="bool" id="resizeondownload" default="true" />
+        <setting label="32106" type="bool" id="resizeondownload" default="false" />
         <setting type="sep" />
         <setting label="32099" type="action"  action="RunScript($CWD/default.py,database)" />
     </category>

@@ -1,3 +1,40 @@
+1.3.8
+- Added Downloaded artwork view for after Auto Download
+
+1.3.7
+- Fix error with special Characters in Artist Names
+- Added New German Strings - Thanks solidsatras
+- Fixed Focus problem
+- Fixed database update when downloading artwork
+
+1.3.6
+- Fixed Dialog for Fanart and ClearLOGO autodownload
+- Added import of missing module
+
+1.3.5
+- Script now saves XML files that is retrieved from fanart.tv(reduces traffic to fanart.tv)
+- changed Artwork layout, larger images
+- Added Autodownload to Fanarts Option - saves fanart to 'Artist/extrafanart' skips if file already exists - based on Music Path in settings
+- Added Autodownload to ClearLOGOs Option - Only downloads the first available Logo, skips if one already exists
+- Cleaned up skin a bit more(slide out menus line up better)
+- Added artwork for Missing cdARTs and Cover Art.
+- Added singles to be searched if there is no other album matches(sometimes Musicbrainz reported a single if the album has the same title)
+
+1.3.2 - 1.3.4
+- Integrated MusicBrainz - to obtain better accuracy for album matching
+- Made skin full screen(1280x720)
+- Cleaned up code
+- Reduced Log spamming in normal mode(XBMC needs to be in Debug mode for full log)
+- Added fanart.tv as artwork source
+- Better Unicode handling(I hope)
+- Added Album Cover Art work to the mix
+- Added Artist FanArt to the mix
+- Added Artist ClearLOGOs to the mix
+- Removed non GUI code from gui.py(added modules)
+- Removed Artist/Album searching
+- Added option of building addon's database in the background(selectable from settings)
+- Added image size check(cdARTs and Cover Art), if under 1000x1000 and available from fanart.tv, download replacement
+
 1.3.1
 - Split Dharma and Eden code to different Git branches
 
