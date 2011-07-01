@@ -1,9 +1,9 @@
 __scriptname__    = "CDArt Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
-__version__       = "1.3.7"
+__version__       = "1.3.8"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
-__credits2__      = "Chaos_666, Magnatism"
+__credits2__      = "Chaos_666, Magnatism, Kode"
 __XBMC_Revision__ = "35415"
 __date__          = "6-26-11"
 __dbversion__     = "1.3.2"
@@ -18,11 +18,8 @@ try:
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
-from xbmcvfs import delete as delete_file
-from xbmcvfs import exists as exists
-# remove comments to save as dharma
-#from os import remove as delete_file
-#exists = os.path.exists
+from os import remove as delete_file
+exists = os.path.exists
  
 __addon__ = xbmcaddon.Addon(__scriptID__)
 __language__ = __addon__.getLocalizedString

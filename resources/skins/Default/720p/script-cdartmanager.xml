@@ -457,7 +457,6 @@
                     <onup>122</onup>
                     <ondown>122</ondown>
                     <viewtype label="Album List">list</viewtype>
-                    <pagecontrol>123</pagecontrol>
                     <scrolltime>200</scrolltime>
                     <itemlayout width="320" height="320">
                         <!--
@@ -510,6 +509,130 @@
                             <aspectratio scalediffuse="false">keep</aspectratio>
                             <animation effect="zoom" end="0,0,300,300" time="100">focus</animation>
                             <visible>Control.HasFocus(122)</visible>
+                        </control>
+                        <!--
+                        <control type="image">
+                            <posx>50</posx>
+                            <posy>0</posy>
+                            <width>550</width>
+                            <height>40</height>
+                            <texture>cdman-button-focus.png</texture>
+                            <visible>Control.HasFocus(122)</visible>
+                        </control>
+                        -->
+                        <control type="label">
+                            <posx>10</posx>
+                            <posy>300</posy>
+                            <width>300</width>
+                            <height>20</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <info>ListItem.Label</info>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>
+          
+            <control type="group" id="9014"> <!-- Downloaded List -->
+                <posx>0</posx>
+                <posy>0</posy>
+
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9014).HasFocus + !Control.HasFocus(404)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(404) | ControlGroup(9014).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(404) | ControlGroup(9014).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="300,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(404) | ControlGroup(9014).HasFocus">conditional</animation>
+                <visible>Control.HasFocus(404)</visible>
+
+                <control type="image" id = "201">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>980</width>
+                    <height>670</height>
+                    <!--
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    -->
+                    <texture>default-menu.png</texture>
+                </control>
+
+                <control type="label">
+                    <description>Downloaded Artwork Label</description>
+                    <posx>340</posx>
+                    <posy>10</posy>
+                    <width>300</width>
+                    <height>20</height>
+                    <font>font13</font>
+                    <aligny>center</aligny>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32111]</label>
+                </control>
+                        
+                <control type="panel" id="404">
+                    <description>Album List</description>
+                    <posx>10</posx>
+                    <posy>25</posy>
+                    <width>960</width>
+                    <height>670</height>
+                    <onleft>9000</onleft>
+                    <onright>404</onright>
+                    <onup>404</onup>
+                    <ondown>404</ondown>
+                    <viewtype label="Album List">list</viewtype>
+                    <scrolltime>200</scrolltime>
+                    <itemlayout width="320" height="320">
+                        <!--
+                        <control type="image">
+                            <posx>50</posx>
+                            <posy>40</posy>
+                            <width>550</width>
+                            <height>40</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        -->
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>10</posy>
+                            <width>250</width>
+                            <height>250</height>
+                            <aspectratio scalediffuse="false">keep</aspectratio>
+                            <info>Listitem.Thumb</info>
+                        </control>
+                        <control type="label">
+                            <posx>10</posx>
+                            <posy>300</posy>
+                            <width>300</width>
+                            <height>20</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <info>ListItem.Label</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="320" height="320">
+                        <!--
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>10</posy>
+                            <width>550</width>
+                            <height>40</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        -->
+                        <control type="image">
+                            <!-- <animation effect="rotate" end="-360" center="auto" time="5000" loop="true" reversible="false" condition=True>conditional</animation> -->
+                            <posx>10</posx>
+                            <posy>10</posy>
+                            <width>250</width>
+                            <height>250</height>
+                            <info>Listitem.Thumb</info>
+                            <aspectratio scalediffuse="false">keep</aspectratio>
+                            <animation effect="zoom" end="0,0,300,300" time="100">focus</animation>
+                            <visible>Control.HasFocus(404)</visible>
                         </control>
                         <!--
                         <control type="image">

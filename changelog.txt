@@ -1,3 +1,6 @@
+1.3.8
+- Added Downloaded artwork view for after Auto Download
+
 1.3.7
 - Fix error with special Characters in Artist Names
 - Added New German Strings - Thanks solidsatras

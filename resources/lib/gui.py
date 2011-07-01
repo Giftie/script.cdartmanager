@@ -616,6 +616,29 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
 
+    def populate_downloaded( self, successfully_downloaded, type ):
+        xbmc.log( "[script.cdartmanager] - #  Populating ClearLOGO List", xbmc.LOGNOTICE )
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        self.getControl( 404 ).reset()
+        xbmcgui.Window(10001).setProperty( "artwork", type )
+        for item in successfully_downloaded:
+            try:
+                try:
+                    listitem = xbmcgui.ListItem( label = item["artist"], label2 = item["title"], thumbnailImage = item["path"] )
+                except:
+                    if type =="fanart":
+                        listitem = xbmcgui.ListItem( label = item["artist"], label2 = "", thumbnailImage = item["fanart"] )
+                    else:
+                        listitem = xbmcgui.ListItem( label = item["artist"], label2 = "", thumbnailImage = item["path"] )
+                self.getControl( 404 ).addItem( listitem )
+                listitem.setLabel( item["artist"] )
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                self.setFocus( self.getControl( 404 ) )
+                self.getControl( 404 ).selectItem( 0 )
+            except:
+                print_exc()
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+
     def populate_local_cdarts( self, focus_item ):
         xbmc.log( "[script.cdartmanager] - ##### Populating Local cdARTS", xbmc.LOGNOTICE )
         label2= ""
@@ -1079,12 +1102,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
             #print self.recognized_artists
             self.populate_artist_list( self.recognized_artists )
-        if controlId == 106 : #cdARTs Automatic Download
-            self.menu_mode = 2
-            self.artwork_type = "cdart"
-            download_count = auto_download( "cdart" )
-            local_album_count, local_artist_count, local_cdart_count = new_local_count()
-            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 120 : #Retrieving information from Artists List
             xbmc.log( "[script.cdartmanager] - # self.menu_mode: %s" % self.menu_mode, xbmc.LOGNOTICE )
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
@@ -1277,12 +1294,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
             #print self.recognized_artists
             self.populate_artist_list( self.recognized_artists )
-        if controlId == 151 : #Cover Art Automatic Download
-            self.menu_mode = 4
-            self.artwork_type = "cover"
-            download_count = auto_download( "cover" )
-            local_album_count, local_artist_count, local_cdart_count = new_local_count()
-            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 170: # fanart Search Artists
             self.menu_mode = 6
         if controlId == 168: # Clear Logo Search Artists
@@ -1338,12 +1349,23 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "fanart" )
                 self.populate_fanarts( self.artist_menu, selected_item )
-        if controlId == 169 : #clearLOGO Automatic Download
-            self.artwork_type = "clearlogo"
-            download_count = auto_download( "clearlogo" )
-        if controlId == 171 : #Fanart Automatic Download
-            self.artwork_type = "fanart"
-            download_count = auto_download( "fanart" )
+        if controlId in ( 169, 171, 106, 151 ): # Automatic Download
+            self.artwork_type = ""
+            if controlId == 106: #cdARTs
+                self.menu_mode = 2
+                self.artwork_type = "cdart"
+            if controlId == 151: #cover arts
+                self.menu_mode = 4
+                self.artwork_type = "cover"
+            if controlId == 169:# ClearLOGOs
+                self.artwork_type = "clearlogo"
+            if controlId == 171:# Fanarts
+                self.artwork_type = "fanart"
+            download_count, successfully_downloaded = auto_download( self.artwork_type )
+            local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
+            if successfully_downloaded:
+                self.populate_downloaded( successfully_downloaded, self.artwork_type )
 
     def onFocus( self, controlId ):
         if not ( controlId == 122 or controlId == 140 or controlId == 160 ):
