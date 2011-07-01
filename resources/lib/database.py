@@ -69,7 +69,7 @@ def retrieve_album_details_full( album_list, total, background ):
             album_count += 1
             percent = int((album_count/float(total)) * 100)
             if not background:
-                pDialog.update( percent, _(20186), "Album: %s" % detail['title'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                pDialog.update( percent, _(20186), "Album: %s" % detail['label'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail['albumid']
             albumdetails = retrieve_album_details( album_id )
             for albums in albumdetails:
@@ -90,7 +90,7 @@ def retrieve_album_details_full( album_list, total, background ):
                         if exists(path):
                             xbmc.log( "[script.cdartmanager] - Path Exists", xbmc.LOGDEBUG )
                             album_artist["local_id"] = detail['albumid']
-                            title = detail['title']
+                            title = detail['label']
                             try:
                                 a_title = albums['artist'].encode("utf-8")
                                 album_artist["artist"] = a_title
@@ -346,7 +346,7 @@ def new_database_setup( background ):
         name = artist["name"]
         artist_count += 1
         for local in local_artist_list:
-            if name == local["artist"]:
+            if name == local["label"]:
                 id = local["artistid"]
                 found = True
                 break
