@@ -25,11 +25,11 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 
-from os import mkdir as make_dir   # change this once xbmcfs has a mkdir()
+from os import makedirs as make_dir   # change this once xbmcfs has a mkdir()
 from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from os import remove as delete_file
 exists = os.path.exists
-from shutil import copy as file_copy
+from shutil import copyfile as file_copy
 
 pDialog = xbmcgui.DialogProgress()
  
@@ -67,7 +67,7 @@ def get_filename( type, url, mode ):
     return file_name
 
 def make_music_path( artist ):
-    path = os.path.join( music_path, artist )
+    path = os.path.join( music_path, artist ).replace("\\\\","\\")
     try:
         if not exists( path ):
             make_dir( path )
@@ -90,8 +90,8 @@ def download_cdart( url_cdart, album, type, mode ):
     xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( path ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      Filename: %s" % repr( file_name ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      url: %s" % repr( url_cdart ), xbmc.LOGDEBUG )
-    destination = os.path.join( addon_work_folder , file_name) # download to work folder first
-    final_destination = os.path.join( path, file_name )
+    destination = os.path.join( addon_work_folder , file_name).replace("\\\\","\\") # download to work folder first
+    final_destination = os.path.join( path, file_name ).replace("\\\\","\\")
     try:
         pDialog.create( _(32047) )
         #Onscreen Dialog - "Downloading...."

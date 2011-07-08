@@ -1,3 +1,8 @@
+1.3.9
+- Fixed Cover Art List - allowed improper downloading of local artwork
+- Fixed directory making when smb:// paths are used
+- Fixed smb:// paths 
+
 1.3.8
 - Added Downloaded artwork view for after Auto Download
 

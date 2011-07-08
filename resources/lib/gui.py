@@ -463,7 +463,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         elif cover["cover"]:
@@ -473,7 +473,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             cover_img=url
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         else:
@@ -490,11 +490,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         if album["cover"]:
                             cover_img = os.path.join( album["path"] , "folder.jpg" )
                             label1 = album["title"]
-                            url = album["cover"]
+                            url = cover_img
                             label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         else:
