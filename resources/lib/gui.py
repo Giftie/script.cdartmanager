@@ -1,14 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#to do:
-# -  
-# -  *add comments showing what local strings are being displayed   _(32002) = Search Artist
-# -  add log xbmc.log(ing, xbmc.LOGNOTICE )
-# -  insure mouse use works properly - at the moment it seems to break everything!
-# -  add user input(ie keyboard) to get more advanced searches
-# -  add bulk uploading and downloading
-# -  add website
-#
 
 import urllib
 import sys
@@ -209,7 +200,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def remove_special( self, temp ):
         return temp.translate(transtab, "!@#$^*()?[]{}<>',./")
-    
+
     # sets the colours for the lists
     def coloring( self , text , color , colorword ):
         if color == "white":
@@ -238,50 +229,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         clean_text = ((clean_text.replace("[COLOR=FFEE82EE]","")).replace("[COLOR=FFFF1493]","")).replace("[COLOR=FFFF0000]","")
         clean_text = ((clean_text.replace("[COLOR=FF00FF00]","")).replace("[COLOR=FFFFFF00]","")).replace("[COLOR=FFFF4500]","")
         return clean_text
-        
-#####   Remove 
-    # finds the cdart for the album list    
-    def find_cdart( self , aname , atitle, remote_cdart_url ):
-        xbmc.log( "[script.cdartmanager] - # Finding cdART for album list", xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - #", xbmc.LOGDEBUG )
-        match = ""
-        s_title = ""
-        name = str.lower( aname )
-        title = str.lower( atitle )
-        s_title = self.remove_special( title )
-        for album in remote_cdart_url:
-            r_title1 = str.lower( album["title"] )
-            r_title2 = str.lower( album["title"].split(" (")[0] )
-            r_title3 = str.lower(self.remove_special( album["title"] ))
-            r_title4 = str.lower(self.remove_special( album["title"].split(" (")[0] ))
-            if title == r_title1 or title == r_title2 or title == r_title3 or title == r_title4 or s_title == r_title1 or s_title == r_title2 or s_title == r_title3 or s_title == r_title4:
-                return album["picture"]
-        return match
-##### remove
-    # finds the cdart for the album list    
-    def find_cdart2( self , aname , atitle ):
-        match = None
-        name = str.lower( aname )
-        title = str.lower( atitle )
-        xml = get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(title.replace("&", "&amp;")) , urllib.quote_plus(name.replace("&", "&amp;"))))
-        match = re.search("<no_result", xml)
-        if match:
-            s_name = self.remove_special( name )
-            s_title = self.remove_special( title )
-            xml = get_html_source( cross_url + "&album=%s&artist=%s" % (urllib.quote_plus(s_title.replace("&", "&amp;")) , urllib.quote_plus(s_name.replace("&", "&amp;"))))
-            if not xml == "":
-                match = re.findall( "<picture>(.*?)</picture>", xml )
-            else:
-                xbmc.log( "[script.cdartmanager] - #### Error, xml= %s" % xml, xbmc.LOGDEBUG )
-                match = []
-        elif not xml == "":
-            match = re.findall( "<picture>(.*?)</picture>", xml )
-        else:
-            xbmc.log( "[script.cdartmanager] - #### Error, xml= %s" % xml, xbmc.LOGDEBUG )
-            match = []
-        return match
-#####    
-
 
     #Local vs. XBMCSTUFF.COM cdART list maker
     def local_vs_distant( self ):
@@ -513,7 +460,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.remotelocal_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         elif cover["cover"]:
@@ -523,7 +470,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                             cover_img=url
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         else:
@@ -540,11 +487,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         if album["cover"]:
                             cover_img = os.path.join( album["path"] , "folder.jpg" )
                             label1 = album["title"]
-                            url = album["cover"]
+                            url = cover_img
                             label2 = "%s&&%s&&&&%s" % ( url, album["path"], "")
                             listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cover_img )
                             self.getControl( 122 ).addItem( listitem )
-                            listitem.setLabel( self.coloring( label1 , self.remote_color , label1 ) )
+                            listitem.setLabel( self.coloring( label1 , self.local_color , label1 ) )
                             listitem.setLabel2( label2 )
                             listitem.setThumbnailImage( cover_img )
                         else:
@@ -599,6 +546,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             clearlogo = remote_clearlogo_list( artist_menu )
             if clearlogo:
                 for artwork in clearlogo:
+                    clear_image_cache( artwork )
                     listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork )
                     self.getControl( 167 ).addItem( listitem )
                     listitem.setLabel( os.path.basename( artwork ) )

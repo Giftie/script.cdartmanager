@@ -37,8 +37,18 @@ from xbmcvfs import copy as file_copy
 pDialog = xbmcgui.DialogProgress()
 
 def clear_image_cache( url ):
-    if exists( Thumbnails().get_cached_picture_thumb( url ) ):
-        delete_file( Thumbnails().get_cached_picture_thumb( url ) )
+    thumb = Thumbnails().get_cached_picture_thumb( url )
+    png = os.path.splitext( thumb )[0] + ".png"
+    dds = os.path.splitext( thumb )[0] + ".dds"
+    jpg = os.path.splitext( thumb )[0] + ".jpg"
+    if exists( thumb ):
+        delete_file( thumb )
+    if exists( png ):
+        delete_file( png )
+    if exists( jpg ):
+        delete_file( jpg )
+    if exists( dds ):
+        delete_file( dds )
 
 def empty_tempxml_folder():
     if exists( tempxml_folder ):
