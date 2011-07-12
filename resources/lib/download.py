@@ -31,7 +31,7 @@ from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_a
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
-from os import mkdir as make_dir   # change this once xbmcfs has a mkdir()
+from os import makedir as make_dir   # change this once xbmcfs has a mkdir()
 # remove comments to save as dharma
 #from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 #from os import remove as delete_file
