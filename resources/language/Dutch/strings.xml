@@ -17,7 +17,7 @@
   <string id="32013">Opschonen Muziek Database</string>
   <string id="32014">Update Muziek Database</string>
   <string id="32015">Verwijder Lokale Database?</string>
-  <string id="32016">Disc:</string>
+  <string id="32016">Schijf:</string>
   <string id="32017">Map waar Lokale cdART Lijst wordt opgeslagen</string>
   <string id="32018">cdART Backup map</string>
   <string id="32019">Backup opslag notatie: </string>
@@ -108,10 +108,10 @@
   <string id="32103">Ontbrekende cdART Lijst Opslaan in Backup Map</string>
   <string id="32104">Ontbrekende cdART Lijst Uploaden naar website</string>
   <string id="32105">Album Details Ophalen</string>
-  <string id="32106">Overwrite low-res existing cdARTs</string>
+  <string id="32106">Bestaande lage-resolutie cdARTs overschrijven</string>
   <string id="32107">FanArt Folder</string>
-  <string id="32108">Database too old</string>
-  <string id="32109">Do you want to Rebuild?</string>
-  <string id="32110">Problem Accessing Folder, Script Exiting</string>
-  <string id="32111">Downloaded Artwork</string>
+  <string id="32108">Database te oud</string>
+  <string id="32109">Wil je opnieuw Bouwen?</string>
+  <string id="32110">Probleem Toegang Folder, Script Sluit Af</string>
+  <string id="32111">Gedownload Artwork</string>
 </strings>
