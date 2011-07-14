@@ -30,6 +30,27 @@ from shutil import copy as file_copy
 
 pDialog = xbmcgui.DialogProgress()
 
+def _makedirs( _path ):
+    def _convert_smb_path( _path ):
+        # if windows and smb:// convert to a proper format for shutil and os modules
+        if ( _path.startswith( "smb://" ) and os.environ.get( "OS", "win32" ) == "win32" ):
+            _path = _path.replace( "/", "\\" ).replace( "smb:", "" )
+        # return result
+        return _path
+    # no need to create folders
+    if ( os.path.isdir( _path ) ): return
+    # temp path
+    tmppath = _path
+    # loop thru and create each folder
+    while ( not os.path.isdir( tmppath ) ):
+        print tmppath
+        try:
+            os.mkdir( _convert_smb_path( tmppath ) )
+        except:
+            tmppath = os.path.dirname( tmppath )
+    # call function until path exists
+    _makedirs( _path )
+
 def clear_image_cache( url ):
     if exists( Thumbnails().get_cached_picture_thumb( url ) ):
         delete_file( Thumbnails().get_cached_picture_thumb( url ) )

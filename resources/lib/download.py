@@ -25,7 +25,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 
-from os import makedirs as make_dir   # change this once xbmcfs has a mkdir()
+from utils import _makedirs as make_dir   # change this once xbmcfs has a mkdir()
 from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from os import remove as delete_file
 exists = os.path.exists
@@ -70,7 +70,7 @@ def make_music_path( artist ):
     path = os.path.join( music_path, artist ).replace("\\\\","\\")
     try:
         if not exists( path ):
-            make_dir( path )
+            make_dir( os.path.dirname( path ) )
             xbmc.log( "[script.cdartmanager] - Path to music artist made", xbmc.LOGDEBUG )
             return True
     except:
@@ -132,7 +132,10 @@ def download_cdart( url_cdart, album, type, mode ):
             message = [ _(32026),  _(32025) , "File: %s" % path , "Url: %s" % url_cdart]
             #message = Download Problem, Check file paths - Artwork Not Downloaded]           
         if type == "fanart":
-            delete_file( destination )
+            try:
+                delete_file( destination )
+            except:
+                xbmc.log( "[script.cdartmanager] - #  Unable to Delete File", xbmc.LOGDEBUG )
     except:
         xbmc.log( "[script.cdartmanager] - #  General download error", xbmc.LOGDEBUG )
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
