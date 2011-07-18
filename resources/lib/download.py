@@ -25,7 +25,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 
-from utils import _makedirs as make_dir   # change this once xbmcfs has a mkdir()
+from utils import _makedirs    # change this once xbmcfs has a mkdir()
 from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from os import remove as delete_file
 exists = os.path.exists
@@ -68,15 +68,13 @@ def get_filename( type, url, mode ):
 
 def make_music_path( artist ):
     path = os.path.join( music_path, artist ).replace("\\\\","\\")
-    try:
-        if not exists( path ):
-            make_dir( os.path.dirname( path ) )
+    if not exists( path ):
+        if _makedirs( path ):
             xbmc.log( "[script.cdartmanager] - Path to music artist made", xbmc.LOGDEBUG )
             return True
-    except:
-        print_exc()
-        xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
-        return False
+        else:
+            xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
+            return False
 
 def download_cdart( url_cdart, album, type, mode ):
     xbmc.log( "[script.cdartmanager] - #    Downloading artwork... ", xbmc.LOGDEBUG )
@@ -87,6 +85,16 @@ def download_cdart( url_cdart, album, type, mode ):
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
         return message, download_success
     path = album["path"].replace("\\\\" , "\\")
+    if path.startswith( "smb://" ):
+        tmppath = path.split( "/" )
+        if "@" in tmppath[ 2 ]:
+            tmppath[ 2 ] = tmppath[ 2 ].split( "@" )[1]
+        path = "smb://" + tmppath[ 2 ] + "/" + "/".join( tmppath[ 3: ] )
+    if not exists( path ):
+        try:
+            pathsuccess = _makedirs( album["path"].replace("\\\\" , "\\") )
+        except:
+            pass
     xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( path ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      Filename: %s" % repr( file_name ), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - #      url: %s" % repr( url_cdart ), xbmc.LOGDEBUG )
@@ -109,9 +117,9 @@ def download_cdart( url_cdart, album, type, mode ):
                 pass  
         if exists( path ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
+            #message = ["Download Sucessful!"]
             message = [_(32023), _(32024), "File: %s" % path , "Url: %s" % url_cdart]
             success = file_copy( destination, final_destination ) # copy it to album folder
-            #message = ["Download Sucessful!"]
             # update database
             if type == "cdart":
                 conn = sqlite3.connect(addon_db)
@@ -186,9 +194,6 @@ def auto_download( type ):
                     continue
                 auto_art["artist"] = artist["name"]
                 path = os.path.join( music_path, artist["name"] )
-                if not exists( path ):
-                    if not make_music_path( artist["name"] ):
-                        continue
                 if type == "fanart":
                     art = remote_fanart_list( auto_art )
                 else:
@@ -198,8 +203,8 @@ def auto_download( type ):
                         auto_art["path"] = os.path.join( path, "extrafanart" ).replace("\\\\" , "\\")
                         if not exists( auto_art["path"] ):
                             try:
-                                make_dir( auto_art["path"] )
-                                xbmc.log( "[script.cdartmanager] - extrafanart directory made", xbmc.LOGDEBUG )
+                                if _makedirs( auto_art["path"] ):
+                                    xbmc.log( "[script.cdartmanager] - extrafanart directory made", xbmc.LOGDEBUG )
                             except:
                                 print_exc()
                                 xbmc.log( "[script.cdartmanager] - unable to make extrafanart directory", xbmc.LOGDEBUG )
