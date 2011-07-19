@@ -1,3 +1,6 @@
+1.4.1
+- Fix Samba Username And Password error
+
 1.4.0
 - Major work done to allow making of directories on samba shares
 - dutch language updated
