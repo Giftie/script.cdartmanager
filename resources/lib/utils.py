@@ -18,6 +18,8 @@ addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 tempxml_folder    = os.path.join( addon_work_folder, "tempxml" )
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+samba_user = __addon__.getSetting( "samba_user" )
+samba_pass = __addon__.getSetting( "samba_pass" )
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
