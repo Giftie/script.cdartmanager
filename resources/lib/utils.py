@@ -24,12 +24,12 @@ samba_pass = __addon__.getSetting( "samba_pass" )
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from file_item import Thumbnails
-from smbclient import smbclient
 
 from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
+from xbmcvfs import mkdir
 
 # remove comments to save as dharma
 #from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
@@ -39,58 +39,15 @@ from xbmcvfs import copy as file_copy
 
 pDialog = xbmcgui.DialogProgress()
 
-def smb_makedirs( path ):
-    if exists( path ):
-        return
-    # setup for samba communication
-    samba_list = path.split( "/" )
-    #print samba_list
-    if "@" in samba_list[ 2 ]:
-        remote_name = samba_list[ 2 ].split( "@" )[1]
-        samba_user = ( samba_list[ 2 ].split( "@" )[0] ).split( ":" )[0]
-        samba_pass = ( samba_list[ 2 ].split( "@" )[0] ).split( ":" )[1]
-    remote_share = samba_list[ 3 ]
-    #print remote_share
-    # default to guest if no user/pass is given
-    if not samba_user:
-        samba_user = None
-        samba_pass = None
-    #print samba_user
-    #print samba_pass
-    smb = smbclient.SambaClient( server=remote_name, share=remote_share,
-                                username=samba_user, password=samba_pass )
-    path2 = "smb://" + remote_name + "/" + "/".join( samba_list[3:] )
-    tmppath = "/".join( samba_list[4:] )
-    while(not ( exists( path2 ) or path2 == "smb:" ) ):
-        #print path2
-        try:
-            smb.mkdir(tmppath.decode("utf-8"))
-        except:
-            tmppath = os.path.dirname( tmppath )
-            # need to strip the same part from a true path for the exists option
-            path2 = os.path.dirname( path2 )
-    smb_makedirs(path)
-    
 def _makedirs( _path ):
-    #print os.environ.get('OS')
-    if _path.startswith( "smb://" ) and not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
-        smb_makedirs( _path )
-        return True
-    if ( _path.startswith( "smb://" ) and os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT") ):
-        if "@" in _path:
-            t_path = "\\\\" + _path.split("@")[1]
-            _path = t_path
-        _path = _path.replace( "/", "\\" ).replace( "smb:", "" )
-    # no need to create folders
-    if ( os.path.isdir( _path ) ): return True
+    success = False
+    if ( exists( _path ) ): return True
     # temp path
     tmppath = _path
     # loop thru and create each folder
-    while ( not os.path.isdir( tmppath ) ):
-        print tmppath
-        try:
-            os.mkdir( tmppath )
-        except:
+    while ( not exists( tmppath ) ):
+        success = mkdir( tmppath )
+        if not success:
             tmppath = os.path.dirname( tmppath )
     # call function until path exists
     _makedirs( _path )
