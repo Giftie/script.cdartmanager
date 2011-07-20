@@ -1,5 +1,5 @@
 1.4.1
-- just keeping the versions in sync
+- replaced smbclient method with the new xbmcvfs.mkdir()
 
 1.4.0
 - Major work done to allow making of directories on samba shares
