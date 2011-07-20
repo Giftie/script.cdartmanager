@@ -113,4 +113,8 @@
   <string id="32108">Datenbank zu alt</string>
   <string id="32109">Wollen Sie die Datenbank aktualisieren?</string>
   <string id="32110">Problem beim Verzeichniszugriff, beende Skript</string>
+  <string id="32111">Downloaded Artwork</string>
+  <string id="32112">Using protected Samba share?</string>
+  <string id="32113">Username</string>
+  <string id="32114">Password</string>
 </strings>
