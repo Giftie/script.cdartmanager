@@ -6,7 +6,7 @@
   <string id="32002">Zoek Artiesten</string>
   <string id="32003">Zoek Albums</string>
   <string id="32004">Automatisch Downloaden</string>
-  <string id="32005">Save Lokale cdART Lijst</string>
+  <string id="32005">Lokale cdART Lijst Opslaan</string>
   <string id="32006">Fan Arts</string>
   <string id="32007">Lokale Artiesten: %s</string>
   <string id="32008">Lokale cdARTs: %s</string>
@@ -32,7 +32,7 @@
   <string id="32028">Download afgebroken!</string>
   <string id="32029">Geen cdART gevonden?</string>
   <string id="32030">Help aub mee! Upload je cdARTs</string>
-  <string id="32031">Op www.xbmcstuff.com</string>
+  <string id="32031">Op fanart.tv</string>
   <string id="32032">Kies een Artiest</string>
   <string id="32033">Niet gevonden op fanart.tv</string>
   <string id="32034">Geen cdART gevonden voor</string>
@@ -114,7 +114,7 @@
   <string id="32109">Wil je opnieuw Bouwen?</string>
   <string id="32110">Probleem Toegang Folder, Script Sluit Af</string>
   <string id="32111">Gedownload Artwork</string>
-  <string id="32112">Using protected Samba share?</string>
-  <string id="32113">Username</string>
-  <string id="32114">Password</string>
+  <string id="32112">Word beschermde Samba geel gebruikt?</string>
+  <string id="32113">Gebruikersnaam</string>
+  <string id="32114">Paswoord</string>
 </strings>
