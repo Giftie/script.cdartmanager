@@ -35,6 +35,8 @@
         <setting label="" type="lsep" />
         <setting label="32106" type="bool" id="resizeondownload" default="false" />
         <setting type="sep" />
+        <setting label="32115" type="bool" id="notifybackground" default="true" />
+        <setting label="32116" type="bool" id="notifyatfinish" default="true" />
         <setting label="32099" type="action"  action="RunScript($CWD/default.py,database)" />
     </category>
 </settings>

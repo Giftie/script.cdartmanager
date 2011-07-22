@@ -18,7 +18,8 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
-
+notify = __addon__.getSetting("notifybackground")
+image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
 safe_db_version = "1.3.2"
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
@@ -37,8 +38,6 @@ from xbmcvfs import copy as file_copy
 #from os import remove as delete_file
 #exists = os.path.exists
 #from shutil import copy as file_copy
-
-
 
 def artwork_search( cdart_url, id, disc, type ):
     xbmc.log( "[script.cdartmanager] - #  Finding Artwork", xbmc.LOGDEBUG )
@@ -71,13 +70,15 @@ def retrieve_album_details_full( album_list, total, background ):
     percent = 0
     try:
         for detail in album_list:
+            if notify == "true" and background:
+                xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( _(32042), repr( detail['title'] ), 500, image) )
             if not background:
                 if (pDialog.iscanceled()):
                     break
             album_count += 1
             percent = int((album_count/float(total)) * 100)
             if not background:
-                pDialog.update( percent, _(20186), "Album: %s" % detail['title'] , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                pDialog.update( percent, _(20186), "Album: %s" % repr( detail['title'] ) , "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
             album_id = detail['albumid']
             albumdetails = retrieve_album_details( album_id )
             for albums in albumdetails:

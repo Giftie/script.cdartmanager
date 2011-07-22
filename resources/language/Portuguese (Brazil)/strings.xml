@@ -32,9 +32,9 @@
   <string id="32028">Download Cancelado!</string>
   <string id="32029">Nenhum cdART encontrado?</string>
   <string id="32030">Por Favor Contribua! Envie seus cdARTs</string>
-  <string id="32031">Em www.xbmcstuff.com</string>
+  <string id="32031">Em www.fanart.tv</string>
   <string id="32032">Escolha um Artista</string>
-  <string id="32033">Não encontrado em XBMCSTUFF.com</string>
+  <string id="32033">Não encontrado em fanart.tv</string>
   <string id="32034">Nenhum cdART encontrado para</string>
   <string id="32035"> *Baixando cdART* </string>
   <string id="32036">Procura de cdARTs</string>
@@ -67,7 +67,7 @@
   <string id="32063">Copiar cdARTs Local que Seja Único</string>
   <string id="32064">Pasta de cdARTs Únicos: %s</string>
   <string id="32065">Comparando cdARTs Locais e Online...</string>
-  <string id="32066">Erro ao conectar em XBMCSTUFF.COM, Esgotado o Tempo da Conexão</string>
+  <string id="32066">Erro ao conectar em fanart.tv, Esgotado o Tempo da Conexão</string>
   <string id="32067">Backup dos arquivos cdART</string>
   <string id="32068">Restaurar de Backup</string>
   <string id="32069">Restaurando cdARTs do backup...</string>
@@ -91,9 +91,9 @@
   <string id="32086">Rosa</string>
   <string id="32087">   Cor dos Artistas Reconhecidos</string>
   <string id="32088">   Cor dos Artistas não Reconhecidos</string>
-  <string id="32089">   Cor dos Álbuns que são iguais ao XBMCSTUFF.com</string>
+  <string id="32089">   Cor dos Álbuns que são iguais ao fanart.tv</string>
   <string id="32090">   Cor dos Álbuns que são iguais aos Locais</string>
-  <string id="32091">   Cor para Álbuns locals e XBMCSTUFF.com</string>
+  <string id="32091">   Cor para Álbuns locals e fanart.tv</string>
   <string id="32092">   Cor de Álbum Sem Igual</string>
   <string id="32093">   Cor da Lista Local de cdART</string>
   <string id="32094">Habilita cores customizadas para rótulos</string> 
@@ -113,5 +113,11 @@
   <string id="32108">Database too old</string>
   <string id="32109">Do you want to Rebuild?</string>
   <string id="32110">Problem Accessing Folder, Script Exiting</string>
-  <string id="32111">Downloaded Artwork</string> 
+  <string id="32111">Downloaded Artwork</string>
+  <string id="32112"></string>
+  <string id="32113"></string>
+  <string id="32114"></string>
+  <string id="32115">Notify During Background Database Build</string>
+  <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
+  <string id="32117">Database Building completed</string>
 </strings>
