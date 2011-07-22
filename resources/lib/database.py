@@ -18,7 +18,8 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
-
+notify = __addon__.getSetting("notifybackground")
+image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
 safe_db_version = "1.3.2"
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
@@ -63,6 +64,8 @@ def retrieve_album_details_full( album_list, total, background ):
     percent = 0
     try:
         for detail in album_list:
+            if notify == "true" and background:
+                xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( _(32042), repr(detail['label']), 500, image) )
             if not background:
                 if (pDialog.iscanceled()):
                     break

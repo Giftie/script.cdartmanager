@@ -32,9 +32,9 @@
   <string id="32028">Download annullato!</string>
   <string id="32029">Nessuna cdART trovata?</string>
   <string id="32030">Partecipa anche tu! Carica le tue cdART</string>
-  <string id="32031">su www.xbmcstuff.com</string>
+  <string id="32031">su fanart.tv</string>
   <string id="32032">Scegli un artista</string>
-  <string id="32033">Non trovato su XBMCSTUFF.com</string>
+  <string id="32033">Non trovato su fanart.tv</string>
   <string id="32034">Nessuna cdART trovata per</string>
   <string id="32035"> *RECUPERO cdART* </string>
   <string id="32036">ricerca cdART</string>
@@ -67,7 +67,7 @@
   <string id="32063">Copia cdART locali uniche</string>
   <string id="32064">Percorso cartella cdART uniche: %s</string>
   <string id="32065">Confronto tra cdART locali e remote...</string>
-  <string id="32066">Errore nella connessione a XBMCSTUFF.COM, Timeout del Socket</string>
+  <string id="32066">Errore nella connessione a fanart.tv, Timeout del Socket</string>
   <string id="32067">Backup file cdART</string>
   <string id="32068">Ripristina da Backup</string>
   <string id="32069">Ripristino cdART dal backup...</string>
@@ -91,9 +91,9 @@
   <string id="32086">Rosa</string>
   <string id="32087">   Colore Artisti Riconosciuti</string>
   <string id="32088">   Colore Artisti non riconosciuti</string>
-  <string id="32089">   Colore Album corrisp. su XBMCSTUFF.com</string>
+  <string id="32089">   Colore Album corrisp. su fanart.tv</string>
   <string id="32090">   Colore Album corrisp. in locale</string>
-  <string id="32091">   Colore corrisp. sia in locale che su XBMCSTUFF.com</string>
+  <string id="32091">   Colore corrisp. sia in locale che su fanart.tv</string>
   <string id="32092">   Colore Album non corrispondenti</string>
   <string id="32093">   Colore Elenco cdART locali</string>
   <string id="32094">Abilita colori personalizzati per le label</string> 
@@ -117,4 +117,7 @@
   <string id="32112">Using protected Samba share?</string>
   <string id="32113">Username</string>
   <string id="32114">Password</string>
+  <string id="32115">Notify During Background Database Build</string>
+  <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
+  <string id="32117">Database Building completed</string>
 </strings>

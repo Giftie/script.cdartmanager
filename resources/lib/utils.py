@@ -67,9 +67,9 @@ def smb_makedirs( path ):
 
 def _makedirs( _path ):
     #print os.environ.get('OS')
-    if _path.startswith( "smb://" ) and not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
-        smb_makedirs( _path )
-        return True
+    #if _path.startswith( "smb://" ) and not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
+    #    smb_makedirs( _path )
+    #    return True
     if ( _path.startswith( "smb://" ) and os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT") ):
         if "@" in _path:
             t_path = "\\\\" + _path.split("@")[1]
@@ -81,7 +81,6 @@ def _makedirs( _path ):
     tmppath = _path
     # loop thru and create each folder
     while ( not os.path.isdir( tmppath ) ):
-        print tmppath
         try:
             os.mkdir( tmppath )
         except:

@@ -37,6 +37,8 @@
         <setting label="32113" type="text" id="samba_user" enable="eq(-1,true)" default="" />
         <setting label="32114" type="text" option="hidden" id="samba_pass" enable="eq(-2,true)" default="" />
         <setting type="sep" />
+        <setting label="32115" type="bool" id="notifybackground" default="true" />
+        <setting label="32116" type="bool" id="notifyatfinish" default="true" />
         <setting label="32099" type="action"  action="RunScript($CWD/default.py,database)" />
     </category>
 </settings>
