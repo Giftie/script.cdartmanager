@@ -1,5 +1,6 @@
 1.4.2
 - Updated Dutch Language - Thanks Machine-Sanctum
+- added Background Database Notification and script lock-out if background database building in progress
 
 1.4.1
 - Fix Samba Username And Password error
