@@ -80,7 +80,6 @@ def get_html_source( url, path ):
     htmlsource = ""
     path = path.replace("http://fanart.tv/api/music.php?id=", "")
     path = path + ".xml"
-    print path
     if not exists( tempxml_folder ):
         os.mkdir( tempxml_folder )
     file_name = os.path.join( tempxml_folder, path )

@@ -229,7 +229,6 @@ def auto_download( type ):
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]
                                 fanart["fanart"] = final_destination
-                                print fanart
                                 successfully_downloaded.append( fanart )
                             else:
                                 xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGDEBUG )
