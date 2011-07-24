@@ -117,7 +117,7 @@
   <string id="32112"></string>
   <string id="32113"></string>
   <string id="32114"></string>
-  <string id="32115">Notify During Background Database Build</string>
-  <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
-  <string id="32117">Database Building completed</string>
+  <string id="32115">Melding Geven Gedurende Database Bouwen op de Achtergrond</string>
+  <string id="32116">Melding Geven na Bouwen van Database op de Achtergrond (weergeven voor 2 seconden)</string>
+  <string id="32117">Database Bouwen Compleet</string>
 </strings>
