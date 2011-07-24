@@ -38,11 +38,9 @@ def artwork_search( cdart_url, id, disc, type ):
     art = {}
     for item in cdart_url:
         if item["musicbrainz_albumid"] == id and type == "cover":
-            print "coverart found"
             art = item
             break
         elif item["musicbrainz_albumid"] == id and item["disc"] == disc and type == "cdart":
-            print "cdART found"
             art = item
             break
     return art
@@ -250,7 +248,6 @@ def recount_cdarts():
         if eval( item[1] ):
             cdart_existing += 1
     c.close()
-    print "Finished Recount cdarts"
     return cdart_existing
         
 def store_lalist( local_artist_list, count_artist_local, background ):
@@ -387,9 +384,14 @@ def get_local_albums_db( artist_name, background ):
             if not background:
                 pDialog.create( _(32102), _(20186) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
+            c.execute(query)
         else:
             query='SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
-        c.execute(query)
+            try:
+                c.execute(query)
+            except OperationalError:
+                query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist='%s'" % artist_name
+                c.execute(query)
         db=c.fetchall()
         c.close
         for item in db:
@@ -428,7 +430,6 @@ def get_local_artists_db():
         count = 0
         for item in db:
             count += 1
-            #print item
             artists = {}
             artists["local_id"] = ( item[0] )
             artists["name"] = ( item[1].encode("utf-8")).lstrip("'u")
@@ -458,7 +459,6 @@ def new_local_count():
             album_count = item[1]
             cdart_existing = item[2]
         cdart_existing = recount_cdarts()
-        print "Finished New Local Count"
         pDialog.close()
         return album_count, local_artist, cdart_existing
     except UnboundLocalError:
