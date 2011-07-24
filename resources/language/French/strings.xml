@@ -11,7 +11,7 @@
   <string id="32007">Artistes Existantes: %s</string>
   <string id="32008">cdARTs Existantes: %s</string>
   <string id="32009">ClearLOGOs</string>
-  <string id="32010">Local Albums: %s</string>     <!--Translation needed -->
+  <string id="32010">Albums Locale: %s</string>     <!--Translation needed -->
   <string id="32011">Advanced</string><!--Translation needed -->
   <string id="32012">Refresh Addon Database</string><!--Translation needed -->
   <string id="32013">Clean Music Database</string><!--Translation needed -->
@@ -101,7 +101,7 @@
   <string id="32096">Duplicates Found</string>
   <string id="32097">    Resize Unique cdARTs?</string>
   <string id="32098">Local cdART List</string>
-  <string id="32099">Build Database</string>
+  <string id="32099">Build Database in background</string>
   <string id="32100">Local Album Count</string>
   <string id="32101">Sorting Album Artists</string>
   <string id="32102">Retrieving Local Database</string>
@@ -120,4 +120,5 @@
   <string id="32115">Notify During Background Database Build</string>
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
+  <string id="32118">Background Database building in progress...  Exiting Script...</string>
 </strings>

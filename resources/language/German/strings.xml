@@ -101,7 +101,7 @@
   <string id="32096">Duplikat gefunden</string>
   <string id="32097">    Größe der Grafiken anpassen?</string>
   <string id="32098">Lokale Grafik Liste</string>
-  <string id="32099">Datenbank erstellen</string>
+  <string id="32099">Datenbank erstellen im hintergrund</string>
   <string id="32100">Anzahl lokaler Alben</string>
   <string id="32101">Sortiere Album Musiker</string>
   <string id="32102">Frage locale Database ab</string>
@@ -120,4 +120,5 @@
   <string id="32115">Notify During Background Database Build</string>
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
+  <string id="32118">Background Database building in progress...  Exiting Script...</string>
 </strings>

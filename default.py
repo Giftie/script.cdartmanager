@@ -5,7 +5,7 @@ __version__       = "1.4.3"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism, Kode"
 __XBMC_Revision__ = "35415"
-__date__          = "7-21-11"
+__date__          = "7-23-11"
 __dbversion__     = "1.3.2"
 __dbversionold__  = "1.1.8"
 
@@ -84,21 +84,23 @@ if ( __name__ == "__main__" ):
         xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
         query = "SELECT version FROM counts"    
         xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
-        if exists( filename ):
+        if exists( filename ):  # Check to see if file 'background_db.txt' exists in work folder, if it does, gracefully exit the script
             background_db = True
+            # message "cdART Manager, Background Database building in progress...  Exiting Script..."
+            xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
             xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
-        if not exists(settings_file) and not background_db:
+        if not exists(settings_file) and not background_db: # Open Settings if settings.xml does not exists
             xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
             __addon__.openSettings()
             first_run = True
-        elif not background_db:
+        elif not background_db: # If Settings exists and not in background_db mode, continue on
             xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
-        if not exists(addon_db) and not background_db:
+        if not exists(addon_db) and not background_db: # if l_cdart.db missing, must be first run
             xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
             first_run = True
         elif not background_db:
             xbmc.log( "[script.cdartmanager] - Addon Db Found, Checking Database Version", xbmc.LOGNOTICE )
-        if exists(addon_db_crash) and not first_run and not background_db:
+        if exists(addon_db_crash) and not first_run and not background_db: # if l_cdart.db.journal exists, creating database must have crashed at some point, delete and start over
             xbmc.log( "[script.cdartmanager] - Detected Database Crash, Trying to delete", xbmc.LOGNOTICE )
             try:
                 delete_file(addon_db)
@@ -107,7 +109,7 @@ if ( __name__ == "__main__" ):
                 xbmc.log( "[script.cdartmanager] - Error Occurred: %s " % e.__class__.__name__, xbmc.LOGNOTICE )
                 traceback.print_exc()
                 script_fail = True
-        elif not first_run and not background_db:
+        elif not first_run and not background_db: # Test database version
             xbmc.log( "[script.cdartmanager] - Looking for database version: %s" % __dbversion__, xbmc.LOGNOTICE )
             try:
                 conn_l = sqlite3.connect(addon_db)

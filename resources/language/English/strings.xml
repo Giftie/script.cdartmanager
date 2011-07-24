@@ -120,4 +120,5 @@
   <string id="32115">Notify During Background Database Build</string>
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
+  <string id="32118">Background Database building in progress...  Exiting Script...</string>
 </strings>
