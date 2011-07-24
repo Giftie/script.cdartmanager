@@ -85,6 +85,8 @@ if ( __name__ == "__main__" ):
         xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
         if exists( filename ):
             background_db = True
+            # message "cdART Manager, Background Database building in progress...  Exiting Script..."
+            xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
             xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
         if not exists(settings_file) and not background_db:
             xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
