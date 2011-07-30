@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 import urllib, sys, re, os
 from traceback import print_exc

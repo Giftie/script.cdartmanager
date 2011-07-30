@@ -1,6 +1,12 @@
+1.4.3
+- Added sorting of song paths(helps if multiple copies of albums)
+- Fixed make directory on smb:// share(tested secured and unsecured on XBMC Live 10.1 and Windows 7)
+- Fixed 'Rebuild Addon Database' on Windows systems, Live seemed to work fine and still does :)
+- removed unused setting(Fanart Path)
+
 1.4.2
 - Updated Dutch Language - Thanks Machine-Sanctum
-- added Background Database Notification and script lock-out if background database building in progress
+- added Background Database Notification and script lock-out if background database building in progress - lock-out works on Windows systems, others stop end database building
 
 1.4.1
 - Fix Samba Username And Password error

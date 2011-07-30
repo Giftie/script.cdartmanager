@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 import urllib, sys, re, os
 import htmlentitydefs
@@ -18,8 +19,6 @@ addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 tempxml_folder    = os.path.join( addon_work_folder, "tempxml" )
 __useragent__  = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
-samba_user = __addon__.getSetting( "samba_user" )
-samba_pass = __addon__.getSetting( "samba_pass" )
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
@@ -34,31 +33,42 @@ from shutil import copy as file_copy
 pDialog = xbmcgui.DialogProgress()
 
 def smb_makedirs( path ):
+    xbmc.log( "[script.cdartmanager] - Building Samba Directory on Non Windows System", xbmc.LOGDEBUG )
     if exists( path ):
         return
     # setup for samba communication
     samba_list = path.split( "/" )
     #print samba_list
+    remote_share = samba_list[ 3 ]
     if "@" in samba_list[ 2 ]:
         remote_name = samba_list[ 2 ].split( "@" )[1]
         samba_user = ( samba_list[ 2 ].split( "@" )[0] ).split( ":" )[0]
         samba_pass = ( samba_list[ 2 ].split( "@" )[0] ).split( ":" )[1]
-    remote_share = samba_list[ 3 ]
-    #print remote_share
-    # default to guest if no user/pass is given
-    if not samba_user:
-        samba_user = None
-        samba_pass = None
-    #print samba_user
-    #print samba_pass
+    else:
+        remote_name = samba_list[ 2 ]
+        try:
+            if protectedshare == "true":
+                samba_user = __addon__.getSetting( "samba_user" )
+                samba_pass = __addon__.getSetting( "samba_pass" )
+            else:
+                # default to guest if no user/pass is given
+                samba_user = None
+                samba_pass = None
+        except:
+            samba_user = None
+            samba_pass = None
+    xbmc.log( "[script.cdartmanager] - Samba - Remote Name: %s" % remote_name, xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Samba - Remote Share: %s" % remote_share, xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Samba - Username: %s" % samba_user, xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Samba - Password: %s" % samba_pass, xbmc.LOGDEBUG )
     smb = smbclient.SambaClient( server=remote_name, share=remote_share,
                                 username=samba_user, password=samba_pass )
     path2 = "smb://" + remote_name + "/" + "/".join( samba_list[3:] )
     tmppath = "/".join( samba_list[4:] )
-    while(not ( exists( path2 ) or path2 == "smb:" ) ):
+    while( not ( exists( path2 ) or path2 == "smb:" ) ):
         #print path2
         try:
-            smb.mkdir(tmppath.decode("utf-8"))
+            smb.mkdir( tmppath.decode("utf-8") )
         except:
             tmppath = os.path.dirname( tmppath )
             # need to strip the same part from a true path for the exists option
@@ -67,10 +77,12 @@ def smb_makedirs( path ):
 
 def _makedirs( _path ):
     #print os.environ.get('OS')
-    #if _path.startswith( "smb://" ) and not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
-    #    smb_makedirs( _path )
-    #    return True
+    xbmc.log( "[script.cdartmanager] - Building Directory", xbmc.LOGDEBUG )
+    if _path.startswith( "smb://" ) and not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
+        smb_makedirs( _path )
+        return True
     if ( _path.startswith( "smb://" ) and os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT") ):
+        xbmc.log( "[script.cdartmanager] - Building Samba Share Directory on Windows System", xbmc.LOGDEBUG )
         if "@" in _path:
             t_path = "\\\\" + _path.split("@")[1]
             _path = t_path
@@ -87,7 +99,7 @@ def _makedirs( _path ):
             tmppath = os.path.dirname( tmppath )
     # call function until path exists
     _makedirs( _path )
-
+    
 def clear_image_cache( url ):
     if exists( Thumbnails().get_cached_picture_thumb( url ) ):
         delete_file( Thumbnails().get_cached_picture_thumb( url ) )

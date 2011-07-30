@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # fanart.tv artist artwork scraper
 
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin

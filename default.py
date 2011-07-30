@@ -1,11 +1,12 @@
-__scriptname__    = "CDArt Manager Script"
+# -*- coding: utf-8 -*-
+__scriptname__    = "cdART Manager Script"
 __scriptID__      = "script.cdartmanager"
 __author__        = "Giftie"
 __version__       = "1.4.3"
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism, Kode"
 __XBMC_Revision__ = "35415"
-__date__          = "7-21-11"
+__date__          = "7-30-11"
 __dbversion__     = "1.3.2"
 __dbversionold__  = "1.1.8"
 
@@ -31,10 +32,10 @@ notifyatfinish = __addon__.getSetting("notifyatfinish")
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
-addon_db = os.path.join(addon_work_folder, "l_cdart.db")
-addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak")
-addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal")
-settings_file = os.path.join(addon_work_folder, "settings.xml")
+addon_db = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
+addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak").replace("\\\\","\\")
+addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal").replace("\\\\","\\")
+settings_file = os.path.join(addon_work_folder, "settings.xml").replace("\\\\","\\")
 script_fail = False
 first_run = False
 rebuild = False
@@ -84,10 +85,17 @@ if ( __name__ == "__main__" ):
         query = "SELECT version FROM counts"    
         xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
         if exists( filename ):
-            background_db = True
-            # message "cdART Manager, Background Database building in progress...  Exiting Script..."
-            xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
-            xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
+            if not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
+                background_db = False
+                # message "cdART Manager, Stopping Background Database Building"
+                xbmcgui.Dialog().ok( __language__(32042), __language__(32119) )
+                xbmc.log( "[script.cdartmanager] - Background Database Was in Progress, Stopping, allowing script to continue", xbmc.LOGNOTICE )
+                delete_file( filename )
+            else:
+                background_db = True
+                # message "cdART Manager, Background Database building in progress...  Exiting Script..."
+                xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
+                xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
         if not exists(settings_file) and not background_db:
             xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
             __addon__.openSettings()

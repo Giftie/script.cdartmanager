@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # xbmc-json utils
 
 import xbmc, xbmcaddon

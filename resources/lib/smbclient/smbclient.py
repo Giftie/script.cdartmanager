@@ -151,6 +151,7 @@ class SambaClient(object):
         if netbios_name:
             smbclient_cmd.extend(['-n', netbios_name])
         self._smbclient_cmd = smbclient_cmd
+        print "smbclient_cmd:  %s" % smbclient_cmd
         self._open_files = weakref.WeakKeyDictionary()
 
     def _raw_runcmd(self, command):
@@ -173,6 +174,7 @@ class SambaClient(object):
 
     def _runcmd_error_on_data(self, cmd, *args):
         """raises SambaClientError if cmd returns any data"""
+        print "command: %s" % cmd
         data = self._runcmd(cmd, *args).strip()
         if data and not _smb_header_re.match(data):
             raise SambaClientError("Error on %r: %r" % (cmd, data))
