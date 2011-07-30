@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 import sys, os, re
 from traceback import print_exc
@@ -162,6 +163,7 @@ def retrieve_album_details_full( album_list, total, background ):
                             xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
                             album_detail_list.append(album_artist)
                         else:
+                            xbmc.log( "[script.cdartmanager] - Path does not exist: %s" % repr( path ), xbmc.LOGDEBUG )
                             break
     except:
         xbmc.log( "[script.cdartmanager] - Error Occured", xbmc.LOGDEBUG )
@@ -479,25 +481,29 @@ def refresh_db( background ):
     local_album_count = 0
     local_artist_count = 0
     local_cdart_count = 0
-    if exists((addon_db).replace("\\\\" , "\\").encode("utf-8")):
+    if exists( addon_db ):
         #File exists needs to be deleted
         if not background:
             db_delete = xbmcgui.Dialog().yesno( _(32042) , _(32015) )
         else:
             db_delete = True
         if db_delete:
-            xbmc.log( "[script.cdartmanager] - #    Deleting Local Database", xbmc.LOGDEBUG )
-            try:
-                delete_file(addon_db_backup)
-                file_copy(addon_db,addon_db_backup)
-                xbmc.log( "[script.cdartmanager] - #    Backing up old Local Database", xbmc.LOGDEBUG )
-            except:
-                file_copy(addon_db,addon_db_backup)
-            try:
-                delete_file(addon_db)
-            except:
-                xbmc.log( "[script.cdartmanager] - Unable to delete Database", xbmc.LOGDEBUG )
-            if exists((addon_db).replace("\\\\" , "\\").encode("utf-8")): # if database file still exists even after trying to delete it.
+            if exists( addon_db_backup ):
+                try:
+                    delete_file(addon_db_backup)
+                except:
+                    xbmc.log( "[script.cdartmanager] - Unable to delete Database Backup", xbmc.LOGDEBUG )
+            if exists( addon_db ):
+                try:
+                    file_copy(addon_db,addon_db_backup)
+                    xbmc.log( "[script.cdartmanager] - #    Backing up old Local Database", xbmc.LOGDEBUG )
+                except:
+                    xbmc.log( "[script.cdartmanager] - Unable to make Database Backup", xbmc.LOGDEBUG )
+                try:
+                    delete_file( addon_db )
+                except:
+                    xbmc.log( "[script.cdartmanager] - Unable to delete Database", xbmc.LOGDEBUG )
+            if exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
                 conn = sqlite3.connect(addon_db)
                 c = conn.cursor()
                 c.execute('''DROP table counts''') 
@@ -508,7 +514,7 @@ def refresh_db( background ):
                 c.close()
             local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
         else:
-            pass            
+            pass
     else :
         #If file does not exist and some how the program got here, create new database
         local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )

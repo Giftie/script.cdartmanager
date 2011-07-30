@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from re import DOTALL, search, compile
 import xbmc
 

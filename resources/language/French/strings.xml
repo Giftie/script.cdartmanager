@@ -109,7 +109,7 @@
   <string id="32104">Uploading Missing cdART List to website</string>
   <string id="32105">Retrieving Album Details</string>
   <string id="32106">Using Dharma</string>
-  <string id="32107">FanArt Folder</string>
+  <string id="32107"></string>
   <string id="32108">Database too old</string>
   <string id="32109">Do you want to Rebuild?</string>
   <string id="32110">Problem Accessing Folder, Script Exiting</string>
@@ -121,4 +121,5 @@
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
   <string id="32118">Background Database building in progress...  Exiting Script...</string>
+  <string id="32119">Stopping Background Database Building<string>
 </strings>

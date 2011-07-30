@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # script.cdart.manager 
 # pre-eden code
 
@@ -28,7 +29,7 @@ def retrieve_album_details( album_id ):
 def get_album_path( album_id ):
     xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Album Path", xbmc.LOGDEBUG )
     paths = []
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "fields": ["file"] }, "id": 1}' % album_id
+    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "fields": ["file"], "fields": ["file"], "sort": {"method":"fullpath","order":"ascending"}}, "id": 1}' % album_id
     json_songs_detail = retrieve_json_dict(json_query, items='songs', force_log=False )
     for song in json_songs_detail:
         path = os.path.dirname( song['file'] )
