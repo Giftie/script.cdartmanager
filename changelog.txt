@@ -1,3 +1,6 @@
+1.4.4
+- fix error when checking image size and for some reason the image is corrupt - treat as wrong size
+
 1.4.3
 - Added sorting of song paths(helps if multiple copies of albums)
 - Changed testing methods of rebuilding of the database
