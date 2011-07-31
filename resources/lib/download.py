@@ -43,13 +43,17 @@ def check_size( path, type ):
         file_copy( source, destination )
     else:
         return True
-    artwork = Image.open( destination )
-    if artwork.size[0] < 1000 and artwork.size[1] < 1000:  # if image is smaller than 1000 x 1000
-        delete_file( destination )
+    try:
+        artwork = Image.open( destination )
+        if artwork.size[0] < 1000 and artwork.size[1] < 1000:  # if image is smaller than 1000 x 1000
+            delete_file( destination )
+            return True
+        else:
+            delete_file( destination )
+            return False
+    except:
+        xbmc.log( "[script.cdartmanager] - artwork does not exist. Source: %s" % source, xbmc.LOGDEBUG )
         return True
-    else:
-        delete_file( destination )
-        return False
 
 def get_filename( type, url, mode ):
     if type == "cdart":

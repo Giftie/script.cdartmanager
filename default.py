@@ -1,14 +1,4 @@
 # -*- coding: utf-8 -*-
-__scriptname__    = "cdART Manager Script"
-__scriptID__      = "script.cdartmanager"
-__author__        = "Giftie"
-__version__       = "1.4.3"
-__credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
-__credits2__      = "Chaos_666, Magnatism, Kode"
-__XBMC_Revision__ = "35415"
-__date__          = "7-30-11"
-__dbversion__     = "1.3.2"
-__dbversionold__  = "1.1.8"
 
 import sys
 import os, traceback
@@ -22,10 +12,20 @@ except:
 from os import remove as delete_file
 exists = os.path.exists
  
-__addon__ = xbmcaddon.Addon(__scriptID__)
-__language__ = __addon__.getLocalizedString
+__addon__         = xbmcaddon.Addon( "script.cdartmanager" )
+__language__      = __addon__.getLocalizedString
+__scriptname__    = __addon__.getAddonInfo('name')
+__scriptID__      = __addon__.getAddonInfo('id')
+__author__        = __addon__.getAddonInfo('author')
+__version__       = __addon__.getAddonInfo('version')
+__credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
+__credits2__      = "Chaos_666, Magnatism, Kode"
+__date__          = "7-31-11"
+__dbversion__     = "1.3.2"
+__dbversionold__  = "1.1.8"
+__addon_path__    = __addon__.getAddonInfo('path')
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 
 notifyatfinish = __addon__.getSetting("notifyatfinish")
@@ -42,7 +42,7 @@ rebuild = False
 soft_exit = False
 background_db = False
 filename = os.path.join(addon_work_folder, "background_db.txt")
-image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
+image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
 
 from utils import empty_tempxml_folder
 
