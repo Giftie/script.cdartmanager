@@ -473,6 +473,7 @@ class _SambaFile(object):
         attr = getattr(self._file, name)
         if callable(attr):
             setattr(self, name, attr)
+            
         return attr
 
     def __enter__(self):
