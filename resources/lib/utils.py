@@ -40,7 +40,15 @@ from xbmcvfs import mkdir
 
 pDialog = xbmcgui.DialogProgress()
 
+def get_unicode( to_decode ):
+    try:
+        temp_string = to_decode.encode('utf-8')
+        return to_decode
+    except UnicodeDecodeError:
+        return to_decode.decode('utf-8')
+        
 def _makedirs( _path ):
+    xbmc.log( "[script.cdartmanager] - Building Directory", xbmc.LOGDEBUG )
     success = False
     if ( exists( _path ) ): return True
     # temp path

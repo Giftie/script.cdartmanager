@@ -1,5 +1,6 @@
 1.4.4
-- fix error when checking image size and for some reason the image is corrupt - treat as wrong size
+- Fixed error when checking image size and for some reason the image is corrupt - treat as wrong size
+- Fixed unicoded paths
 
 1.4.3
 - Added sorting of song paths(helps if multiple copies of albums)
