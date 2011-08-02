@@ -121,10 +121,6 @@ def get_musicbrainz_artist_id( artist ):
         name = ""
         id = ""
         sortname = ""
-        try:
-            artist = artist.encode("utf-8")
-        except:
-            artist = artist.decode("utf-8")
         artist=artist.replace(" ", "+").replace(" & "," ")
         f = ArtistFilter( name=artist, limit=1 )
         q_result = Query().getArtists(f)

@@ -32,6 +32,13 @@ from shutil import copy as file_copy
 
 pDialog = xbmcgui.DialogProgress()
 
+def get_unicode( to_decode ):
+    try:
+        temp_string = to_decode.encode('utf-8')
+        return to_decode
+    except UnicodeDecodeError:
+        return to_decode.decode('utf-8')
+
 def smb_makedirs( path ):
     xbmc.log( "[script.cdartmanager] - Building Samba Directory on Non Windows System", xbmc.LOGDEBUG )
     if exists( path ):
@@ -103,6 +110,7 @@ def _makedirs( _path ):
 def clear_image_cache( url ):
     if exists( Thumbnails().get_cached_picture_thumb( url ) ):
         delete_file( Thumbnails().get_cached_picture_thumb( url ) )
+        
 def empty_tempxml_folder():
     if exists( tempxml_folder ):
         for file_name in os.listdir( tempxml_folder ):
@@ -288,5 +296,6 @@ def upload_unique_cdarts():
         self.upload_to_website()
     else:
         xbmcgui.Dialog().ok( "There are no unique local cdARTs")        
+
 
  
