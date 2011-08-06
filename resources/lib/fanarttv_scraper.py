@@ -46,6 +46,7 @@ def remote_cdart_list( artist_menu ):
                         album["local_name"] = album["artist"] = artist_menu["name"]
                         album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
                         album["disc"] = cdart["disc"]
+                        album["size"] = cdart["size"]
                         album["picture"] = cdart["cdart"]
                         album["thumb_cdart"] = cdart["cdart"]
                         cdart_url.append(album)
@@ -151,20 +152,22 @@ def retrieve_fanarttv_xml( id ):
                     album_artwork["cdart"] = []
                     album_artwork["cover"] = ""
                     try:
-                        cdart_match = re.search( '<cdart>(.*?)</cdart>' , album_sort[ 1 ] )
+                        cdart_match = re.search( '<cdart size="(.*?)">(.*?)</cdart>' , album_sort[ 1 ] )
                         cover_match = re.search( '<cover>(.*?)</cover>' , album_sort[ 1 ] )
-                        cdart_multi_match = re.findall( '<cdart disc="(.*?)">(.*?)</cdart>' , album_sort[ 1 ] )
+                        cdart_multi_match = re.findall( '<cdart disc="(.*?)" size="(.*?)">(.*?)</cdart>' , album_sort[ 1 ] )
                         if cdart_match:
                             cdart = {}
                             cdart["disc"] = 1
-                            cdart["cdart"] = cdart_match.group( 1 )
+                            cdart["cdart"] = cdart_match.group( 2 )
+                            cdart["size"] = int( cdart_match.group( 1 ) )
                             album_artwork["cdart"].append(cdart)
                             xbmc.log( "[script.cdartmanager] - cdart: %s" % cdart_match.group( 1 ), xbmc.LOGDEBUG )
                         else:
                             for disc in cdart_multi_match:
                                 cdart = {}
                                 cdart["disc"] = int(disc[0])
-                                cdart["cdart"] = disc[1]
+                                cdart["cdart"] = disc[2]
+                                cdart["size"] = int( disc[1] )
                                 album_artwork["cdart"].append(cdart)
                         if cover_match:
                             album_artwork["cover"] = cover_match.group( 1 )

@@ -1,3 +1,6 @@
+1.4.5
+- added better resize code
+
 1.4.4
 - fix error when checking image size and for some reason the image is corrupt - treat as wrong size
 - Fixed unicoded paths

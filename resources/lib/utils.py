@@ -75,7 +75,8 @@ def smb_makedirs( path ):
     while( not ( exists( path2 ) or path2 == "smb:" ) ):
         #print path2
         try:
-            smb.mkdir( tmppath.decode("utf-8") )
+            xbmc.log( "[script.cdartmanager] - Attempting making direcory: %s" % tmppath, xbmc.LOGDEBUG )
+            smb.mkdir( get_unicode( tmppath) )
         except:
             tmppath = os.path.dirname( tmppath )
             # need to strip the same part from a true path for the exists option
