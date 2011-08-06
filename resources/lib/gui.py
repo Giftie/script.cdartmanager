@@ -1109,9 +1109,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             selected_item = self.getControl( 122 ).getSelectedPosition()
             if not url =="" : # If it is a recognized Album...
                 if self.menu_mode == 1:
-                    message, d_success = download_cdart( url, cdart_path, "cdart", "manual" )
+                    message, d_success = download_cdart( url, cdart_path, "cdart", "manual", 0 )
                 elif self.menu_mode == 3:
-                    message, d_success = download_cdart( url, cdart_path, "cover", "manual" )
+                    message, d_success = download_cdart( url, cdart_path, "cover", "manual", 0 )
                 try:
                     pDialog.close()
                 except:
@@ -1270,7 +1270,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist["path"] = os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
                 selected_item = self.getControl( 167 ).getSelectedPosition()
                 if url:
-                    download_cdart( url, artist, "clearlogo", "manual" )
+                    download_cdart( url, artist, "clearlogo", "manual", 0 )
                     try:
                         pDialog.close()
                     except:
@@ -1287,7 +1287,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist["path"] =  os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
                 selected_item = self.getControl( 160 ).getSelectedPosition()
                 if url:
-                    download_cdart( url, artist, "fanart", "manual" )
+                    download_cdart( url, artist, "fanart", "manual", 0 )
                     try:
                         pDialog.close()
                     except:
