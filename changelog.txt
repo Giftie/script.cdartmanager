@@ -1,3 +1,7 @@
+1.4.8
+- properly handle the exception, turn it into a string, then rip it apart :)
+- fixed Local cdART list, show cdART in top left corner
+
 1.4.7
 - Opps...  Created another error trying to fix something...
 

@@ -597,14 +597,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.getControl( 140 ).reset()
         for album in l_artist:
             if album["cdart"]:
-                cdart_img = os.path.join(album["path"], "cdart.png")
-                label2 = "%s&&%s&&&&%s" % (url, album["path"], cdart_img)
-                label1 = "%s * %s" % (album["artist"] , album["title"])
+                cdart_img = os.path.join( album["path"], "cdart.png" )
+                label2 = "%s&&%s&&&&%s" % ( url, album["path"], cdart_img )
+                label1 = "%s * %s" % ( album["artist"] , album["title"] )
                 listitem = xbmcgui.ListItem( label=label1, label2=label2, thumbnailImage=cdart_img )
                 self.getControl( 140 ).addItem( listitem )
                 listitem.setLabel( self.coloring( label1 , "orange" , label1 ) )
                 listitem.setLabel2( label2 )
-                work_temp.append(album)
+                work_temp.append( album )
                 #xbmc.log( label2, xbmc.LOGNOTICE )
             else:
                 pass
@@ -969,8 +969,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         image = blank_art
         cdart_path = {}
         try: # If there is information in label 2 of list id 140(local album list)
-            local_cdart = (self.getControl(140).getSelectedItem().getLabel2()).split("&&&&")[1]
-            url = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
+            local_cdart = ( self.getControl(140).getSelectedItem().getLabel2() ).split("&&&&")[1]
+            url = (( self.getControl( 140 ).getSelectedItem().getLabel2() ).split("&&&&")[0]).split("&&")[1]
             cdart_path["path"] = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
             xbmc.log( "[script.cdartmanager] - # cdART url: %s" % url, xbmc.LOGNOTICE )
             xbmc.log( "[script.cdartmanager] - # cdART path: %s" % cdart_path["path"], xbmc.LOGNOTICE )
@@ -1041,6 +1041,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.artwork_type = "cdart"
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
+            self.getControl( 140 ).reset()
             distant_artist = get_distant_artists()
             #xbmc.log( "[script.cdartmanager] - Distant Artists:", xbmc.LOGNOTICE )
             #xbmc.log( distant_artist, xbmc.LOGNOTICE )
@@ -1158,6 +1159,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 137 : #Local cdART List
             self.getControl( 122 ).reset()
+            self.menu_mode = 8
             xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
             self.populate_local_cdarts( 0 )
         if controlId == 107 :
@@ -1227,6 +1229,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.artwork_type = "cover"
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
+            self.getControl( 140 ).reset()
             distant_artist = get_distant_artists()
             local_artists = get_local_artists_db()
             if distant_artist:
@@ -1307,11 +1310,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmcgui.Window(10001).clearProperty( "artwork" )
         if controlId == 140:
             self.cdart_icon()
-        #if controlId == 122 or controlId == 140:
-        #    self.cdart_icon()
+        if controlId in ( 100, 101, 152, 103, 104, 111):
+            xbmcgui.Window(10001).clearProperty( "artwork" )
+            self.menu_mode = 0
 
     def onAction( self, action ):
-        #self.cdart_icon()
+        if self.menu_mode == 8:
+            self.cdart_icon()
         buttonCode =  action.getButtonCode()
         actionID   =  action.getId()
         #xbmc.log( "[script.cdartmanager] - onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode), xbmc.LOGNOTICE )
