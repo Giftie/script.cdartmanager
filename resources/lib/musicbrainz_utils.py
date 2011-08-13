@@ -9,6 +9,7 @@ __version__       = sys.modules[ "__main__" ].__version__
 __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+count = 0
 
 try:
     from sqlite3 import dbapi2 as sqlite3
@@ -62,6 +63,7 @@ def get_musicbrainz_with_singles( album_title, artist ):
             album["artist_id"] = ""
             album["id"] = ""
             album["title"] = ""
+    count = 0
     xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
 
@@ -103,6 +105,7 @@ def get_musicbrainz_album( album_title, artist ):
         else:
             xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
             album = get_musicbrainz_with_singles( album_title, artist )
+    count = 0
     xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
 
