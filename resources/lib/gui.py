@@ -1156,6 +1156,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 137 : #Local cdART List
             self.getControl( 122 ).reset()
+            self.menu_mode = 8
             xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
             self.populate_local_cdarts( 0 )
         if controlId == 107 :
@@ -1319,11 +1320,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmcgui.Window(10001).clearProperty( "artwork" )
         if controlId == 140:
             self.cdart_icon()
-        #if controlId == 122 or controlId == 140:
-        #    self.cdart_icon()
+        if controlId in ( 100, 101, 152, 103, 104, 111):
+            xbmcgui.Window(10001).clearProperty( "artwork" )
+            self.menu_mode = 0
 
     def onAction( self, action ):
-        #self.cdart_icon()
+        if self.menu_mode == 8:
+            self.cdart_icon()
         buttonCode =  action.getButtonCode()
         actionID   =  action.getId()
         #xbmc.log( "[script.cdartmanager] - onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode), xbmc.LOGNOTICE )
