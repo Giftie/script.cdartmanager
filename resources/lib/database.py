@@ -58,12 +58,12 @@ def get_xbmc_database_info( background ):
     if not background:
         pDialog.create( _(32021), _(32105) )
     album_list, total = retrieve_album_list()
-    album_detail_list = retrieve_album_details_full( album_list, total, background )
+    album_detail_list = retrieve_album_details_full( album_list, total, background, False )
     if not background:
         pDialog.close()
     return album_detail_list 
 
-def retrieve_album_details_full( album_list, total, background ):
+def retrieve_album_details_full( album_list, total, background, update ):
     xbmc.log( "[script.cdartmanager] - # Retrieving Album Details", xbmc.LOGDEBUG )
     album_detail_list = []
     album_count = 0
@@ -138,13 +138,6 @@ def retrieve_album_details_full( album_list, total, background ):
                                 else:
                                     album_artist["disc"] = 1
                                 album_artist["title"] = ( title.replace(" -", "") ).rstrip()
-                            try:
-                                album_artist["title"] = get_unicode( album_artist["title"] )
-                                musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
-                            except:
-                                print_exc()
-                            album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
-                            album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
                             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album_artist["title"]), xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(album_artist["artist"]), xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
@@ -152,9 +145,18 @@ def retrieve_album_details_full( album_list, total, background ):
                             xbmc.log( "[script.cdartmanager] - cdART Exists?: %s" % album_artist["cdart"], xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Cover Art Exists?: %s" % album_artist["cover"], xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Disc #: %s" % album_artist["disc"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
                             album_detail_list.append(album_artist)
+                            if not update:
+                                try:
+                                    album_artist["title"] = get_unicode( album_artist["title"] )
+                                    musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
+                                except:
+                                    print_exc()
+                                album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
+                                album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
+                                xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
+                            
                         else:
                             xbmc.log( "[script.cdartmanager] - Path does not exist: %s" % repr( path ), xbmc.LOGDEBUG )
                             break
@@ -498,3 +500,56 @@ def refresh_db( background ):
     #update counts
     xbmc.log( "[script.cdartmanager] - # Finished Refeshing Database", xbmc.LOGDEBUG )
     return local_album_count, local_artist_count, local_cdart_count
+
+def update_database( background ):
+    xbmc.log( "[script.cdartmanager] - #  Updating Addon's DB", xbmc.LOGDEBUG )
+    update_list = []
+    new_list = []
+    if not background:
+        pDialog.create( _(32021), _(32105) )
+    local_album_list = get_local_albums_db( "all_artists", False )
+    album_list, total = retrieve_album_list()
+    album_detail_list = retrieve_album_details_full( album_list, total, background, True )
+    if not background:
+        pDialog.close()
+    #print album_detail_list
+    #print local_album_list
+    for item in album_detail_list:
+        update_album = {}
+        new_album = {}
+        new = True
+        update = False
+        #print item
+        for db_item in local_album_list:
+            #print db_item
+            if item["local_id"] == db_item["local_id"] and item["disc"] == db_item["disc"]:
+                #album id's match check path
+                if item["path"] == db_list["path"]:
+                    #path's match, no reason to update
+                    new = False
+                    update = False
+                    break
+                else:
+                    #path is different, need to update
+                    new = False
+                    update = True
+                    break
+            else:
+                continue
+        if new:
+            # new album, add it to new_list
+            new_album = item
+            new_list.append(new_album)
+            continue
+        if update:
+            # updated album, add to update_list
+            update_album = item
+            update_list.append(update_album)
+            continue
+        else:
+            # not new or updated
+            continue
+    print update_list
+    print new_list
+    
+            

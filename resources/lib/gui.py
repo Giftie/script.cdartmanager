@@ -49,7 +49,7 @@ from folder import dirEntries
 from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder
 from download import download_cdart, auto_download
-from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search
+from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
 from file_item import Thumbnails
 
@@ -1137,6 +1137,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 133 : #Update Music database selected from Advanced Menu
             xbmc.log( "[script.cdartmanager] - #  Executing Built-in - UpdateLibrary(music)", xbmc.LOGNOTICE )
             xbmc.executebuiltin( "UpdateLibrary(music)")
+            #xbmc.log( "[script.cdartmanager] - #  Updating addon db", xbmc.LOGNOTICE )
+            #update_database( False )
         if controlId == 135 : #Back up cdART selected from Advanced Menu
             self.cdart_copy()
         if controlId == 134 : #Copy Unique Local cdART selected from Advanced Menu
@@ -1171,8 +1173,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_album = self.remove_color(artist_album)
             artist = artist_album.split(" * ")[0]
             album_title = artist_album.split(" * ")[1]
-            #xbmc.log( "[script.cdartmanager] - # Album: %s" % album_title, xbmc.LOGNOTICE )
-            #xbmc.log( "[script.cdartmanager] - # Artist: %s" % artist, xbmc.LOGNOTICE )
             self.getControl( 300 ).setLabel( self.getControl(140).getSelectedItem().getLabel() )
         if controlId == 143 : #Delete cdART
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
@@ -1180,8 +1180,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist_album = self.remove_color(artist_album)
             artist = artist_album.split(" * ")[0]
             album_title = artist_album.split(" * ")[1]
-            #xbmc.log( "[script.cdartmanager] - # Path: %s" % path, xbmc.LOGNOTICE )
-            #xbmc.log( "[script.cdartmanager] - # Album: %s" % album_title, xbmc.LOGNOTICE )
             self.single_cdart_delete( path, album_title )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
@@ -1194,8 +1192,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist = artist_album.split(" * ")[0]
             album_title = artist_album.split(" * ")[1]
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
-            #xbmc.log( "[script.cdartmanager] - # Album: %s" % album_title, xbmc.LOGNOTICE )
-            #xbmc.log( "[script.cdartmanager] - # Artist: %s" % artist, xbmc.LOGNOTICE )
             self.single_backup_copy( artist, album_title, path )
             self.popup(_(32074),self.getControl(140).getSelectedItem().getLabel(), "", path)
             self.setFocusId( 140 )
@@ -1206,8 +1202,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             artist = artist_album.split(" * ")[0]
             album_title = artist_album.split(" * ")[1]
             path = ((self.getControl( 140 ).getSelectedItem().getLabel2()).split("&&&&")[1])
-            #xbmc.log( "[script.cdartmanager] - # Album: %s" % album_title, xbmc.LOGNOTICE )
-            #xbmc.log( "[script.cdartmanager] - # Artist: %s" % artist, xbmc.LOGNOTICE )
             self.single_unique_copy( artist, album_title, path )
             self.popup(_(32076),self.getControl(140).getSelectedItem().getLabel(), "", path)
             self.setFocusId( 140 )
@@ -1234,12 +1228,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
-            #xbmc.log( "[script.cdartmanager] - Distant Artists:", xbmc.LOGNOTICE )
-            #xbmc.log( distant_artist, xbmc.LOGNOTICE )
             local_artists = get_local_artists_db()
             if distant_artist:
                 self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
-            #print self.recognized_artists
             self.populate_artist_list( self.recognized_artists )
         if controlId == 170: # fanart Search Artists
             self.menu_mode = 6
@@ -1255,12 +1246,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
-            #xbmc.log( "[script.cdartmanager] - Distant Artists:", xbmc.LOGNOTICE )
-            #xbmc.log( distant_artist, xbmc.LOGNOTICE )
             local_artists = get_local_artists_db()
             if distant_artist:
                 self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
-            #print self.recognized_artists
             self.populate_artist_list( self.recognized_artists )
         if controlId == 167:
             artist = {}

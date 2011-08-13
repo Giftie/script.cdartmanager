@@ -49,10 +49,19 @@ def get_musicbrainz_with_singles( album_title, artist ):
                 album["artist_id"] = id
     except WebServiceError, e:
         xbmc.log( "[script.cdartmanager] - Error: %s" % e, xbmc.LOGERROR )
-        album["artist"] = ""
-        album["artist_id"] = ""
-        album["id"] = ""
-        album["title"] = ""
+        if int( e ) == 503 and count < 5:
+            xbmc.sleep( 2000 ) # give the musicbrainz server a 2 second break hopefully it will recover
+            count += 1
+            album = album = get_musicbrainz_with_singles( album_title, artist ) # try again
+        elif int( e ) == 503 and count > 5:
+            xbmc.log( "[script.cdartmanager] - Script being blocked, attempted 5 tries with 2 second pauses", xbmc.LOGDEBUG )
+            count = 0
+        else:
+            album["artist"] = ""
+            album["artist_id"] = ""
+            album["id"] = ""
+            album["title"] = ""
+    xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
 
 def get_musicbrainz_album( album_title, artist ):
@@ -82,8 +91,17 @@ def get_musicbrainz_album( album_title, artist ):
                 album["artist_id"] = id
     except WebServiceError, e:
         xbmc.log( "[script.cdartmanager] - Error: %s" % e, xbmc.LOGERROR )
-        album = get_musicbrainz_with_singles( album_title, artist )
-    xbmc.sleep(900) # sleep for allowing proper use of webserver
+        if int( e ) == 503 and count < 5:
+            xbmc.sleep( 2000 ) # give the musicbrainz server a 2 second break hopefully it will recover
+            count += 1
+            album = get_musicbrainz_ablum( album_title, artist ) # try again
+        elif int( e ) == 503 and count > 5:
+            xbmc.log( "[script.cdartmanager] - Script being blocked, attempted 5 tries with 2 second pauses", xbmc.LOGDEBUG )
+            count = 0
+        else:
+            xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
+            album = get_musicbrainz_with_singles( album_title, artist )
+    xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
 
 def update_musicbrainzid( type, info ):
