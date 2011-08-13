@@ -20,7 +20,7 @@ __author__        = __addon__.getAddonInfo('author')
 __version__       = __addon__.getAddonInfo('version')
 __credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__      = "Chaos_666, Magnatism, Kode"
-__date__          = "8-6-11"
+__date__          = "8-12-11"
 __dbversion__     = "1.3.2"
 __dbversionold__  = "1.1.8"
 __addon_path__    = __addon__.getAddonInfo('path')
@@ -41,7 +41,6 @@ first_run = False
 rebuild = False
 soft_exit = False
 background_db = False
-filename = os.path.join(addon_work_folder, "background_db.txt")
 image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
 
 from utils import empty_tempxml_folder
@@ -61,17 +60,12 @@ if ( __name__ == "__main__" ):
     try:
         if sys.argv[ 1 ]:
             if sys.argv[ 1 ] == "database":
-                try:
-                    missing=open(filename, "wb")
-                    missing.write("Building Database\n")
-                    missing.close()
-                except:
-                    traceback.print_exc()
-                    xbmc.log( "[script.cdartmanager] - Failed to save file: %s" % filename, xbmc.LOGNOTICE )
+                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "True") 
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
                 if notifyatfinish=="true":
                     xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32116), 2000, image) )
+                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
             elif sys.argv[ 1 ] == "autocdart":
                 pass
             elif sys.argv[ 1 ] == "autocover":
@@ -84,18 +78,19 @@ if ( __name__ == "__main__" ):
         xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
         query = "SELECT version FROM counts"    
         xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
-        if exists( filename ):
+        if xbmc.getInfoLabel( "Window(10000).Property(cdartmanager_db)" ) == "True":
             if not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
                 background_db = False
                 # message "cdART Manager, Stopping Background Database Building"
                 xbmcgui.Dialog().ok( __language__(32042), __language__(32119) )
                 xbmc.log( "[script.cdartmanager] - Background Database Was in Progress, Stopping, allowing script to continue", xbmc.LOGNOTICE )
-                delete_file( filename )
+                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
             else:
                 background_db = True
                 # message "cdART Manager, Background Database building in progress...  Exiting Script..."
                 xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
                 xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
+                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
         if not exists(settings_file) and not background_db:
             xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
             __addon__.openSettings()

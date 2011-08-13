@@ -36,24 +36,27 @@ pDialog = xbmcgui.DialogProgress()
  
 def check_size( path, type, size ):
     # first copy from source to work directory since Python does not support SMB://
+    if ( path.startswith( "smb://" ) and os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT") ):
+        if "@" in path:
+            t_path = "\\\\" + path.split("@")[1]
+            path = t_path
+        path = path.replace( "/", "\\" ).replace( "smb:", "" )
     file_name = get_filename( type, path, "auto" )
-    destination = os.path.join( addon_work_folder, "temp", file_name )
     source = os.path.join( path, file_name )
+    print source
     xbmc.log( "[script.cdartmanager] - Checking Size", xbmc.LOGDEBUG )
     if exists( source ):
-        file_copy( source, destination )
-    else:
-        return True
-    try:
-        artwork = Image.open( destination )
-        if artwork.size[0] < 1000 and artwork.size[1] < 1000 and size == 1000:  # if image is smaller than 1000 x 1000 and the image on fanart.tv = 1000
-            delete_file( destination )
+        try:
+            artwork = Image.open( source.decode('utf-8','ignore') )
+            if artwork.size[0] < 1000 and artwork.size[1] < 1000 and size == 1000:  # if image is smaller than 1000 x 1000 and the image on fanart.tv = 1000
+                return True
+            else:
+                return False
+        except:
+            print_exc()
+            xbmc.log( "[script.cdartmanager] - artwork does not exist. Source: %s" % source, xbmc.LOGDEBUG )
             return True
-        else:
-            delete_file( destination )
-            return False
-    except:
-        xbmc.log( "[script.cdartmanager] - artwork does not exist. Source: %s" % source, xbmc.LOGDEBUG )
+    else:
         return True
 
 def get_filename( type, url, mode ):
@@ -120,7 +123,10 @@ def download_cdart( url_cdart, album, type, mode, size ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
             #message = ["Download Sucessful!"]
             message = [_(32023), _(32024), "File: %s" % path , "Url: %s" % url_cdart]
-            success = file_copy( destination, final_destination ) # copy it to album folder
+            try:
+                success = file_copy( destination, final_destination ) # copy it to album folder
+            except:
+                print_exc()
             # update database
             if type == "cdart":
                 conn = sqlite3.connect(addon_db)

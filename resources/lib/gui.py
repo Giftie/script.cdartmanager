@@ -74,8 +74,6 @@ addon_img = os.path.join( addon_image_path , "cdart-icon.png" )
 missing_cdart_image = os.path.join( addon_image_path , "missing_cdart.png" )
 missing_cover_image = os.path.join( addon_image_path , "missing_cover.png" )
 pDialog = xbmcgui.DialogProgress()
-usehttpapi = __addon__.getSetting("usingdharma")
-#usehttpapi = "true"
 safe_db_version = "1.3.2"
 
 from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path

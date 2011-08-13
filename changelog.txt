@@ -1,5 +1,10 @@
+1.4.6
+- Added more delay to looking for unmatched albums on MusicBrainz - hope to reduce the chance of being blocked even more
+
 1.4.5
 - added better resize code
+- fix Windows weirdness.
+- changed method of checking if background db is in progress
 
 1.4.4
 - fix error when checking image size and for some reason the image is corrupt - treat as wrong size
