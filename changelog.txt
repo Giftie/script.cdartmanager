@@ -1,3 +1,6 @@
+1.4.7
+- Opps...  Created another error trying to fix something...
+
 1.4.6
 - Added more delay to looking for unmatched albums on MusicBrainz - hope to reduce the chance of being blocked even more
 
