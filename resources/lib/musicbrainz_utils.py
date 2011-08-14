@@ -100,7 +100,7 @@ def get_musicbrainz_album( album_title, artist, e_count ):
         if int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count < 5:
             xbmc.sleep( 2000 ) # give the musicbrainz server a 2 second break hopefully it will recover
             count += 1
-            album = get_musicbrainz_ablum( album_title, artist, count ) # try again
+            album = get_musicbrainz_album( album_title, artist, count ) # try again
         elif int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count > 5:
             xbmc.log( "[script.cdartmanager] - Script being blocked, attempted 5 tries with 2 second pauses", xbmc.LOGDEBUG )
             count = 0
