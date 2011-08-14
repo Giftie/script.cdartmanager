@@ -32,12 +32,6 @@ from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_a
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
-#from os import makedir as make_dir   # change this once xbmcfs has a mkdir()
-# remove comments to save as dharma
-#from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-#from os import remove as delete_file
-#exists = os.path.exists
-#from shutil import copyfile as file_copy
 
 pDialog = xbmcgui.DialogProgress()
  
@@ -90,11 +84,11 @@ def make_music_path( artist ):
             return False
 
 def download_cdart( url_cdart, album, type, mode, size ):
-    xbmc.log( "[script.cdartmanager] - #    Downloading artwork... ", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
     file_name = get_filename( type, url_cdart, mode )
     if file_name == "unknown":
-        xbmc.log( "[script.cdartmanager] - #    Unknown Type ", xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - Unknown Type ", xbmc.LOGDEBUG )
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
         return message, download_success
     path = album["path"].replace("\\\\" , "\\")
@@ -103,9 +97,9 @@ def download_cdart( url_cdart, album, type, mode, size ):
             pathsuccess = _makedirs( album["path"].replace("\\\\" , "\\") )
         except:
             pass
-    xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( path ), xbmc.LOGDEBUG )
-    xbmc.log( "[script.cdartmanager] - #      Filename: %s" % repr( file_name ), xbmc.LOGDEBUG )
-    xbmc.log( "[script.cdartmanager] - #      url: %s" % repr( url_cdart ), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Path: %s" % repr( path ), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Filename: %s" % repr( file_name ), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - url: %s" % repr( url_cdart ), xbmc.LOGDEBUG )
     destination = os.path.join( addon_work_folder , file_name).replace("\\\\","\\") # download to work folder first
     final_destination = os.path.join( path, file_name ).replace("\\\\","\\")
     try:
@@ -143,14 +137,14 @@ def download_cdart( url_cdart, album, type, mode, size ):
                 c.close()
             download_success = True
         else:
-            xbmc.log( "[script.cdartmanager] - #  Path error", xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - #    file path: %s" % repr( destination ), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Path error", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] -     file path: %s" % repr( destination ), xbmc.LOGDEBUG )
             message = [ _(32026),  _(32025) , "File: %s" % path , "Url: %s" % url_cdart]
             #message = Download Problem, Check file paths - Artwork Not Downloaded]           
         if type == "fanart":
             delete_file( destination )
     except:
-        xbmc.log( "[script.cdartmanager] - #  General download error", xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - General download error", xbmc.LOGDEBUG )
         message = [ _(32026), _(32025), "File: %s" % path , "Url: %s" % url_cdart]
         #message = [Download Problem, Check file paths - Artwork Not Downloaded]           
         print_exc()
@@ -169,7 +163,7 @@ def cdart_search( cdart_url, id, disc ):
     
 #Automatic download of non existing cdarts and refreshes addon's db
 def auto_download( type ):
-    xbmc.log( "[script.cdartmanager] -  Autodownload", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Autodownload", xbmc.LOGDEBUG )
     try:
         artist_count = 0
         download_count = 0
@@ -190,7 +184,7 @@ def auto_download( type ):
                 break
             artist_count += 1
             percent = int((artist_count / float(count_artist_local)) * 100)
-            xbmc.log( "[script.cdartmanager] - #    Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"]), xbmc.LOGNOTICE )
+            xbmc.log( "[script.cdartmanager] - Artist: %-40s Local ID: %-10s   Distant ID: %s" % (repr(artist["name"]), artist["local_id"], artist["distant_id"]), xbmc.LOGNOTICE )
             if type == "fanart" or type == "clearlogo":
                 pDialog.update( percent , "%s%s" % (_(32038) , repr(artist["name"]) ) )
                 auto_art = {}
@@ -222,7 +216,7 @@ def auto_download( type ):
                         for artwork in art:
                             fanart = {}
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):
-                                xbmc.log( "[script.cdartmanager] - #            Fanart already exists, skipping", xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - Fanart already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
                                 message, d_success, final_destination = download_cdart( artwork , auto_art, "fanart", "auto", 0 )
@@ -232,13 +226,13 @@ def auto_download( type ):
                                 fanart["fanart"] = final_destination
                                 successfully_downloaded.append( fanart )
                             else:
-                                xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGDEBUG )
-                                xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( auto_art["path"]), xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - Download Error...  Check Path.", xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] -     Path: %s" % repr( auto_art["path"]), xbmc.LOGDEBUG )
                                 d_error = True
                     else:
                         artwork = art[0]
                         if exists( os.path.join( auto_art["path"], "logo.png" ) ):
-                            xbmc.log( "[script.cdartmanager] - #            ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
                             continue
                         else:
                             message, d_success, final_destination = download_cdart( artwork , auto_art, "clearlogo", "auto", 0 )
@@ -247,11 +241,11 @@ def auto_download( type ):
                             auto_art["path"] = final_destination
                             successfully_downloaded.append( auto_art )
                         else:
-                            xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr( auto_art["path"]), xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - Download Error...  Check Path.", xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] -     Path: %s" % repr( auto_art["path"]), xbmc.LOGDEBUG )
                             d_error = True
                 else :
-                        xbmc.log( "[script.cdartmanager] - #            Artist Match not found", xbmc.LOGDEBUG )
+                        xbmc.log( "[script.cdartmanager] - Artist Match not found", xbmc.LOGDEBUG )
             else:
                 local_album_list = get_local_albums_db( artist["name"], False )
                 remote_cdart_url = remote_cdart_list( artist )
@@ -261,13 +255,13 @@ def auto_download( type ):
                     if ( pDialog.iscanceled() ):
                         break
                     if not remote_cdart_url:
-                        xbmc.log( "[script.cdartmanager] - #    No artwork found", xbmc.LOGDEBUG )
+                        xbmc.log( "[script.cdartmanager] - No artwork found", xbmc.LOGDEBUG )
                         break
                     album_count += 1
                     pDialog.update( percent , "%s%s" % (_(32038) , repr(artist["name"]) )  , "%s%s" % (_(32039) , repr(album["title"] )) )
                     name = artist["name"]
                     title = album["title"]
-                    xbmc.log( "[script.cdartmanager] - #     Album: %s" % repr(album["title"]), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album["title"]), xbmc.LOGDEBUG )
                     if type == "cdart":
                         if not album["cdart"] or resizeondownload == "true":
                             musicbrainz_albumid = album["musicbrainz_albumid"]
@@ -278,7 +272,7 @@ def auto_download( type ):
                                 if resizeondownload == "true":
                                     low_res = check_size( album["path"].replace( "\\\\", "\\" ), "cdart", cdart["size"] )
                                 if cdart["picture"]: 
-                                    xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH FOUND", xbmc.LOGDEBUG )
+                                    xbmc.log( "[script.cdartmanager] - ALBUM MATCH FOUND", xbmc.LOGDEBUG )
                                     #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGDEBUG )
                                     if low_res:
                                         message, d_success, final_destination = download_cdart( cdart["picture"] , album, "cdart", "auto", 0 )
@@ -288,18 +282,18 @@ def auto_download( type ):
                                             album["path"] = final_destination
                                             successfully_downloaded.append( album )
                                         else:
-                                            xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGDEBUG )
-                                            xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
+                                            xbmc.log( "[script.cdartmanager] - Download Error...  Check Path.", xbmc.LOGDEBUG )
+                                            xbmc.log( "[script.cdartmanager] -     Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
                                             d_error = True
                                     else:
                                         pass
                                 else:
-                                    xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                                    xbmc.log( "[script.cdartmanager] - ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
                             else :
-                                xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
                         else:
                             cdart_existing += 1
-                            xbmc.log( "[script.cdartmanager] - #            cdART file already exists, skipped..."    , xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - cdART file already exists, skipped..."    , xbmc.LOGDEBUG )
                     elif type == "cover":
                         if not album["cover"]:
                             musicbrainz_albumid = album["musicbrainz_albumid"]
@@ -310,8 +304,7 @@ def auto_download( type ):
                                 if resizeondownload == "true":
                                     low_res = check_size( album["path"].replace( "\\\\", "\\" ), "cover", 1000 )
                                 if art["cover"]: 
-                                    xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH FOUND", xbmc.LOGDEBUG )
-                                    #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGDEBUG )
+                                    xbmc.log( "[script.cdartmanager] - ALBUM MATCH FOUND", xbmc.LOGDEBUG )
                                     if low_res:
                                         message, d_success, final_destination = download_cdart( art["cover"] , album, "cover", "auto", 0 )
                                         if d_success == 1:
@@ -320,18 +313,18 @@ def auto_download( type ):
                                             album["path"] = final_destination
                                             successfully_downloaded.append( album )
                                         else:
-                                            xbmc.log( "[script.cdartmanager] - #  Download Error...  Check Path.", xbmc.LOGDEBUG )
-                                            xbmc.log( "[script.cdartmanager] - #      Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
+                                            xbmc.log( "[script.cdartmanager] - Download Error...  Check Path.", xbmc.LOGDEBUG )
+                                            xbmc.log( "[script.cdartmanager] -     Path: %s" % repr(album["path"]), xbmc.LOGDEBUG )
                                             d_error = True
                                     else:
                                         pass
                                 else :
-                                    xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                                    xbmc.log( "[script.cdartmanager] - ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
                             else :
-                                xbmc.log( "[script.cdartmanager] - #            ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
                         else:
                             cdart_existing += 1
-                            xbmc.log( "[script.cdartmanager] - #            cover file already exists, skipped..."    , xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - cover file already exists, skipped..."    , xbmc.LOGDEBUG )
         pDialog.close()
         if d_error:
             xbmcgui.Dialog().ok( _(32026), "%s: %s" % ( _(32041), download_count ) )

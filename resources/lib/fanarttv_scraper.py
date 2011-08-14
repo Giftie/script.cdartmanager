@@ -30,7 +30,7 @@ lookup_id = False
 pDialog = xbmcgui.DialogProgress()
 
 def remote_cdart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote cdARTs", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Finding remote cdARTs", xbmc.LOGDEBUG )
     cdart_url = []
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
@@ -56,7 +56,7 @@ def remote_cdart_list( artist_menu ):
     return cdart_url
 
 def remote_coverart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote Cover ARTs", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Finding remote Cover ARTs", xbmc.LOGDEBUG )
     coverart_url = []
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
@@ -80,7 +80,7 @@ def remote_coverart_list( artist_menu ):
     return coverart_url
 
 def remote_fanart_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote fanart", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Finding remote fanart", xbmc.LOGDEBUG )
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
@@ -95,7 +95,7 @@ def remote_fanart_list( artist_menu ):
         return ""
 
 def remote_clearlogo_list( artist_menu ):
-    xbmc.log( "[script.cdartmanager] - #   Finding remote clearlogo", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Finding remote clearlogo", xbmc.LOGDEBUG )
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
@@ -201,7 +201,7 @@ def get_distant_artists():
     return distant_artists
 
 def get_recognized( distant, local ):
-    xbmc.log( "[script.cdartmanager] - #  Retrieving Recognized Artists from fanart.tv", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Retrieving Recognized Artists from fanart.tv", xbmc.LOGDEBUG )
     true = 0
     count = 0
     name = ""
@@ -230,9 +230,9 @@ def get_recognized( distant, local ):
         pDialog.update(percent, (_(32049) % true))
         #Onscreen Dialog - Artists Matched: %
         count += 1
-    xbmc.log( "[script.cdartmanager] - #  Total Artists Matched: %s" % true, xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - Total Artists Matched: %s" % true, xbmc.LOGDEBUG )
     if true == 0:
-        xbmc.log( "[script.cdartmanager] - #  No Matches found.  Compare Artist and Album names with xbmcstuff.com", xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - No Matches found.  Compare Artist and Album names with xbmcstuff.com", xbmc.LOGDEBUG )
     pDialog.close()   
     return recognized, artist_list    
 

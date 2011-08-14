@@ -32,12 +32,6 @@ from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
 from xbmcvfs import mkdir
 
-# remove comments to save as dharma
-#from dharma_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-#from os import remove as delete_file
-#exists = os.path.exists
-#from shutil import copy as file_copy
-
 pDialog = xbmcgui.DialogProgress()
 
 def get_unicode( to_decode ):
@@ -109,7 +103,7 @@ def get_html_source( url, path ):
             break
         except:
             print_exc()
-            xbmc.log( "[script.cdartmanager] - # !!Unable to open page %s" % url, xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - !!Unable to open page %s" % url, xbmc.LOGDEBUG )
             error = True
     if error:
         return htmlsource
@@ -144,7 +138,7 @@ def upload_missing_list():
     # Here the script will upload the missing list stored in backup folder
     # and wait for a response from the website(a file) that will either initiate 
     # a batch download or a dialog stating that there are not any matches
-    xbmc.log( "[script.cdartmanager] - #    Saving Missing cdART list to backup folder", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Saving Missing cdART list to backup folder", xbmc.LOGNOTICE )
     count = 0
     percent = 0
     line = ""
@@ -171,12 +165,11 @@ def extract_zip( filename ):
     # Here the script will extract the cdARTs store in the zip file downloaded from
     # the website and delete file after extraction is complete(no wasted space)
     # files will be stored in addon_data/script.cdartmanager/temp/extracted_cdarts
-    xbmc.log( "[script.cdartmanager] - #  Decompressing unique cdARTs", xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - #", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Decompressing unique cdARTs", xbmc.LOGNOTICE )
     source = os.path.join(addon_work_folder, 'filename')
     destination = os.path.join(addon_work_folder, 'temp')
-    xbmc.log( "[script.cdartmanager] - #    Source: %s ", source, xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - #    Destination: %s ", destination, xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Source: %s ", source, xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Destination: %s ", destination, xbmc.LOGNOTICE )
     output = tarfile.TarFile.open(destination, 'r:gz2')
     try:
         output = tarfile.TarFile.open(destination, 'r:gz2')
@@ -185,7 +178,7 @@ def extract_zip( filename ):
         finally:
             file.close()
     except:
-        xbmc.log( "[script.cdartmanager] - # Problem extracting file", xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Problem extracting file", xbmc.LOGNOTICE )
             
 def download_missing_cdarts():
     # Nothing really here yet
@@ -199,7 +192,7 @@ def download_missing_cdarts():
     zip_filename = ""
     zip_file=self.upload_missing_list()
     if zip_file == "":
-        xbmc.log( "[script.cdartmanager] - # Sorry no matching cdARTs", xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Sorry no matching cdARTs", xbmc.LOGNOTICE )
     else:
         zip_filename = os.path.join(download_temp_folder, zip_file)
         download_from_website(zip_filename)
@@ -229,12 +222,11 @@ def upload_to_website():
         xbmc.log( "[script.cdartmanager] - Error uploading file: %s" % e, xbmc.LOGNOTICE )
 
 def compress_cdarts( unique_folder ):
-    xbmc.log( "[script.cdartmanager] - #  Compressing unique cdARTs", xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - #"        , xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Compressing unique cdARTs", xbmc.LOGNOTICE )
     source = unique_folder
     destination = os.path.join(addon_work_folder, 'unique.tar.gz')
-    xbmc.log( "[script.cdartmanager] - #    Source: %s " % source, xbmc.LOGNOTICE )
-    xbmc.log( "[script.cdartmanager] - #    Destination: %s " % destination, xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Source: %s " % source, xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - Destination: %s " % destination, xbmc.LOGNOTICE )
     fileList = dirEntries(source, media_type="files", recursive="TRUE", contains="")
     try:
         output = tarfile.TarFile.open(destination, 'w:gz')
@@ -244,7 +236,7 @@ def compress_cdarts( unique_folder ):
         output.close()
         self.upload_to_website()
     except:
-        xbmc.log( "[script.cdartmanager] - # Problem Compressing Unique cdARTs", xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Problem Compressing Unique cdARTs", xbmc.LOGNOTICE )
     
 def upload_unique_cdarts():
     # Nothing really here yet
