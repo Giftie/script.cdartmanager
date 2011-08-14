@@ -134,7 +134,7 @@ def retrieve_album_details_full( album_list, total, background ):
                                 album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                             try:
                                 album_artist["title"] = get_unicode( album_artist["title"] )
-                                musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"] )
+                                musicbrainz_albuminfo = get_musicbrainz_album( album_artist["title"], album_artist["artist"], 0 )
                             except:
                                 print_exc()
                             album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]

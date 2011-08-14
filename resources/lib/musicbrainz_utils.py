@@ -21,8 +21,9 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter, ReleaseGroupIncludes
 from musicbrainz2.model import Release
 
-def get_musicbrainz_with_singles( album_title, artist ):
+def get_musicbrainz_with_singles( album_title, artist, e_count ):
     album = {}
+    count = e_count
     xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
@@ -54,7 +55,7 @@ def get_musicbrainz_with_singles( album_title, artist ):
         if int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count < 5:
             xbmc.sleep( 2000 ) # give the musicbrainz server a 2 second break hopefully it will recover
             count += 1
-            album = album = get_musicbrainz_with_singles( album_title, artist ) # try again
+            album = album = get_musicbrainz_with_singles( album_title, artist, count ) # try again
         elif int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count > 5:
             xbmc.log( "[script.cdartmanager] - Script being blocked, attempted 5 tries with 2 second pauses", xbmc.LOGDEBUG )
             count = 0
@@ -67,8 +68,9 @@ def get_musicbrainz_with_singles( album_title, artist ):
     xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
 
-def get_musicbrainz_album( album_title, artist ):
+def get_musicbrainz_album( album_title, artist, e_count ):
     album = {}
+    count = e_count
     xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
@@ -81,7 +83,7 @@ def get_musicbrainz_album( album_title, artist ):
         album_result = Query().getReleaseGroups( filter )
         if len( album_result ) == 0:
             xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
-            album = get_musicbrainz_with_singles( album_title, artist )
+            album = get_musicbrainz_with_singles( album_title, artist, 0 )
         else:
             album["artist"] = album_result[ 0 ].releaseGroup.artist.name
             album["artist_id"] = (album_result[ 0 ].releaseGroup.artist.id).replace( "http://musicbrainz.org/artist/", "" )
@@ -98,13 +100,13 @@ def get_musicbrainz_album( album_title, artist ):
         if int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count < 5:
             xbmc.sleep( 2000 ) # give the musicbrainz server a 2 second break hopefully it will recover
             count += 1
-            album = get_musicbrainz_ablum( album_title, artist ) # try again
+            album = get_musicbrainz_ablum( album_title, artist, count ) # try again
         elif int( web_error.replace( "HTTP Error ", "").replace( ":", "") ) == 503 and count > 5:
             xbmc.log( "[script.cdartmanager] - Script being blocked, attempted 5 tries with 2 second pauses", xbmc.LOGDEBUG )
             count = 0
         else:
             xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
-            album = get_musicbrainz_with_singles( album_title, artist )
+            album = get_musicbrainz_with_singles( album_title, artist, 0 )
     count = 0
     xbmc.sleep( 1000 ) # sleep for allowing proper use of webserver
     return album
@@ -125,7 +127,7 @@ def update_musicbrainzid( type, info ):
             c.close()
             return artist_id
         if type == "album":
-            album_id = get_musicbrainz_album( info["title"], info["artist"] )["id"] 
+            album_id = get_musicbrainz_album( info["title"], info["artist"], 0 )["id"] 
             conn = sqlite3.connect(addon_db)
             c = conn.cursor()
             c.execute("""UPDATE alblist SET musicbrainz_albumid='%s' WHERE title='%s'""" % (album_id, info["title"]) )
