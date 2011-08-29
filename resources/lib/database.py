@@ -278,6 +278,38 @@ def store_counts( artist_count, album_count, cdart_existing ):
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Storing Counts", xbmc.LOGDEBUG )
     
+def check_local_albumartist( album_artist, local_artist_list, background ):
+    artist_count = 0
+    percent = 0
+    found = False
+    local_album_artist_list = []
+    for artist in album_artist:        # match album artist to local artist id
+        if not background:
+            pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
+            if (pDialog.iscanceled()):
+                break
+        #xbmc.log( artist, xbmc.LOGDEBUG )
+        album_artist_1 = {}
+        name = ""
+        name = artist["name"]
+        artist_count += 1
+        for local in local_artist_list:
+            if name == local["artist"]:
+                id = local["artistid"]
+                found = True
+                break
+        if found:
+            album_artist_1["name"] = name                                   # store name and
+            album_artist_1["local_id"] = id                                 # local id
+            album_artist_1["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
+            local_album_artist_list.append(album_artist_1)
+        else:
+            try:
+                print artist["name"]
+            except:
+                print_exc()
+    return local_album_artist_list, artist_count
+    
 def new_database_setup( background ):
     global local_artist
     artist_count = 0
@@ -312,34 +344,7 @@ def new_database_setup( background ):
     album_count, cdart_existing = store_alblist( local_album_list, background ) # store album details first
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
-    percent = 0
-    found = False
-    for artist in album_artist:        # match album artist to local artist id
-        if not background:
-            pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), repr(artist["name"]) ) )
-            if (pDialog.iscanceled()):
-                break
-        #xbmc.log( artist, xbmc.LOGDEBUG )
-        album_artist_1 = {}
-        name = ""
-        name = artist["name"]
-        artist_count += 1
-        for local in local_artist_list:
-            if name == local["label"]:
-                id = local["artistid"]
-                found = True
-                break
-        if found:
-            album_artist_1["name"] = name                                   # store name and
-            album_artist_1["local_id"] = id                                 # local id
-            album_artist_1["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
-            local_album_artist_list.append(album_artist_1)
-        else:
-            try:
-                print artist["name"]
-            except:
-                print_exc()
-            
+    local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background )
     count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
     if not background:
         if (pDialog.iscanceled()):
@@ -368,9 +373,11 @@ def get_local_albums_db( artist_name, background ):
             query='SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s"' % artist_name
             try:
                 c.execute(query)
-            except OperationalError:
+            except sqlite3.OperationalError:
                 query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist='%s'" % artist_name
                 c.execute(query)
+            except:
+                print_exc()
         db=c.fetchall()
         c.close
         for item in db:

@@ -1,5 +1,6 @@
 1.5.0
 - clean up excess logging comments, cosmetics
+- Request for Update On the Official Repo
 
 1.4.9
 - correctly place count into testing
