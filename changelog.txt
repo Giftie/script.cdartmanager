@@ -1,5 +1,7 @@
-1.5.0
+2.5.0
 - clean up excess logging comments, cosmetics
+- Changed major version number for Pre-Eden Version
+- Request addition to Pre-Eden Repo
 
 1.4.9
 - correctly place count into testing
