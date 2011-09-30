@@ -1,3 +1,6 @@
+1.5.3 
+- fixed HTTP-API database access
+
 1.5.2
 - fixed - copy and paste can be a real monster...
 
