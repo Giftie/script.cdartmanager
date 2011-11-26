@@ -9,24 +9,24 @@ try:
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
+from xbmcvfs import copy as file_copy
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
  
-__addon__         = xbmcaddon.Addon( "script.cdartmanager" )
-__language__      = __addon__.getLocalizedString
-__scriptname__    = __addon__.getAddonInfo('name')
-__scriptID__      = __addon__.getAddonInfo('id')
-__author__        = __addon__.getAddonInfo('author')
-__version__       = __addon__.getAddonInfo('version')
-__credits__       = "Ppic, Reaven, Imaginos, redje, Jair, "
-__credits2__      = "Chaos_666, Magnatism, Kode"
-__date__          = "8-14-11"
-__dbversion__     = "1.3.2"
-__dbversionold__  = "1.1.8"
-__addon_path__    = __addon__.getAddonInfo('path')
-
-
-notifyatfinish = __addon__.getSetting("notifyatfinish")
+__addon__            = xbmcaddon.Addon( "script.cdartmanager" )
+__language__         = __addon__.getLocalizedString
+__scriptname__       = __addon__.getAddonInfo('name')
+__scriptID__         = __addon__.getAddonInfo('id')
+__author__           = __addon__.getAddonInfo('author')
+__version__          = __addon__.getAddonInfo('version')
+__credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
+__credits2__         = "Chaos_666, Magnatism, Kode"
+__date__             = "11-24-11"
+__dbversion__        = "1.5.3"
+__dbversionold__     = "1.3.2"
+__dbversionancient__ = "1.1.8"
+__addon_path__       = __addon__.getAddonInfo('path')
+notifyatfinish       = __addon__.getSetting("notifyatfinish")
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
@@ -34,6 +34,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 addon_db = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
+addon_db_update = os.path.join(addon_work_folder, "l_cdart." + __dbversionold__ + ".db").replace("\\\\","\\")
 addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak").replace("\\\\","\\")
 addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal").replace("\\\\","\\")
 settings_file = os.path.join(addon_work_folder, "settings.xml").replace("\\\\","\\")
@@ -45,6 +46,7 @@ background_db = False
 image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
 
 from utils import empty_tempxml_folder
+from database import build_local_artist_table, store_counts, new_local_count
 
 if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
@@ -124,6 +126,13 @@ if ( __name__ == "__main__" ):
                     if item[0] == __dbversion__:
                         xbmc.log( "[script.cdartmanager] - Database matched", xbmc.LOGNOTICE )
                         break
+                    elif item[0] == __dbversionold__:
+                        xbmc.log( "[script.cdartmanager] - Vserion 1.3.2 found, updating Local Artist Table" , xbmc.LOGNOTICE )
+                        file_copy( addon_db,addon_db_update )
+                        xbmc.log( "[script.cdartmanager] - Backing up old Local Database", xbmc.LOGDEBUG )
+                        album_count, artist_count, cdart_existing = new_local_count()   
+                        local_artist_count = build_local_artist_table( False )
+                        store_counts( local_artist_count, artist_count, album_count, cdart_existing )
                     else:
                         xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
                         rebuild = xbmcgui.Dialog().yesno( __language__(32108) , __language__(32109) )

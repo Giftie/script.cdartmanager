@@ -48,7 +48,7 @@ def remote_cdart_list( artist_menu ):
                         album["disc"] = cdart["disc"]
                         album["size"] = cdart["size"]
                         album["picture"] = cdart["cdart"]
-                        album["thumb_cdart"] = cdart["cdart"]
+                        album["thumb_art"] = cdart["cdart"]
                         cdart_url.append(album)
                     #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGDEBUG )
     except:
@@ -71,8 +71,9 @@ def remote_coverart_list( artist_menu ):
                         album["artistd_id"] = artist_menu["distant_id"]
                         album["local_name"] = album["artist"] = artist_menu["name"]
                         album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
-                        album["cover"] = artwork["cover"]
-                        album["thumb_cover"] = artwork["cover"]
+                        album["size"] = 1000
+                        album["picture"] = artwork["cover"]
+                        album["thumb_art"] = artwork["cover"]
                         coverart_url.append(album)
                     #xbmc.log( "[script.cdartmanager] - cdart_url: %s " % cdart_url, xbmc.LOGDEBUG )
     except:
@@ -81,33 +82,27 @@ def remote_coverart_list( artist_menu ):
 
 def remote_fanart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote fanart", xbmc.LOGDEBUG )
+    backgrounds = ""
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             backgrounds = art[0]["backgrounds"]
-            if backgrounds:
-                return backgrounds
-            else:
-                return ""
     except:
         print_exc()
-        return ""
+    return backgrounds
 
 def remote_clearlogo_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote clearlogo", xbmc.LOGDEBUG )
+    clearlogo = ""
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             clearlogo = art[ 1 ]["clearlogo"]
-            if clearlogo:
-                return clearlogo
-            else:
-                return ""
     except:
         print_exc()
-        return ""
+    return clearlogo
 
 def retrieve_fanarttv_xml( id ):
     xbmc.log( "[script.cdartmanager] - Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )

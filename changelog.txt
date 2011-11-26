@@ -1,3 +1,12 @@
+2.5.3
+- change layout of skin(for future additions)
+- added decoding of latin-1 strings(to fix some Windows created tags)
+- removed some repetative coding.
+
+2.5.2
+- added All Artists to search for logos and fanart
+- removed pysqlite dependancy
+
 2.5.1
 - fixed error when artist name or album title contains a double quote
 - fixed changes made in XBMC(json-rpc)

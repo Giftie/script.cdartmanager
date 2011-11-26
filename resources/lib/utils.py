@@ -39,7 +39,10 @@ def get_unicode( to_decode ):
         temp_string = to_decode.encode('utf-8')
         return to_decode
     except UnicodeDecodeError:
-        return to_decode.decode('utf-8')
+        try:
+            return to_decode.decode('latin-1') # catch some Windows coded strings
+        except:
+            return to_decode.decode('utf-8')
         
 def _makedirs( _path ):
     xbmc.log( "[script.cdartmanager] - Building Directory", xbmc.LOGDEBUG )
