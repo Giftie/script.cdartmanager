@@ -1188,7 +1188,7 @@ id      | description
                     <onleft>9005</onleft>
                     <onright>9019</onright>
                     <onup>191</onup>
-                    <ondown>191</ondown>
+                    <ondown>192</ondown>
                 </control>
                 <control type="button" id="192"> <!-- Update Database -->
                     <description>Update Database</description>
@@ -1209,7 +1209,7 @@ id      | description
                     <onleft>9005</onleft>
                     <onright>9019</onright>
                     <onup>191</onup>
-                    <ondown>188</ondown>
+                    <ondown>191</ondown>
                 </control>
             </control>
             

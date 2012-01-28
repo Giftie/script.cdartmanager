@@ -976,6 +976,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             pDialog.close()
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
+        if controlId == 192: #Update database
+            update_database( False )
+            pDialog.close()
+            local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 136 : #Restore from Backup
             self.restore_from_backup()
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
