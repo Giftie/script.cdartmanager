@@ -27,7 +27,7 @@ BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('p
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
-from utils import clear_image_cache, _makedirs
+from utils import clear_image_cache, _makedirs, get_unicode
 from file_item import Thumbnails
 from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
@@ -76,13 +76,23 @@ def get_filename( type, url, mode ):
 
 def make_music_path( artist ):
     path = os.path.join( music_path, artist ).replace( "\\\\","\\" )
-    if not exists( path ):
-        if _makedirs( path ):
-            xbmc.log( "[script.cdartmanager] - Path to music artist made", xbmc.LOGDEBUG )
-            return True
-        else:
-            xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
-            return False
+    path2 = os.path.join( music_path, str.lower(artist) ).replace( "\\\\","\\" )
+    if not exists( path2 ):
+        if not exists( path ):
+            if _makedirs( path ):
+                xbmc.log( "[script.cdartmanager] - Path to music artist made", xbmc.LOGDEBUG )
+                return True
+            else:
+                xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
+                return False
+    else:
+        if not exists( path ):
+            if _makedirs( path ):
+                xbmc.log( "[script.cdartmanager] - Path to music artist made", xbmc.LOGDEBUG )
+                return True
+            else:
+                xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
+                return False
 
 def download_art( url_cdart, album, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
@@ -90,7 +100,7 @@ def download_art( url_cdart, album, type, mode, size ):
     file_name = get_filename( type, url_cdart, mode )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - Unknown Type ", xbmc.LOGDEBUG )
-        message = [ _(32026), _(32025), "File: %s" % path, "Url: %s" % url_cdart ]
+        message = [ _(32026), _(32025), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart ) ]
         return message, download_success
     path = album["path"].replace( "\\\\" , "\\" )
     if not exists( path ):
@@ -105,6 +115,7 @@ def download_art( url_cdart, album, type, mode, size ):
     final_destination = os.path.join( path, file_name ).replace( "\\\\","\\" )
     try:
         pDialog.create( _(32047) )
+        xbmc.sleep( 1000 )
         #Onscreen Dialog - "Downloading...."
         #this give the ability to use the progress bar by retrieving the downloading information
         #and calculating the percentage
@@ -112,25 +123,25 @@ def download_art( url_cdart, album, type, mode, size ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
             strProgressBar = str( percent )
             if type == "fanart" or type == "clearlogo":
-                pDialog.update( percent, "%s%s" % ( _(32038) , album["artist"] ) )
+                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
             else:
-                pDialog.update( percent, "%s%s" % ( _(32038) , album["artist"] ), "%s%s" % ( _(32039) , album["title"] ) )
+                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
             #Onscreen Dialog - *DOWNLOADING CDART*
             if ( pDialog.iscanceled() ):
                 pass  
         if exists( path ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
             #message = ["Download Sucessful!"]
-            message = [_(32023), _(32024), "File: %s" % path, "Url: %s" % url_cdart]
+            message = [_(32023), _(32024), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart )]
             success = file_copy( destination, final_destination ) # copy it to album folder
             # update database
             try:
                 conn = sqlite3.connect(addon_db)
                 c = conn.cursor()
                 if type == "cdart":
-                    c.execute('''UPDATE alblist SET cdart="True" WHERE path="%s"''' % ( album["path"] ) )
+                    c.execute('''UPDATE alblist SET cdart="True" WHERE path="%s"''' % ( get_unicode( album["path"] ) ) )
                 elif type == "cover":
-                    c.execute('''UPDATE alblist SET cover="True" WHERE path="%s"''' % ( album["path"] ) )
+                    c.execute('''UPDATE alblist SET cover="True" WHERE path="%s"''' % ( get_unicode( album["path"] ) ) )
                 conn.commit()
                 c.close()
             except:
@@ -140,13 +151,13 @@ def download_art( url_cdart, album, type, mode, size ):
         else:
             xbmc.log( "[script.cdartmanager] - Path error", xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] -     file path: %s" % repr( destination ), xbmc.LOGDEBUG )
-            message = [ _(32026),  _(32025) , "File: %s" % path, "Url: %s" % url_cdart ]
+            message = [ _(32026),  _(32025) , "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart ) ]
             #message = Download Problem, Check file paths - Artwork Not Downloaded]           
         if type == "fanart":
             delete_file( destination )
     except:
         xbmc.log( "[script.cdartmanager] - General download error", xbmc.LOGDEBUG )
-        message = [ _(32026), _(32025), "File: %s" % repr( path ), "Url: %s" % url_cdart ]
+        message = [ _(32026), _(32025), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart ) ]
         #message = [Download Problem, Check file paths - Artwork Not Downloaded]           
         print_exc()
     if mode == "auto":
@@ -186,6 +197,7 @@ def auto_download( type ):
         count_artist_local = len( recognized_artists )
         percent = 0
         pDialog.create( _(32046) )
+        xbmc.sleep( 1000 )
         #Onscreen Dialog - Automatic Downloading of Artwork
         for artist in recognized_artists:
             if ( pDialog.iscanceled() ):
@@ -194,7 +206,7 @@ def auto_download( type ):
             percent = int( (artist_count / float(count_artist_local) ) * 100)
             xbmc.log( "[script.cdartmanager] - Artist: %-40s Local ID: %-10s   Distant ID: %s" % ( repr( artist["name"] ), artist["local_id"], artist["distant_id"] ), xbmc.LOGNOTICE )
             if type in ( "fanart", "clearlogo" ):
-                pDialog.update( percent , "%s%s" % ( _(32038) , artist["name"] ) )
+                pDialog.update( percent , "%s%s" % ( _(32038) , get_unicode( artist["name"] ) ) )
                 auto_art = {}
                 auto_art["musicbrainz_artistid"] = artist["distant_id"]
                 if not auto_art["musicbrainz_artistid"]:
@@ -270,7 +282,7 @@ def auto_download( type ):
                         xbmc.log( "[script.cdartmanager] - No artwork found", xbmc.LOGDEBUG )
                         break
                     album_count += 1
-                    pDialog.update( percent , "%s%s" % ( _(32038) , artist["name"] )   , "%s%s" % (_(32039) , album["title"] ) )
+                    pDialog.update( percent , "%s%s" % ( _(32038) , get_unicode( artist["name"] ) )   , "%s%s" % (_(32039) , get_unicode( album["title"] ) ) )
                     name = artist["name"]
                     title = album["title"]
                     xbmc.log( "[script.cdartmanager] - Album: %s" % repr( album["title"] ), xbmc.LOGDEBUG )

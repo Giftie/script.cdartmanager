@@ -21,9 +21,9 @@ addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo( 'path' ), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source
-artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d'''
-release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
-release_group_url_singles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
+artist_url = '''http://192.168.2.192:3000/ws/2/artist/?query=artist:"%s"&limit=%d'''
+release_group_url_nosingles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
+release_group_url_singles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
 
 def split_album_info( album_result, index ):
     album = {}

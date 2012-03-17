@@ -174,6 +174,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def local_vs_distant( self ):
         xbmc.log( "[script.cdartmanager] - Local vs. FanArt.TV cdART", xbmc.LOGNOTICE )
         pDialog.create( _(32065) )
+        xbmc.sleep( 1000 )
         #Onscreen Dialog - Comparing Local and Online cdARTs...
         local_count = 0
         distant_count = 0
@@ -547,6 +548,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.log( "[script.cdartmanager] - Unique Folder: %s" % unique_folder, xbmc.LOGNOTICE )
         xbmc.log( "[script.cdartmanager] - Resize: %s" % resize, xbmc.LOGNOTICE )
         pDialog.create( _(32060) )
+        xbmc.sleep( 1000 )
         for album in unique:
             percent = int((count/len(unique))*100)
             xbmc.log( "[script.cdartmanager] - Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"]), xbmc.LOGNOTICE )
@@ -601,6 +603,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def restore_from_backup( self ):
         xbmc.log( "[script.cdartmanager] - Restoring cdARTs from backup folder", xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
+        xbmc.sleep( 1000 )
         #Onscreen Dialog - Restoring cdARTs from backup...
         bkup_folder = __addon__.getSetting("backup_path")
         if bkup_folder =="":
@@ -631,6 +634,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         total_albums=len(local_db)
         xbmc.log( "[script.cdartmanager] - total albums: %s" % total_albums, xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
+        xbmc.sleep( 1000 )
         for album in local_db:
             if (pDialog.iscanceled()):
                 break
@@ -704,6 +708,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             cdart_list_folder = __addon__.getSetting("cdart_path")
         albums = get_local_albums_db( "all artists", self.background )
         pDialog.create( _(32060) )
+        xbmc.sleep( 1000 )
         for album in albums:
             if (pDialog.iscanceled()):
                 break
@@ -759,6 +764,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         albums = get_local_albums_db("all artists", self.background)
         bkup_folder = __addon__.getSetting("backup_path")
         pDialog.create( _(32103), _(20186) )
+        xbmc.sleep( 1000 )
         if bkup_folder =="":
             __addon__.openSettings()
             bkup_folder = __addon__.getSetting("backup_path")
@@ -837,6 +843,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #self.getControl( 403 ).setLabel( line3 )
         #self.getControl( 9012 ).setVisible( True )
         pDialog.create( header, line1, line2, line3 )
+        xbmc.sleep( 1000 )
         xbmc.sleep(2000)
         pDialog.close()
         #self.getControl( 9012 ).setVisible( False ) 

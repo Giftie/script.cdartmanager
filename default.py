@@ -21,7 +21,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "11-24-11"
+__date__             = "2-4-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -49,6 +49,7 @@ from utils import empty_tempxml_folder
 from database import build_local_artist_table, store_counts, new_local_count
 
 if ( __name__ == "__main__" ):
+    xbmc.executebuiltin('Dialog.Close(all, true)')  
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __scriptname__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #        default.py module                                 #", xbmc.LOGNOTICE )
@@ -165,4 +166,3 @@ if ( __name__ == "__main__" ):
     except:
         print "Unexpected error:", sys.exc_info()[0]
         raise
-        

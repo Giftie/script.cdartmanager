@@ -54,16 +54,6 @@ def get_unicode( to_decode ):
                 # remove already encoded stuff
                 to_decode = to_decode[exc.start+1:]
         return "".join(final)
-    
-#def get_unicode( to_decode ):
-#    try:
-#        temp_string = to_decode.encode('utf-8')
-#        return to_decode
-#    except UnicodeDecodeError:
-#        try:
-#            return to_decode.decode('latin-1') # catch some Windows coded strings
-#        except:
-#            return to_decode.decode('utf-8')
             
 def settings_to_log( settings_path, script_heading="[utils.py]" ):
     try:
@@ -86,16 +76,26 @@ def settings_to_log( settings_path, script_heading="[utils.py]" ):
 def _makedirs( _path ):
     xbmc.log( "[script.cdartmanager] - Building Directory", xbmc.LOGDEBUG )
     success = False
+    canceled = False
     if ( exists( _path ) ): return True
     # temp path
     tmppath = _path
     # loop thru and create each folder
     while ( not exists( tmppath ) ):
+        try:
+            if (pDialog.iscanceled()):
+                canceled = True
+                break 
+        except:
+            pass
         success = mkdir( tmppath )
         if not success:
             tmppath = os.path.dirname( tmppath )
     # call function until path exists
-    _makedirs( _path )
+    if not canceled:
+        _makedirs( _path )
+    else:
+        return canceled
 
 def clear_image_cache( url ):
     thumb = Thumbnails().get_cached_picture_thumb( url )

@@ -52,6 +52,7 @@ def get_xbmc_database_info( background ):
     xbmc.log( "[script.cdartmanager] - Retrieving Album Info from XBMC's Music DB", xbmc.LOGDEBUG )
     if not background:
         pDialog.create( _(32021), _(32105) )
+        xbmc.sleep( 1000 )
     album_list, total = retrieve_album_list()
     if not album_list:
         if not background:
@@ -304,16 +305,16 @@ def check_local_albumartist( album_artist, local_artist_list, background ):
     found = False
     local_album_artist_list = []
     for artist in album_artist:        # match album artist to local artist id
-        if not background:
-            pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), (artist["name"]) ) )
-            if (pDialog.iscanceled()):
-                break
         #xbmc.log( artist, xbmc.LOGDEBUG )
         album_artist_1 = {}
         name = ""
         name = get_unicode( artist["name"] )
         artist_count += 1
         for local in local_artist_list:
+            if not background:
+                pDialog.update( percent, _(20186), "%s"  % _(32101) , "%s:%s" % ( _(32038), ( get_unicode( local["artist"] ) ) ) )
+                if (pDialog.iscanceled()):
+                    break
             if name == get_unicode( local["artist"] ):
                 id = local["artistid"]
                 found = True
@@ -468,12 +469,13 @@ def build_local_artist_table( background ):
     c = conn.cursor()
     if not background:
         pDialog.create( _(32124), _(20186) )
+        xbmc.sleep( 1000 )
     try:
         for local_artist in local_artist_list:
             artist = {}
             percent = int( ( count/float( total ) ) * 100 )
             if not background:
-                pDialog.update( percent, _(20186), "Artist ID: %s" % local_artist["artistid"], "Artist: %s" % repr( local_artist["artist"] ) )
+                pDialog.update( percent, _(20186), "Artist ID: %s" % local_artist["artistid"], "Artist: %s" % get_unicode( local_artist["artist"] ) )
             count += 1
             for album_artist in local_album_artist_list:
                 if local_artist["artistid"] == album_artist["local_id"]:
@@ -500,9 +502,9 @@ def build_local_artist_table( background ):
             print artist
             percent = int( ( count/float( len(new_local_artist_list ) ) ) * 100 )
             if not background:
-                pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), ( artist["name"] ) ) )
+                pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), get_unicode( artist["name"] ) ) )
             try:
-                c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], artist["name"], artist["musicbrainz_artistid"] ) )
+                c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
                 count += 1
             except:
                 print_exc()
@@ -524,6 +526,7 @@ def new_local_count():
     c = conn_l.cursor()
     try:
         pDialog.create( _(32020), _(20186) )
+        xbmc.sleep( 1000 )
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         query = "SELECT artists, albums, cdarts FROM counts"
         c.execute(query)
@@ -539,7 +542,7 @@ def new_local_count():
     except UnboundLocalError:
         xbmc.log( "[script.cdartmanager] - Counts Not Available in Local DB, Rebuilding DB", xbmc.LOGDEBUG )
         c.close
-        refresh_db( False )
+        return refresh_db( False )
     
 #user call from Advanced menu to refresh the addon's database
 
@@ -596,21 +599,37 @@ def update_database( background ):
     xbmc.log( "[script.cdartmanager] - Updating Addon's DB", xbmc.LOGDEBUG )
     update_list = []
     new_list = []
+    matches = []
+    unmatched = []
+    matches_indexed = {}
+    album_detail_list_indexed = {}
     if not background:
         pDialog.create( _(32021), _(32105) )
+        xbmc.sleep( 1000 )
     local_album_list = get_local_albums_db( "all artists", False )
     if not background:
         pDialog.create( _(32021), _(32105) )
+        xbmc.sleep( 1000 )
     album_list, total = retrieve_album_list()
     if not background:
         pDialog.create( _(32021), _(32105) )
+        xbmc.sleep( 1000 )
     album_detail_list = retrieve_album_details_full( album_list, total, background, True )
     #if not background:
     #    pDialog.close()
-    unmatched = [item for item in album_detail_list if item["path"] not in local_album_list]
-    print "Number of Unmatched: %s" % len( unmatched )
-    print unmatched    
+    for item in album_detail_list:
+        album_detail_list_indexed[(item["disc"], item["artist"], item["title"], item["cover"], item["cdart"], item["local_id"], item["path"])] = item
+    for item in local_album_list:
+        if (item["disc"], item["artist"], item["title"], item["cover"], item["cdart"], item["local_id"], item["path"]) in album_detail_list_indexed:
+            matches.append(item)
+    for item in matches:
+        matches_indexed[(item["disc"], item["artist"], item["title"], item["cover"], item["cdart"], item["local_id"], item["path"])] = item
+    for item in album_detail_list:
+        if not (item["disc"], item["artist"], item["title"], item["cover"], item["cdart"], item["local_id"], item["path"]) in matches_indexed:
+            unmatched.append(item)
+    print "Number of matched: %s" % len( matches )
+    print "Number of unmatched: %s" % len( unmatched )
+    print "Old total: %s:" % len( local_album_list )
+    print "New total: %s:" % len( album_detail_list )
     if not background:
         pDialog.close()
-
-        

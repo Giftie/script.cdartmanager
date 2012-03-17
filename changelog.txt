@@ -1,3 +1,7 @@
+2.5.4
+- Make changes to MusicBrainz code
+- add work around for problems with ProgressDialog
+
 2.5.3
 - change layout of skin(for future additions)
 - added decoding of latin-1 strings(to fix some Windows created tags)
