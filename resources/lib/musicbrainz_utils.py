@@ -20,10 +20,17 @@ addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo( 'path' ), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+#from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter, ReleaseGroupIncludes
+#from musicbrainz2.model import Release
 from utils import get_html_source
-artist_url = '''http://192.168.2.192:3000/ws/2/artist/?query=artist:"%s"&limit=%d'''
-release_group_url_nosingles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
-release_group_url_singles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
+artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d'''
+release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
+release_group_url_singles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
+#artist_url = '''http://192.168.2.192:3000/ws/2/artist/?query=artist:"%s"&limit=%d'''
+#release_group_url_nosingles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
+#release_group_url_singles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
+
+
 
 def split_album_info( album_result, index ):
     album = {}
@@ -58,7 +65,10 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     album["artist_id"] = ""
     album["id"] = ""
     album["title"] = ""
-    xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+    if not with_singles:
+        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+    else:
+        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist), xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
     artist = artist.replace('"','?')

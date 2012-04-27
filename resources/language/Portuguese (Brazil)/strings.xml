@@ -121,4 +121,24 @@
   <string id="32117">Construção do Banco de Dados completado</string>
   <string id="32118">Construindo do Banco de Dados em progresso...  Saíndo do Script...</string>
   <string id="32119">Interrompendo a construção do Bando de Dados em Background</string>
+  <string id="32120">All Artists</string>
+  <string id="32121">Album Artists</string>
+  <string id="32122">Edit By Artist</string>
+  <string id="32123">Backup Database</string>
+  <string id="32124">Retrieving All Local Artists</string>
+  <string id="32125">Artist ID: </string>
+  <string id="32126">Modify Local Database</string>
+  <string id="32127">Edit by Album</string>
+  <string id="32128">MusicBrainz Search Limit</string>
+  <string id="32129">Update Database</string>
+  <string id="32130">XBMC Music Database missing...</string>
+  <string id="32131">Please insure Music Library is built.</string>
+  <string id="32132">Updating Missing MusicBrainz Artist's IDs</string>
+  <string id="32133">Updating Missing MusicBrainz Album/Artist ID's</string>
+  <string id="32134">Updating Addon Database</string>
+  <string id="32135">Updating Addon Database - Local Artists</string>
+  <string id="32136">Enable MusicBrainz ID update during Addon Database update(for missing IDs)</string>
+  <string id="32137">Artist: </string>
+  <string id="32138">Album: </string>
+  <string id="32139">Successfully backed up Addon Database</string>
 </strings>

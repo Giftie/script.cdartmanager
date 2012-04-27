@@ -34,6 +34,7 @@ addon_db          = sys.modules[ "__main__" ].addon_db
 addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 __useragent__     = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+image             = sys.modules[ "__main__" ].image
 
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
@@ -50,7 +51,7 @@ from folder import dirEntries
 from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode
 from download import download_art, auto_download
-from database import store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database
+from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
 from file_item import Thumbnails
 
@@ -174,7 +175,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def local_vs_distant( self ):
         xbmc.log( "[script.cdartmanager] - Local vs. FanArt.TV cdART", xbmc.LOGNOTICE )
         pDialog.create( _(32065) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Comparing Local and Online cdARTs...
         local_count = 0
         distant_count = 0
@@ -359,7 +360,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             fanart = remote_fanart_list( artist_menu )
             if fanart:
                 for artwork in fanart:
-                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork )
+                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
                     self.getControl( 160 ).addItem( listitem )
                     listitem.setLabel( os.path.basename( artwork ) )
                     xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -385,7 +386,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if clearlogo:
                 for artwork in clearlogo:
                     clear_image_cache( artwork )
-                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork )
+                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
                     self.getControl( 167 ).addItem( listitem )
                     listitem.setLabel( os.path.basename( artwork ) )
                     xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -548,7 +549,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.log( "[script.cdartmanager] - Unique Folder: %s" % unique_folder, xbmc.LOGNOTICE )
         xbmc.log( "[script.cdartmanager] - Resize: %s" % resize, xbmc.LOGNOTICE )
         pDialog.create( _(32060) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         for album in unique:
             percent = int((count/len(unique))*100)
             xbmc.log( "[script.cdartmanager] - Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"]), xbmc.LOGNOTICE )
@@ -603,7 +604,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def restore_from_backup( self ):
         xbmc.log( "[script.cdartmanager] - Restoring cdARTs from backup folder", xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Restoring cdARTs from backup...
         bkup_folder = __addon__.getSetting("backup_path")
         if bkup_folder =="":
@@ -634,7 +635,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         total_albums=len(local_db)
         xbmc.log( "[script.cdartmanager] - total albums: %s" % total_albums, xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         for album in local_db:
             if (pDialog.iscanceled()):
                 break
@@ -708,7 +709,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             cdart_list_folder = __addon__.getSetting("cdart_path")
         albums = get_local_albums_db( "all artists", self.background )
         pDialog.create( _(32060) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         for album in albums:
             if (pDialog.iscanceled()):
                 break
@@ -764,7 +765,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         albums = get_local_albums_db("all artists", self.background)
         bkup_folder = __addon__.getSetting("backup_path")
         pDialog.create( _(32103), _(20186) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         if bkup_folder =="":
             __addon__.openSettings()
             bkup_folder = __addon__.getSetting("backup_path")
@@ -843,7 +844,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #self.getControl( 403 ).setLabel( line3 )
         #self.getControl( 9012 ).setVisible( True )
         pDialog.create( header, line1, line2, line3 )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         xbmc.sleep(2000)
         pDialog.close()
         #self.getControl( 9012 ).setVisible( False ) 
@@ -949,7 +950,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     pass # pDialog not open anyways
                 xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
             else : # If it is not a recognized Album...
-                xbmc.log( "[script.cdartmanager] - Oops --  Some how I go here... - ControlID(122)", xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Oops --  Some how I got here... - ControlID(122)", xbmc.LOGDEBUG )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             artist_name = self.artist_menu["name"].decode("utf-8")
@@ -977,7 +978,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             else:
                 xbmcgui.Dialog().ok( "There are no unique local cdARTs")
         if controlId == 131 : #Modify Local Database
-            self.setFocusID( 191 ) # change when other options 
+            self.setFocusId( 190 ) # change when other options 
+        if controlId == 190 : # backup database
+            backup_database()
+            xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( _(32042), _(32139), 2000, image) )
         if controlId == 191 : #Refresh Local database selected from Advanced Menu
             refresh_db( False )
             pDialog.close()
@@ -1066,13 +1070,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.artwork_type = "fanart"
             self.setFocusId( 170 )
         if controlId == 170:
-            self.setFocusID( 180 )
+            self.setFocusId( 180 )
         if controlId == 171:
-            self.setFocusID( 181 )
+            self.setFocusId( 181 )
         if controlId == 168:
-            self.setFocusID( 184 )
+            self.setFocusId( 184 )
         if controlId == 169:
-            self.setFocusID( 186 )
+            self.setFocusId( 186 )
         if controlId == 152:
             self.artwork_type = "clearlogo"
             self.setFocusId( 168 )
