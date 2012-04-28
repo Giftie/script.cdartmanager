@@ -3,10 +3,11 @@
 - added local artist to be added to database - this allows clearLOGOs to be downloaded for compliation artists
 - removed some hard coded English strings
 - changed MusicBrainz Access - should work better and also notify me when being overloaded.
-- split album artist with ' / ' separating artists and use first artist
+- split album artist with ' / ' separating artists and use first artist(album artists should not have a separator)
 - added auto download for all artists fanart/clearLOGOs
 - added option to not add local artists at the start when moving from an older version of cdART Manager
 - added 'Use Release Name' to Musicbrainz query, should improve percentage of matched albums
+- added creation of 'fanart.jpg' during auto fanart download
 
 2.5.3
 - change layout of skin(for future additions)
