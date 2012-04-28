@@ -9,11 +9,9 @@
   </requires>
   <extension point="xbmc.python.script"
              library="default.py">
-	  <provides>executable</provides>
   </extension> 
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <minversion>Pre-11.0</minversion>
     <summary>cdART Manager</summary>
     <summary lang="hu">CD-kép kezelő</summary>
     <description>With this script you are able to manage your cdARTs.  You can download cdARTs from fanart.tv, Backup your cdARTs, View and even delete your local cdARTs </description>

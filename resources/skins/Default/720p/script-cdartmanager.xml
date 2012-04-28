@@ -1166,7 +1166,7 @@ id      | description
                     <pulseonselect>false</pulseonselect>
                     <onleft>9005</onleft>
                     <onright>9019</onright>
-                    <onup>189</onup>
+                    <onup>192</onup>
                     <ondown>191</ondown>
                 </control>
                 <control type="button" id="191"> <!-- Refresh Database -->
@@ -1187,7 +1187,7 @@ id      | description
                     <pulseonselect>false</pulseonselect>
                     <onleft>9005</onleft>
                     <onright>9019</onright>
-                    <onup>191</onup>
+                    <onup>190</onup>
                     <ondown>192</ondown>
                 </control>
                 <control type="button" id="192"> <!-- Update Database -->
@@ -1209,7 +1209,7 @@ id      | description
                     <onleft>9005</onleft>
                     <onright>9019</onright>
                     <onup>191</onup>
-                    <ondown>191</ondown>
+                    <ondown>190</ondown>
                 </control>
             </control>
             
@@ -1279,8 +1279,8 @@ id      | description
                     <textureradioon>HomeHasSub.png</textureradioon>
                     <textureradiooff>HomeHasSub.png</textureradiooff>
                     <onleft>9000</onleft>
-                    <onright>191</onright>
-                    <onclick>191</onclick>
+                    <onright>190</onright>
+                    <onclick>190</onclick>
                     <onup>130</onup>
                     <ondown>132</ondown>
                 </control>

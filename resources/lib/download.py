@@ -97,6 +97,7 @@ def make_music_path( artist ):
 def download_art( url_cdart, album, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
+    percent = 0
     file_name = get_filename( type, url_cdart, mode )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - Unknown Type ", xbmc.LOGDEBUG )
@@ -115,7 +116,6 @@ def download_art( url_cdart, album, type, mode, size ):
     final_destination = os.path.join( path, file_name ).replace( "\\\\","\\" )
     try:
         pDialog.create( _(32047) )
-        xbmc.sleep( 1000 )
         #Onscreen Dialog - "Downloading...."
         #this give the ability to use the progress bar by retrieving the downloading information
         #and calculating the percentage
@@ -197,7 +197,7 @@ def auto_download( type ):
         count_artist_local = len( recognized_artists )
         percent = 0
         pDialog.create( _(32046) )
-        xbmc.sleep( 1000 )
+        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Automatic Downloading of Artwork
         for artist in recognized_artists:
             if ( pDialog.iscanceled() ):
@@ -208,9 +208,12 @@ def auto_download( type ):
             if type in ( "fanart", "clearlogo" ):
                 pDialog.update( percent , "%s%s" % ( _(32038) , get_unicode( artist["name"] ) ) )
                 auto_art = {}
+                temp_art = {}
+                temp_art["musicbrainz_artistid"] = artist["distant_id"]
                 auto_art["musicbrainz_artistid"] = artist["distant_id"]
                 if not auto_art["musicbrainz_artistid"]:
                     continue
+                temp_art["artist"] = artist["name"]
                 auto_art["artist"] = artist["name"]
                 path = os.path.join( music_path, artist["name"] )
                 if type == "fanart":
@@ -219,6 +222,7 @@ def auto_download( type ):
                     art = remote_clearlogo_list( auto_art )
                 if art:
                     if type == "fanart":
+                        temp_art["path"] = path
                         auto_art["path"] = os.path.join( path, "extrafanart" ).replace( "\\\\" , "\\" )
                         if not exists( auto_art["path"] ):
                             try:
@@ -233,13 +237,15 @@ def auto_download( type ):
                     else:
                         auto_art["path"] = path
                     if type == "fanart":
+                        if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
+                            message, d_success = download_art( art[0], temp_art, "fanart", "single", 0 )
                         for artwork in art:
                             fanart = {}
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):
                                 xbmc.log( "[script.cdartmanager] - Fanart already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
-                                message, d_success, final_destination = download_art( artwork , auto_art, "fanart", "auto", 0 )
+                                message, d_success, final_destination = download_art( artwork, auto_art, "fanart", "auto", 0 )
                             if d_success == 1:
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]

@@ -21,7 +21,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "2-4-12"
+__date__             = "4-27-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -68,7 +68,7 @@ if ( __name__ == "__main__" ):
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
                 if notifyatfinish=="true":
-                    xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32116), 2000, image) )
+                    xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32117), 2000, image) )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
             elif sys.argv[ 1 ] == "autocdart":
                 pass
@@ -82,7 +82,7 @@ if ( __name__ == "__main__" ):
         xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
         query = "SELECT version FROM counts"    
         xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
-        if xbmc.getInfoLabel( "Window(10000).Property(cdartmanager_db)" ) == "True":  # Check to see if file 'background_db.txt' exists in work folder, if it does, gracefully exit the script
+        if xbmc.getInfoLabel( "Window(10000).Property(cdartmanager_db)" ) == "True":  # Check to see if skin property is set, if it is, gracefully exit the script
             if not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
                 background_db = False
                 # message "cdART Manager, Stopping Background Database Building"
@@ -129,11 +129,23 @@ if ( __name__ == "__main__" ):
                         break
                     elif item[0] == __dbversionold__:
                         xbmc.log( "[script.cdartmanager] - Vserion 1.3.2 found, updating Local Artist Table" , xbmc.LOGNOTICE )
-                        file_copy( addon_db,addon_db_update )
-                        xbmc.log( "[script.cdartmanager] - Backing up old Local Database", xbmc.LOGDEBUG )
                         album_count, artist_count, cdart_existing = new_local_count()   
-                        local_artist_count = build_local_artist_table( False )
-                        store_counts( local_artist_count, artist_count, album_count, cdart_existing )
+                        xbmc.log( "[script.cdartmanager] - Backing up old Local Database", xbmc.LOGDEBUG )
+                        file_copy( addon_db,addon_db_update )
+                        update = xbmcgui.Dialog().yesno( __language__(32140) , __language__(32141) )
+                        #ask to if user would like to update database with local artists
+                        if update:
+                            local_artist_count = build_local_artist_table( False )
+                            store_counts( local_artist_count, artist_count, album_count, cdart_existing )
+                        else:
+                            # update version to current version, then add local_artists table.  This allows the script to only ask the question once
+                            c = conn_l.cursor()
+                            c.execute( '''DROP table IF EXISTS counts''' )
+                            c.execute( '''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''' )
+                            c.execute( "insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", ( 0, artist_count, album_count, cdart_existing, __dbversion__ ) )
+                            c.execute( '''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''' )
+                            conn_l.commit()
+                            c.close()
                     else:
                         xbmc.log( "[script.cdartmanager] - Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
                         rebuild = xbmcgui.Dialog().yesno( __language__(32108) , __language__(32109) )
