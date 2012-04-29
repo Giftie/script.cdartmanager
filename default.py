@@ -21,7 +21,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "4-27-12"
+__date__             = "4-28-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -43,8 +43,11 @@ first_run = False
 rebuild = False
 soft_exit = False
 background_db = False
+matched = False
 image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
 
+from musicbrainz_utils import get_musicbrainz_album, get_musicbrainz_artist_id
+import fanarttv_scraper 
 from utils import empty_tempxml_folder, settings_to_log, _makedirs
 from database import build_local_artist_table, store_counts, new_local_count
 
@@ -68,6 +71,7 @@ if ( __name__ == "__main__" ):
         _makedirs( addon_work_folder )
         __addon__.openSettings()
         first_run = True
+    print "sys.argv length: %s" % len(sys.argv)
     try:
         if sys.argv[ 1 ] and not first_run:
             if sys.argv[ 1 ] == "database":
@@ -92,6 +96,52 @@ if ( __name__ == "__main__" ):
                 xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "oneshot":
                 xbmc.log( "[script.cdartmanager] - Start method - One Shot Download method", xbmc.LOGNOTICE )
+                artwork_type = ""
+                artwork_path = ""
+                artist_name  = ""
+                album_title  = ""
+                artist_info  = {}
+                try:
+                    artwork_type = sys.argv[ 2 ] # types availabe: cdart, coverart, fanart, logo
+                    artwork_path = sys.argv[ 3 ]
+                    artist_info["name"] = artist_name  = sys.argv[ 4 ]
+                    if artwork_type in ( "cdart", "coverart" ):
+                        album_title = sys.argv[ 5 ]
+                        musicbrainz_albuminfo, discard = get_musicbrainz_album( album_title, artist_name, 0, 1 )
+                        if musicbrainz_albuminfo["id"]:
+                            xbmc.log( "[script.cdartmanager] - One Shot - MusicBrainz Album ID found", xbmc.LOGNOTICE )
+                            matched = True
+                        else:
+                            xbmc.log( "[script.cdartmanager] - One Shot - MusicBrainz Album ID not found", xbmc.LOGNOTICE )
+                            matched = False
+                        if matched:
+                            if artwork_type == "cdart":
+                                artwork = fanarttv_scraper.remote_cdart_list( artist_info )
+                            elif artwork_type == "coverart":
+                                artwork = fanarttv_scraper.remote_coverart_list( artist_info )
+                        else:
+                            pass
+                    elif artwork_type in ( "fanart", "logo", "cdart", "coverart" ):
+                        name, id, sortname = get_musicbrainz_artist_id( artist_name )
+                        if id:
+                            xbmc.log( "[script.cdartmanager] - One Shot - MusicBrainz Artist ID found", xbmc.LOGNOTICE )
+                            artist_info["distant_id"] = id
+                            artist_info["local_id"] = 0
+                            matched = True
+                        else:
+                            xbmc.log( "[script.cdartmanager] - One Shot - MusicBrainz Artist ID not found", xbmc.LOGNOTICE )
+                            matched = False
+                        if matched:
+                            if artwork_type == "fanart":
+                                artwork = fanarttv_scraper.remote_fanart_list( artist_info )
+                            elif artwork_type == "logo":
+                                artwork = fanarttv_scraper.remote_clearlogo_list( artist_info )
+                        else:
+                            pass
+                    else:
+                        xbmc.log( "[script.cdartmanager] - One Shot - Opps something happend, no artwork type given", xbmc.LOGNOTICE )
+                except:
+                    xbmc.log( "[script.cdartmanager] - One Shot - missing arguments, unable to download", xbmc.LOGNOTICE )                  
             else:
                 xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv[ 1 ]: %s" % sys.argv[ 1 ], xbmc.LOGNOTICE )
     except IndexError:
