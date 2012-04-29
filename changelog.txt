@@ -1,3 +1,118 @@
+2.5.5
+- added option to settings enable/disable "All Artists" when building Database
+- added ability to cancel local artist building
+- added more testing to insure that work folder has been created
+- added logging of script settings
+
+2.5.4
+- added addon database update
+- added local artist to be added to database - this allows clearLOGOs to be downloaded for compliation artists
+- removed some hard coded English strings
+- changed MusicBrainz Access - should work better and also notify me when being overloaded.
+- split album artist with ' / ' separating artists and use first artist(album artists should not have a separator)
+- added auto download for all artists fanart/clearLOGOs
+- added option to not add local artists at the start when moving from an older version of cdART Manager
+- added 'Use Release Name' to Musicbrainz query, should improve percentage of matched albums
+- added creation of 'fanart.jpg' during auto fanart download
+
+2.5.3
+- change layout of skin(for future additions)
+- added decoding of latin-1 strings(to fix some Windows created tags)
+- removed some repetative coding.
+
+2.5.2
+- added All Artists to search for logos and fanart
+- removed pysqlite dependancy
+
+2.5.1
+- fixed error when artist name or album title contains a double quote
+- fixed changes made in XBMC(json-rpc)
+
+2.5.0
+- clean up excess logging comments, cosmetics
+- Changed major version number for Pre-Eden Version
+- Request addition to Pre-Eden Repo
+
+1.4.9
+- correctly place count into testing
+
+1.4.8
+- properly handle the exception, turn it into a string, then rip it apart :)
+- fixed Local cdART list, show cdART in top left corner
+
+1.4.7
+- Opps...  Created another error trying to fix something...
+
+1.4.6
+- Added more delay to looking for unmatched albums on MusicBrainz - hope to reduce the chance of being blocked even more
+
+1.4.5
+- added better resize code
+- changed method of checking if background db is in progress
+
+1.4.4
+- Fixed error when checking image size and for some reason the image is corrupt - treat as wrong size
+- Fixed unicoded paths
+
+1.4.3
+- Added sorting of song paths(helps if multiple copies of albums)
+- Changed testing methods of rebuilding of the database
+- removed unused setting(Fanart Path)
+
+1.4.2
+- Updated Dutch Language - Thanks Machine-Sanctum
+- added Background Database Notification and script lock-out if background database building in progress - lock-out works on Windows systems, others stop end database building
+
+1.4.1
+- replaced smbclient method with the new xbmcvfs.mkdir()
+
+1.4.0
+- Major work done to allow making of directories on samba shares
+- dutch language updated
+
+1.3.9
+- Fixed Cover Art List - allowed improper downloading of local artwork
+
+1.3.8
+- Added Downloaded artwork view for after Auto Download
+
+1.3.7
+- Fix error with special Characters in Artist Names
+- Added New German Strings - Thanks solidsatras
+- Fixed Focus problem
+- Fixed database update when downloading artwork
+
+1.3.6
+- Fixed Dialog for Fanart and ClearLOGO autodownload
+- Added import of missing module
+
+1.3.5
+- Script now saves XML files that is retrieved from fanart.tv(reduces traffic to fanart.tv)
+- changed Artwork layout, larger images
+- Added Autodownload to Fanarts Option - saves fanart to 'Artist/extrafanart' skips if file already exists - based on Music Path in settings
+- Added Autodownload to ClearLOGOs Option - Only downloads the first available Logo, skips if one already exists
+- Cleaned up skin a bit more(slide out menus line up better)
+- Added artwork for Missing cdARTs and Cover Art.
+- Added singles to be searched if there is no other album matches(sometimes Musicbrainz reported a single if the album has the same title)
+
+1.3.2 - 1.3.4
+- Integrated MusicBrainz - to obtain better accuracy for album matching
+- Made skin full screen(1280x720)
+- Cleaned up code
+- Reduced Log spamming in normal mode(XBMC needs to be in Debug mode for full log)
+- Added fanart.tv as artwork source
+- Better Unicode handling(I hope)
+- Added Album Cover Art work to the mix
+- Added Artist FanArt to the mix
+- Added Artist ClearLOGOs to the mix
+- Removed non GUI code from gui.py(added modules)
+- Removed Artist/Album searching
+- Added option of building addon's database in the background(selectable from settings)
+- Added image size check(cdARTs and Cover Art), if under 1000x1000 and available from fanart.tv, download replacement
+
+1.3.1
+- Split Dharma and Eden code to different Git branches
+
 1.3.0
 - Fixed UnboundLocal error
 

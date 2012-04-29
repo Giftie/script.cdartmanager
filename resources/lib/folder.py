@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from re import DOTALL, search, compile
 import xbmc
 
@@ -10,7 +11,6 @@ def dirEntries( dir_name, media_type="files", recursive="FALSE", contains="" ):
             media_type - valid types: video, music, pictures, files, programs
             recursive  - Setting to "TRUE" searches Parent and subdirectories, Setting to "FALSE" only search Parent Directory
     '''
-    print "dirEntries Activated"
     fileList = []
     json_query = '{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "recursive": "%s"}, "id": 1}' % ( escapeDirJSON( dir_name ), media_type, recursive )
     json_folder_detail = xbmc.executeJSONRPC(json_query)
@@ -36,7 +36,6 @@ def escapeDirJSON ( dir_name ):
         escapeDirJSON( dir_name )
             dir_name    - the name of the directory
     '''
-    print "escapeDirJSON Activated"
     if (dir_name.find(":")):
         dir_name = dir_name.replace("\\", "\\\\")
     return dir_name
