@@ -1,3 +1,9 @@
+2.5.5
+- added option to settings enable/disable "All Artists" when building Database
+- added ability to cancel local artist building
+- added more testing to insure that work folder has been created
+- added logging of script settings
+
 2.5.4
 - added addon database update
 - added local artist to be added to database - this allows clearLOGOs to be downloaded for compliation artists

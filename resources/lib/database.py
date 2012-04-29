@@ -78,7 +78,7 @@ def retrieve_album_details_full( album_list, total, background, simple, update )
             album_count += 1
             percent = int((album_count/float(total)) * 100)
             if not background:
-                pDialog.update( percent, _(20186), "%s%s" % ( _(32138), ( repr( detail['title'] ) ) ), "%s #:%6s      %s:%6s" % ( _(32039), album_count, _(32045), total ) )
+                pDialog.update( percent, _(20186), "%s%s" % ( _(32138), ( repr( detail['title'] ) ) ), "%s #:%6s      %s%6s" % ( _(32039), album_count, _(32045), total ) )
             try:
                 album_id = detail['local_id']
             except:
@@ -204,7 +204,7 @@ def store_alblist( local_album_list, background ):
     try:
         for album in local_album_list:
             if not background:
-                pDialog.update( percent, _(20186), "%s%s" % ( _(32138), repr( album["title"] ) ), "%s:%6s" % ( _(32100), album_count ) )
+                pDialog.update( percent, _(20186), "%s%s" % ( _(32138), repr( album["title"] ) ), "%s%6s" % ( _(32100), album_count ) )
             xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album["local_id"], xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGDEBUG )
@@ -346,6 +346,7 @@ def new_database_setup( background ):
     download_count = 0
     cdart_existing = 0
     album_count = 0
+    local_artist_count = 0
     percent=0
     local_artist_list = []
     local_album_artist_list = []
@@ -373,6 +374,7 @@ def new_database_setup( background ):
     c.execute('''create table lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')   # create local album artists database
     c.execute('''create table alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
     c.execute('''create table unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
+    c.execute('''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')
     conn.commit()
     c.close()
     album_count, cdart_existing = store_alblist( local_album_list, background ) # store album details first
@@ -380,7 +382,8 @@ def new_database_setup( background ):
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
     local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background )
     count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
-    local_artist_count = build_local_artist_table( background )
+    if __addon__.getSetting("enable_all_artists") == "true":
+        local_artist_count = build_local_artist_table( background )
     store_counts( local_artist_count, artist_count, album_count, cdart_existing )
     if not background:
         if (pDialog.iscanceled()):
@@ -509,10 +512,8 @@ def build_local_artist_table( background ):
                     name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( local_artist["artist"] )
                 artist["local_id"] = local_artist["artistid"]
             new_local_artist_list.append( artist )
-        #print new_local_artist_list
         count = 0
         percent = 0
-        c.execute('''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')
         for artist in new_local_artist_list:
             percent = int( ( count/float( len(new_local_artist_list ) ) ) * 100 )
             if not background:
@@ -616,6 +617,8 @@ def update_database( background ):
     local_artists_unmatched_detail = []
     temp_local_artists = []
     artist = {}
+    updated_artists = []
+    updated_albums = []
     if not background:
         pDialog.create( _(32134), _(32105) ) # retrieving all artist from xbmc
     local_album_list = get_local_albums_db( "all artists", False )
@@ -658,45 +661,53 @@ def update_database( background ):
     for item in local_artists:
         if not ( item["local_id"], item["name"] ) in local_artists_matched_indexed:
             local_artists_unmatched.append( item )
+    combined_artists = local_artists_matched
     percent = 0
     count = 0
-    for local_artist in local_artists_unmatched:
-        artist = {}
-        percent = int( ( count/float( len( local_artists_unmatched ) ) ) * 100 )
-        if not background:
-            pDialog.update( percent, _(32135), "%s%s" % ( _(32125), local_artist["local_id"] ), "%s%s" % ( _(32137), repr( local_artist["name"]) ) )
-        count += 1
-        artist["name"] = get_unicode( local_artist["name"] )
-        artist["local_id"] = local_artist["local_id"]
-        try:
-            name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( local_artist["name"] ) )
-        except:
-            name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( local_artist["name"] )
-        local_artists_unmatched_detail.append( artist )
-    combined_artists = local_artists_matched
-    if __addon__.getSetting("update_musicbrainz") == "true":  # update missing MusicBrainz ID's
-        updated_artists = []
-        updated_albums = []
-        count = 1
-        for artist in combined_artists:
-            update_artist = artist
-            percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
-            count += 1
+    if __addon__.getSetting("enable_all_artists") == "true":
+        for local_artist in local_artists_unmatched:
+            artist = {}
+            percent = int( ( count/float( len( local_artists_unmatched ) ) ) * 100 )
             if not background:
-                pDialog.update( percent, _(32132), "%s%s" % ( _(32125), update_artist["local_id"] ), "%s%s" % ( _(32137), repr( update_artist["name"]) ) )
-            if not update_artist["musicbrainz_artistid"]:
-                try:
-                    name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( update_artist["name"] ) )
-                except:
-                    name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( update_artist["name"] )
-            updated_artists.append( update_artist )
+                pDialog.update( percent, _(32135), "%s%s" % ( _(32125), local_artist["local_id"] ), "%s%s" % ( _(32137), repr( local_artist["name"]) ) )
+            count += 1
+            artist["name"] = get_unicode( local_artist["name"] )
+            artist["local_id"] = local_artist["local_id"]
+            try:
+                name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( local_artist["name"] ) )
+            except:
+                name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( local_artist["name"] )
+            local_artists_unmatched_detail.append( artist )
+    if __addon__.getSetting("update_musicbrainz") == "true":  # update missing MusicBrainz ID's
         count = 1
+        if __addon__.getSetting("enable_all_artists") == "true":
+            for artist in combined_artists:
+                if not background:
+                    if (pDialog.iscanceled()):
+                        break
+                update_artist = artist
+                percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
+                count += 1
+                if not background:
+                    pDialog.update( percent, _(32132), "%s%s" % ( _(32125), update_artist["local_id"] ), "%s%s" % ( _(32137), repr( update_artist["name"]) ) )
+                if not update_artist["musicbrainz_artistid"]:
+                    try:
+                        name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( update_artist["name"] ) )
+                    except:
+                        name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( update_artist["name"] )
+                updated_artists.append( update_artist )
+            count = 1
+        else:
+            updated_artists = combined_artists
         for album in combined:
+            if not background:
+                if (pDialog.iscanceled()):
+                    break
             update_album = album
             percent = int( ( count/float( len( combined ) ) ) * 100 )
             count += 1
             if not background:
-                pDialog.update( percent, _(32133), "%s%s" % ( _(32138), repr( album["title"] ) ), "%s%s" % ( _(32138), repr( album["artist"] ) ) )
+                pDialog.update( percent, _(32133), "%s%s" % ( _(32138), repr( album["title"] ) ), "%s%s" % ( _(32137), repr( album["artist"] ) ) )
             if not album["musicbrainz_albumid"]:
                 musicbrainz_albuminfo, discard = get_musicbrainz_album( album["title"], album["artist"], 0, 1 )
                 update_album["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
@@ -727,16 +738,17 @@ def update_database( background ):
     count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
     conn = sqlite3.connect( addon_db )
     c = conn.cursor()
-    for artist in combined_artists:
-        percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
-        if not background:
-            pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), get_unicode( artist["name"] ) ) )
-        try:
-            c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
-            count += 1
-        except:
-            print_exc()
-            continue            
+    if len( combined_artists ) > 0:
+        for artist in combined_artists:
+            percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
+            if not background:
+                pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), get_unicode( artist["name"] ) ) )
+            try:
+                c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
+                count += 1
+            except:
+                print_exc()
+                continue            
     conn.commit()
     if not background:
         pDialog.close()

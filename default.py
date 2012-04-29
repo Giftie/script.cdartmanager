@@ -45,7 +45,7 @@ soft_exit = False
 background_db = False
 image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
 
-from utils import empty_tempxml_folder
+from utils import empty_tempxml_folder, settings_to_log, _makedirs
 from database import build_local_artist_table, store_counts, new_local_count
 
 if ( __name__ == "__main__" ):
@@ -60,20 +60,38 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
+    settings_to_log( addon_work_folder, "[script.cdartmanager]" )
     empty_tempxml_folder()
+    xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
+    if not exists(settings_file): # Open Settings if settings.xml does not exists
+        xbmc.log( "[script.cdartmanager] - settings.xml File not found, creating path and opening settings", xbmc.LOGNOTICE )
+        _makedirs( addon_work_folder )
+        __addon__.openSettings()
+        first_run = True
     try:
-        if sys.argv[ 1 ]:
+        if sys.argv[ 1 ] and not first_run:
             if sys.argv[ 1 ] == "database":
+                xbmc.log( "[script.cdartmanager] - Start method - Build Database in background", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "True") 
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
                 if notifyatfinish=="true":
                     xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32117), 2000, image) )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
+            elif sys.argv[ 1 ] == "update":
+                xbmc.log( "[script.cdartmanager] - Start method - Update Database in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "autocdart":
-                pass
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload cdARTs in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "autocover":
-                pass
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload cover art in background", xbmc.LOGNOTICE )
+            elif sys.argv[ 1 ] == "autofanart":
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload fanarts in background", xbmc.LOGNOTICE )
+            elif sys.argv[ 1 ] == "autologo":
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload logos in background", xbmc.LOGNOTICE )
+            elif sys.argv[ 1 ] == "autoall":
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
+            elif sys.argv[ 1 ] == "oneshot":
+                xbmc.log( "[script.cdartmanager] - Start method - One Shot Download method", xbmc.LOGNOTICE )
             else:
                 xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv[ 1 ]: %s" % sys.argv[ 1 ], xbmc.LOGNOTICE )
     except IndexError:
@@ -81,7 +99,6 @@ if ( __name__ == "__main__" ):
         xbmc.log( "[script.cdartmanager] - Addon Database: %s" % addon_db, xbmc.LOGNOTICE )
         xbmc.log( "[script.cdartmanager] - Addon settings: %s" % settings_file, xbmc.LOGNOTICE )
         query = "SELECT version FROM counts"    
-        xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
         if xbmc.getInfoLabel( "Window(10000).Property(cdartmanager_db)" ) == "True":  # Check to see if skin property is set, if it is, gracefully exit the script
             if not os.environ.get( "OS", "win32" ) in ("win32", "Windows_NT"):
                 background_db = False
@@ -95,11 +112,7 @@ if ( __name__ == "__main__" ):
                 xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
                 xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
-        if not exists(settings_file) and not background_db: # Open Settings if settings.xml does not exists
-            xbmc.log( "[script.cdartmanager] - settings.xml File not found, opening settings", xbmc.LOGNOTICE )
-            __addon__.openSettings()
-            first_run = True
-        elif not background_db: # If Settings exists and not in background_db mode, continue on
+        if not background_db: # If Settings exists and not in background_db mode, continue on
             xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
         if not exists(addon_db) and not background_db: # if l_cdart.db missing, must be first run
             xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
@@ -163,7 +176,7 @@ if ( __name__ == "__main__" ):
                     xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
                     script_fail = True
         path = __addon__.getAddonInfo('path')   
-        if not script_fail and not background_db:
+        if not script_fail and not background_db and not first_run:
             if rebuild:
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
