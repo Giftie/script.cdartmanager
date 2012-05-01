@@ -175,7 +175,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def local_vs_distant( self ):
         xbmc.log( "[script.cdartmanager] - Local vs. FanArt.TV cdART", xbmc.LOGNOTICE )
         pDialog.create( _(32065) )
-        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Comparing Local and Online cdARTs...
         local_count = 0
         distant_count = 0
@@ -224,8 +223,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         temp_album["local"] = False
                         xbmc.log( "[script.cdartmanager] - No local cdART image exists", xbmc.LOGNOTICE )
                 cdart_lvd.append(temp_album)
-                #xbmc.log( temp_album, xbmc.LOGNOTICE )
-                #xbmc.log( cdart_lvd                , xbmc.LOGNOTICE )
                 if ( pDialog.iscanceled() ):
                     break
             if ( pDialog.iscanceled() ):
@@ -549,7 +546,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.log( "[script.cdartmanager] - Unique Folder: %s" % unique_folder, xbmc.LOGNOTICE )
         xbmc.log( "[script.cdartmanager] - Resize: %s" % resize, xbmc.LOGNOTICE )
         pDialog.create( _(32060) )
-        #xbmc.sleep( 1000 )
         for album in unique:
             percent = int((count/len(unique))*100)
             xbmc.log( "[script.cdartmanager] - Artist: %-30s    ##    Album:%s" % (album["artist"], album["title"]), xbmc.LOGNOTICE )
@@ -604,7 +600,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def restore_from_backup( self ):
         xbmc.log( "[script.cdartmanager] - Restoring cdARTs from backup folder", xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
-        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Restoring cdARTs from backup...
         bkup_folder = __addon__.getSetting("backup_path")
         if bkup_folder =="":
@@ -635,7 +630,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         total_albums=len(local_db)
         xbmc.log( "[script.cdartmanager] - total albums: %s" % total_albums, xbmc.LOGNOTICE )
         pDialog.create( _(32069) )
-        #xbmc.sleep( 1000 )
         for album in local_db:
             if (pDialog.iscanceled()):
                 break
@@ -709,7 +703,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             cdart_list_folder = __addon__.getSetting("cdart_path")
         albums = get_local_albums_db( "all artists", self.background )
         pDialog.create( _(32060) )
-        #xbmc.sleep( 1000 )
         for album in albums:
             if (pDialog.iscanceled()):
                 break
@@ -763,14 +756,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         percent = 0
         line = ""
         albums = get_local_albums_db("all artists", self.background)
-        bkup_folder = __addon__.getSetting("backup_path")
         pDialog.create( _(32103), _(20186) )
-        #xbmc.sleep( 1000 )
-        if bkup_folder =="":
-            __addon__.openSettings()
-            bkup_folder = __addon__.getSetting("backup_path")
-        filename=os.path.join(bkup_folder, "missing.txt")
-        filename2 = os.path.join(addon_work_folder, "missing.txt")
+        filename=os.path.join(addon_work_folder, "missing.txt")
         try:
             missing=open(filename, "wb")
             missing.write("Albums Missing cdARTs\n")
@@ -781,18 +768,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if not album["cdart"]:
                     artist = repr(album["artist"]) 
                     title = repr(album["title"])
-                    line = artist + " * " + title + "\n"
-                    missing.write( line )
-            missing.close()
-            missing=open(filename2, "wb")
-            missing.write("Albums Missing cdARTs\n")
-            missing.write("---------------------\n")
-            missing.write("\n")
-            for album in albums:
-                count += 1
-                if not album["cdart"]:
-                    artist = repr( album["artist"] ) 
-                    title = repr( album["title"] )
                     line = artist + " * " + title + "\n"
                     missing.write( line )
             missing.close()
@@ -844,7 +819,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #self.getControl( 403 ).setLabel( line3 )
         #self.getControl( 9012 ).setVisible( True )
         pDialog.create( header, line1, line2, line3 )
-        #xbmc.sleep( 1000 )
         xbmc.sleep(2000)
         pDialog.close()
         #self.getControl( 9012 ).setVisible( False ) 
@@ -958,9 +932,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if self.menu_mode == 1:
                 self.remote_cdart_url = remote_cdart_list( self.artist_menu )
                 xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
-                self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item )
+                self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item, "cdart" )
             elif self.menu_mode == 3:
-                self.remote_cdart_url = remote_coverart_list( self.artist_menu, selected_item )
+                self.remote_cdart_url = remote_coverart_list( self.artist_menu, selected_item, "cover" )
                 xbmcgui.Window(10001).setProperty( "artwork", "cover" )
                 self.populate_coverarts( self.artist_menu, self.remote_cdart_url )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
@@ -976,7 +950,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if difference == 1:
                 self.unique_cdart_copy( unique )
             else:
-                xbmcgui.Dialog().ok( "There are no unique local cdARTs")
+                xbmcgui.Dialog().ok( "There are no unique local cdARTs" )
         if controlId == 131 : #Modify Local Database
             self.setFocusId( 190 ) # change when other options 
         if controlId == 190 : # backup database
@@ -1161,7 +1135,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.cdart_icon()
         buttonCode =  action.getButtonCode()
         actionID   =  action.getId()
-        #xbmc.log( "[script.cdartmanager] - onAction(): actionID=%i buttonCode=%i" % (actionID,buttonCode), xbmc.LOGNOTICE )
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
             empty_tempxml_folder()
@@ -1175,7 +1148,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.close()
 
 def onAction( self, action ):
-    #xbmc.log( action, xbmc.LOGNOTICE )
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             empty_tempxml_folder()
             self.close()

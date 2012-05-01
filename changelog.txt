@@ -1,7 +1,12 @@
+2.5.6
+- fixed settings opening if backup folder not set - Thanks Martijn
+- fixed progress dialog 'flash' - Thanks Martijn
+- updated Portuguese (Brazil) strings - Thanks Wanilton
+
 2.5.5
-- added option to settings enable/disable "All Artists" when building Database
-- added ability to cancel local artist building
-- added more testing to insure that work folder has been created
+- added option to settings enable/disable "All Artists" when building Database - Thanks Martijn
+- added ability to cancel local artist building - Thanks Martijn
+- added more testing to insure that work folder has been created - Thanks Martijn
 - added logging of script settings
 
 2.5.4

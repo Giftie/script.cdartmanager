@@ -52,7 +52,6 @@ def get_xbmc_database_info( background ):
     xbmc.log( "[script.cdartmanager] - Retrieving Album Info from XBMC's Music DB", xbmc.LOGDEBUG )
     if not background:
         pDialog.create( _(32021), _(32105) )
-        xbmc.sleep( 1000 )
     album_list, total = retrieve_album_list()
     if not album_list:
         if not background:
@@ -541,23 +540,22 @@ def new_local_count():
     c = conn_l.cursor()
     try:
         pDialog.create( _(32020), _(20186) )
-        xbmc.sleep( 1000 )
         #Onscreen Dialog - Retrieving Local Music Database, Please Wait....
         query = "SELECT artists, albums, cdarts FROM counts"
         c.execute(query)
         counts=c.fetchall()
         c.close
         for item in counts:
-            local_artist = item[0]
+            album_artist = item[0]
             album_count = item[1]
             cdart_existing = item[2]
         cdart_existing = recount_cdarts()
         pDialog.close()
-        return album_count, local_artist, cdart_existing
+        return album_count, album_artist, cdart_existing
     except UnboundLocalError:
         xbmc.log( "[script.cdartmanager] - Counts Not Available in Local DB, Rebuilding DB", xbmc.LOGDEBUG )
         c.close
-        return refresh_db( False )
+        return 0,0,0
     
 #user call from Advanced menu to refresh the addon's database
 
@@ -760,7 +758,7 @@ def update_database( background ):
 
 def backup_database():
     todays_date = today = datetime.datetime.today().strftime("%m-%d-%Y")
-    db_backup_file = "lcdart-%s.bak" % todays_date
+    db_backup_file = "l_cdart-%s.bak" % todays_date
     addon_backup_path = os.path.join( addon_work_folder, db_backup_file ).replace("\\\\","\\")
     file_copy( addon_db, addon_backup_path )
     if exists( addon_backup_path ):

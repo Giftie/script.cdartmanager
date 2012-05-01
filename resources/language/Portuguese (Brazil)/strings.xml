@@ -144,5 +144,6 @@
   <string id="32139">Sucesso no backup do banco de dados do Addon</string>
   <string id="32140">Versão de Banco de Dados antiga encontrado...</string>
   <string id="32141">Você deseja adicionar Artistas Locais para o Banco de Dados do Addon?</string>
-  <string id="32142">Add all artists to Database during Database build or update?</string>
+  <string id="32142">Adicionar todos os artistas para Database durante construção ou atualização?</string>
+  <string id="32143">Ajustes Extras</string>
 </strings>

@@ -21,7 +21,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "4-27-12"
+__date__             = "4-30-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -60,16 +60,16 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
-    settings_to_log( addon_work_folder, "[script.cdartmanager]" )
-    empty_tempxml_folder()
     xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
     if not exists(settings_file): # Open Settings if settings.xml does not exists
         xbmc.log( "[script.cdartmanager] - settings.xml File not found, creating path and opening settings", xbmc.LOGNOTICE )
         _makedirs( addon_work_folder )
         __addon__.openSettings()
-        first_run = True
+        soft_exit = True
+    settings_to_log( addon_work_folder, "[script.cdartmanager]" )
+    empty_tempxml_folder()
     try:
-        if sys.argv[ 1 ] and not first_run:
+        if sys.argv[ 1 ] and not soft_exit:
             if sys.argv[ 1 ] == "database":
                 xbmc.log( "[script.cdartmanager] - Start method - Build Database in background", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "True") 
@@ -112,14 +112,14 @@ if ( __name__ == "__main__" ):
                 xbmcgui.Dialog().ok( __language__(32042), __language__(32118) )
                 xbmc.log( "[script.cdartmanager] - Background Database Building in Progress, exiting", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
-        if not background_db: # If Settings exists and not in background_db mode, continue on
+        if not background_db and not soft_exit: # If Settings exists and not in background_db mode, continue on
             xbmc.log( "[script.cdartmanager] - Addon Work Folder Found, Checking For Database", xbmc.LOGNOTICE )
         if not exists(addon_db) and not background_db: # if l_cdart.db missing, must be first run
             xbmc.log( "[script.cdartmanager] - Addon Db not found, Must Be First Run", xbmc.LOGNOTICE )
             first_run = True
-        elif not background_db:
+        elif not background_db and not soft_exit:
             xbmc.log( "[script.cdartmanager] - Addon Db Found, Checking Database Version", xbmc.LOGNOTICE )
-        if exists(addon_db_crash) and not first_run and not background_db: # if l_cdart.db.journal exists, creating database must have crashed at some point, delete and start over
+        if exists(addon_db_crash) and not first_run and not background_db and not soft_exit: # if l_cdart.db.journal exists, creating database must have crashed at some point, delete and start over
             xbmc.log( "[script.cdartmanager] - Detected Database Crash, Trying to delete", xbmc.LOGNOTICE )
             try:
                 delete_file(addon_db)
@@ -128,7 +128,7 @@ if ( __name__ == "__main__" ):
                 xbmc.log( "[script.cdartmanager] - Error Occurred: %s " % e.__class__.__name__, xbmc.LOGNOTICE )
                 traceback.print_exc()
                 script_fail = True
-        elif not first_run and not background_db: # Test database version
+        elif not first_run and not background_db and not soft_exit and not script_fail: # Test database version
             xbmc.log( "[script.cdartmanager] - Looking for database version: %s" % __dbversion__, xbmc.LOGNOTICE )
             try:
                 conn_l = sqlite3.connect(addon_db)
@@ -176,7 +176,7 @@ if ( __name__ == "__main__" ):
                     xbmc.log( "[script.cdartmanager] - # Error: %s" % e.__class__.__name__, xbmc.LOGNOTICE )
                     script_fail = True
         path = __addon__.getAddonInfo('path')   
-        if not script_fail and not background_db and not first_run:
+        if not script_fail and not background_db:
             if rebuild:
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
@@ -185,7 +185,7 @@ if ( __name__ == "__main__" ):
                 ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
                 ui.doModal()
                 del ui
-        elif not background_db:
+        elif not background_db and not soft_exit:
             xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
             xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )
     except:

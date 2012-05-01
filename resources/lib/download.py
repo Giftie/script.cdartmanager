@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import xbmc, xbmcgui
-import urllib, sys, re, os
+import urllib, sys, re, os, urllib2
 from traceback import print_exc
 from PIL import Image
 try:
@@ -93,11 +93,11 @@ def make_music_path( artist ):
             else:
                 xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
                 return False
-
+                
 def download_art( url_cdart, album, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
-    percent = 0
+    percent = 1
     file_name = get_filename( type, url_cdart, mode )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - Unknown Type ", xbmc.LOGDEBUG )
@@ -115,12 +115,17 @@ def download_art( url_cdart, album, type, mode, size ):
     destination = os.path.join( addon_work_folder , file_name).replace( "\\\\","\\" ) # download to work folder first
     final_destination = os.path.join( path, file_name ).replace( "\\\\","\\" )
     try:
+        pDialog.update( percent )
+    except:
         pDialog.create( _(32047) )
         #Onscreen Dialog - "Downloading...."
+    try:
         #this give the ability to use the progress bar by retrieving the downloading information
         #and calculating the percentage
         def _report_hook( count, blocksize, totalsize ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
+            if percent < 0:
+                precent = 1
             strProgressBar = str( percent )
             if type == "fanart" or type == "clearlogo":
                 pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
@@ -197,7 +202,6 @@ def auto_download( type ):
         count_artist_local = len( recognized_artists )
         percent = 0
         pDialog.create( _(32046) )
-        #xbmc.sleep( 1000 )
         #Onscreen Dialog - Automatic Downloading of Artwork
         for artist in recognized_artists:
             if ( pDialog.iscanceled() ):
