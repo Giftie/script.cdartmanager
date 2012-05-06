@@ -1,3 +1,6 @@
+2.5.7
+- fixed timing of Progress Dialog, fixed hang with XBMC using 12.1
+
 2.5.6
 - fixed script requiring the back up folder to be set(unless actually when trying to back up) - Thanks Martijn
 - fixed progress dialog 'flash' - Thanks Martijn
