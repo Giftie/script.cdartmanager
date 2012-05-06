@@ -126,6 +126,8 @@ def download_art( url_cdart, album, type, mode, size ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
             if percent < 0:
                 precent = 1
+            if percent > 100:
+		percent = 100
             strProgressBar = str( percent )
             if type == "fanart" or type == "clearlogo":
                 pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
