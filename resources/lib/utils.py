@@ -3,7 +3,6 @@ import xbmc, xbmcgui
 import urllib, sys, re, os
 import htmlentitydefs
 from traceback import print_exc
-from BeautifulSoup import BeautifulSoup
 
 try:
     from sqlite3 import dbapi2 as sqlite3

@@ -1,3 +1,6 @@
+2.5.8
+- removed import of BeautifulSoup
+
 2.5.7
 - fixed timing of Progress Dialog, fixed hang with XBMC using 12.1
 
