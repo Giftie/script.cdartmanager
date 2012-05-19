@@ -78,7 +78,7 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
         url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False )
     if limit == 1:
-        match = re.search( '''<release-group ext:score="(.*?)" type="(.*?)" id="(.*?)"><primary-type>(?:.*?)</primary-type><title>(.*?)</title>(?:.*?)<artist id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</release-group>''', htmlsource )
+        match = re.search( '''<release-group ext:score="(.*?)" type="(.*?)" id="(.*?)">(?:.*?)<title>(.*?)</title>(?:.*?)<artist id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</release-group>''', htmlsource )
         if match:
             album["artist"] = match.group(6)
             album["artist_id"] = match.group(5)
