@@ -21,18 +21,17 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "5-13-12"
+__date__             = "5-18-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
 __addon_path__       = __addon__.getAddonInfo('path')
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
-
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
-addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') )
+addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode('utf-8')
 addon_db = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
 addon_db_update = os.path.join(addon_work_folder, "l_cdart." + __dbversionold__ + ".db").replace("\\\\","\\")
 addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak").replace("\\\\","\\")
@@ -43,7 +42,7 @@ first_run = False
 rebuild = False
 soft_exit = False
 background_db = False
-image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") )
+image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") ).decode('utf-8')
 
 from utils import empty_tempxml_folder, settings_to_log, _makedirs
 from database import build_local_artist_table, store_counts, new_local_count

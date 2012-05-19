@@ -19,11 +19,11 @@ __version__       = sys.modules[ "__main__" ].__version__
 __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 __useragent__     = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
 resizeondownload  = __addon__.getSetting( "resizeondownload" )
 music_path        = __addon__.getSetting( "music_path" )
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search

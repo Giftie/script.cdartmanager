@@ -35,6 +35,7 @@ addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 __useragent__     = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
 image             = sys.modules[ "__main__" ].image
+BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
@@ -42,7 +43,6 @@ socket.setdefaulttimeout(30)
 KEY_BUTTON_BACK  = 275
 KEY_KEYBOARD_ESC = 61467
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo( 'path' ), 'resources' ) )
 skin_art_path      = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media" )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 

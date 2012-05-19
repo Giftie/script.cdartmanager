@@ -20,11 +20,11 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 notify = __addon__.getSetting("notifybackground")
 image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
 safe_db_version = "1.5.3"
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo('path'), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 pDialog = xbmcgui.DialogProgress()
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
@@ -680,14 +680,13 @@ def update_database( background ):
         count = 1
         if __addon__.getSetting("enable_all_artists") == "true":
             for artist in combined_artists:
-                if not background:
-                    if (pDialog.iscanceled()):
-                        break
                 update_artist = artist
                 percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
                 count += 1
                 if not background:
                     pDialog.update( percent, _(32132), "%s%s" % ( _(32125), update_artist["local_id"] ), "%s%s" % ( _(32137), repr( update_artist["name"]) ) )
+                    if (pDialog.iscanceled()):
+                        break
                 if not update_artist["musicbrainz_artistid"]:
                     try:
                         name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( update_artist["name"] ) )
@@ -698,16 +697,16 @@ def update_database( background ):
         else:
             updated_artists = combined_artists
         for album in combined:
-            if not background:
-                if (pDialog.iscanceled()):
-                    break
             update_album = album
             percent = int( ( count/float( len( combined ) ) ) * 100 )
             count += 1
             if not background:
                 pDialog.update( percent, _(32133), "%s%s" % ( _(32138), repr( album["title"] ) ), "%s%s" % ( _(32137), repr( album["artist"] ) ) )
+                if (pDialog.iscanceled()):
+                    break
             if not album["musicbrainz_albumid"]:
                 musicbrainz_albuminfo, discard = get_musicbrainz_album( album["title"], album["artist"], 0, 1 )
+                print musicbrainz_albuminfo
                 update_album["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                 update_album["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
             updated_albums.append( update_album )

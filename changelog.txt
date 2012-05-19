@@ -1,3 +1,6 @@
+2.5.9
+- fix MusicBrainz Album matching(due to change with MusicBrainz)
+
 2.5.8
 - removed import of BeautifulSoup
 

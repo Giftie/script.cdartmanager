@@ -17,21 +17,15 @@ __version__       = sys.modules[ "__main__" ].__version__
 __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon__.getAddonInfo( 'path' ), 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-#from musicbrainz2.webservice import Query, ArtistFilter, WebServiceError, ReleaseFilter, ReleaseGroupFilter, ReleaseGroupIncludes
-#from musicbrainz2.model import Release
+
 from utils import get_html_source
 artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d'''
 release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
 release_group_url_using_release_name = '''http://musicbrainz.org/ws/2/release-group/?query=release:"%s" AND artist:"%s"&limit=%d'''
 release_group_url_singles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s"&limit=%d'''
-#artist_url = '''http://192.168.2.192:3000/ws/2/artist/?query=artist:"%s"&limit=%d'''
-#release_group_url_nosingles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
-#release_group_url_singles = '''http://192.168.2.192:3000/ws/2/release-group/?query="%s" AND artist:"%s" AND type=singles&limit=%d'''
-
-
 
 def split_album_info( album_result, index ):
     album = {}
@@ -84,7 +78,7 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
         url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False )
     if limit == 1:
-        match = re.search( '''<release-group ext:score="(.*?)" type="(.*?)" id="(.*?)"><title>(.*?)</title>(?:.*?)<artist id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</release-group>''', htmlsource )
+        match = re.search( '''<release-group ext:score="(.*?)" type="(.*?)" id="(.*?)"><primary-type>(?:.*?)</primary-type><title>(.*?)</title>(?:.*?)<artist id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</release-group>''', htmlsource )
         if match:
             album["artist"] = match.group(6)
             album["artist_id"] = match.group(5)
