@@ -402,8 +402,8 @@ def get_local_albums_db( artist_name, background ):
     c = conn_l.cursor()
     try:
         if artist_name == "all artists":
-            if not background:
-                pDialog.create( _(32102), _(20186) )
+            #if not background:
+            #    pDialog.create( _(32102), _(20186) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
             c.execute(query)
         else:
@@ -432,12 +432,12 @@ def get_local_albums_db( artist_name, background ):
             local_album_list.append(album)
     except:
         print_exc()
-        if not background:
-            pDialog.close()
+        #if not background:
+        #    pDialog.close()
     #xbmc.log( local_album_list, xbmc.LOGDEBUG )
-    if artist_name == "all artists":
-        if not background:
-            pDialog.close()
+    #if artist_name == "all artists":
+    #    if not background:
+    #        pDialog.close()
     xbmc.log( "[script.cdartmanager] - Finished Retrieving Local Albums from Database", xbmc.LOGDEBUG )
     return local_album_list
         

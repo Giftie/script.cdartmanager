@@ -1,5 +1,7 @@
 2.5.9
 - fix MusicBrainz Album matching(due to change with MusicBrainz)
+- fix fanart.tv API due to change
+- remove unneeded progress dialogs
 
 2.5.8
 - removed import of BeautifulSoup

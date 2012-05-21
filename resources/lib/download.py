@@ -98,11 +98,11 @@ def download_art( url_cdart, album, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
     percent = 1
-    try:
-        pDialog.update( percent )
-    except:
-        pDialog.create( _(32047) )
-        #Onscreen Dialog - "Downloading...."
+    #try:
+    #    pDialog.update( percent )
+    #except:
+    #    pDialog.create( _(32047) )
+    #    #Onscreen Dialog - "Downloading...."
     file_name = get_filename( type, url_cdart, mode )
     if file_name == "unknown":
         xbmc.log( "[script.cdartmanager] - Unknown Type ", xbmc.LOGDEBUG )
@@ -127,13 +127,13 @@ def download_art( url_cdart, album, type, mode, size ):
             if percent < 0:
                 precent = 1
             strProgressBar = str( percent )
-            if type == "fanart" or type == "clearlogo":
-                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
-            else:
-                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
+     #       if type == "fanart" or type == "clearlogo":
+     #           pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
+     #       else:
+     #           pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
             #Onscreen Dialog - *DOWNLOADING CDART*
-            if ( pDialog.iscanceled() ):
-                pass  
+     #       if ( pDialog.iscanceled() ):
+     #           pass  
         if exists( path ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
             #message = ["Download Sucessful!"]

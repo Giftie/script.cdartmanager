@@ -934,9 +934,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
                 self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item, "cdart" )
             elif self.menu_mode == 3:
-                self.remote_cdart_url = remote_coverart_list( self.artist_menu, selected_item, "cover" )
+                self.remote_cdart_url = remote_coverart_list( self.artist_menu )
                 xbmcgui.Window(10001).setProperty( "artwork", "cover" )
-                self.populate_coverarts( self.artist_menu, self.remote_cdart_url )
+                self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item, "cover" )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.log( "[script.cdartmanager] - #  Executing Built-in - CleanLibrary(music)", xbmc.LOGNOTICE )
             xbmc.executebuiltin( "CleanLibrary(music)") 
