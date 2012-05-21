@@ -148,7 +148,7 @@ def retrieve_fanarttv_xml( id ):
                     album_artwork["cover"] = ""
                     try:
                         cdart_match = re.findall( '<cdart id="(?:.*?)" url="(.*?)" likes="(?:.*?) disc="(.*?)" size="(.*?)"/>' , album_sort[ 1 ] )
-                        cover_match = re.search( '<cover id="(?:.*?)" url="(.*?)" likes="(?:.*?)/>' , album_sort[ 1 ] )
+                        cover_match = re.search( '<albumcover id="(?:.*?)" url="(.*?)" likes="(?:.*?)/>' , album_sort[ 1 ] )
                         if cdart_match:
                             for disc in cdart_match:
                                 cdart = {}
