@@ -48,7 +48,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
 from convert import set_entity_or_charref
 from folder import dirEntries
-from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list
+from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode
 from download import download_art, auto_download
 from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database
@@ -400,6 +400,33 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
 
+    def populate_artistthumbs( self, artist_menu, focus_item ):
+        xbmc.log( "[script.cdartmanager] - Populating artist thumb List", xbmc.LOGNOTICE )
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        self.getControl( 199 ).reset()
+        try:
+            artistthumb = remote_artistthumb_list( artist_menu )
+            if artistthumb:
+                for artwork in artistthumb:
+                    clear_image_cache( artwork )
+                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
+                    self.getControl( 199 ).addItem( listitem )
+                    listitem.setLabel( os.path.basename( artwork ) )
+                    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                    self.setFocus( self.getControl( 199 ) )
+                    self.getControl( 199 ).selectItem( focus_item )
+            else:
+                xbmc.log( "[script.cdartmanager - No artist thumb for this artist", xbmc.LOGNOTICE )
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                xbmcgui.Window(10001).clearProperty( "artwork" )
+                xbmcgui.Dialog().ok( _(32033), _(32030), _(32031) )
+                #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
+                return
+        except:
+            print_exc()
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+
+            
     def populate_downloaded( self, successfully_downloaded, type ):
         xbmc.log( "[script.cdartmanager] - Populating ClearLOGO List", xbmc.LOGNOTICE )
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
@@ -891,6 +918,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             elif self.menu_mode == 7:
                 xbmcgui.Window(10001).setProperty( "artwork", "clearlogo" )
                 self.populate_clearlogos( self.artist_menu, 0 )
+            elif self.menu_mode == 9:
+                xbmcgui.Window(10001).setProperty( "artwork", "artistthumb" )
+                self.populate_artistthumbs( self.artist_menu, 0 )
         if controlId == 122 : #Retrieving information from Album List
             self.getControl( 140 ).reset()
             select = None
@@ -1040,6 +1070,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.menu_mode = 6
         if controlId in ( 184, 185 ): # Clear Logo Search Artists
             self.menu_mode = 7
+        if controlId in ( 197, 198 ): # Artist Thumb Search Artists
+            self.menu_mode = 9
         if controlId == 102:
             self.artwork_type = "fanart"
             self.setFocusId( 170 )
@@ -1051,14 +1083,21 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setFocusId( 184 )
         if controlId == 169:
             self.setFocusId( 186 )
+        if controlId == 193:
+            self.setFocusId( 197 )
+        if controlId == 194:
+            self.setFocusId( 195 )
         if controlId == 152:
             self.artwork_type = "clearlogo"
             self.setFocusId( 168 )
-        if controlId in ( 180, 181, 184, 185 ):
+        if controlId == 153:
+            self.artwork_type = "artistthumb"
+            self.setFocusId( 193 )
+        if controlId in ( 180, 181, 184, 185, 197, 198 ):
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
-            if controlId in ( 180, 184):
+            if controlId in ( 180, 184, 197 ):
                 local_artists = get_local_artists_db( mode="album_artists" )
             else:
                 local_artists = get_local_artists_db( mode="local_artists" )
@@ -1098,8 +1137,25 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "fanart" )
-                self.populate_fanarts( self.artist_menu, selected_item )  
-        if controlId in ( 182, 186, 187, 183, 106, 151 ): # Automatic Download
+                self.populate_fanarts( self.artist_menu, selected_item )
+        if controlId == 199:
+            artist = {}
+            if self.menu_mode == 9:
+                url = ( self.getControl( 199 ).getSelectedItem().getLabel2() ).split("&&&&")[ 1 ]
+                artist["artist"] = ( self.getControl( 199 ).getSelectedItem().getLabel2() ).split("&&&&")[ 0 ]
+                artist["path"] = os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
+                selected_item = self.getControl( 199 ).getSelectedPosition()
+                if url:
+                    download_art( url, artist, "artistthumb", "manual", 0 )
+                    try:
+                        pDialog.close()
+                    except:
+                        pass
+                else:
+                    xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
+                xbmcgui.Window(10001).setProperty( "artwork", "artistthumb" )
+                self.populate_artistthumbs( self.artist_menu, selected_item )
+        if controlId in ( 182, 186, 187, 183, 106, 151, 195, 196 ): # Automatic Download
             self.artwork_type = ""
             if controlId == 106: #cdARTs
                 self.menu_mode = 2
@@ -1115,6 +1171,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.artwork_type = "clearlogo_allartists"
             if controlId == 183:# Fanarts All Artists
                 self.artwork_type = "fanart_allartists"
+            if controlId == 195:# Artist Thumbs
+                self.artwork_type = "artistthumb"
+            if controlId == 196:# Artist Thumbs All Artists
+                self.artwork_type = "artistthumb_allartists"            
             download_count, successfully_downloaded = auto_download( self.artwork_type )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )

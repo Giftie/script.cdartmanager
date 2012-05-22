@@ -25,7 +25,7 @@ resizeondownload  = __addon__.getSetting( "resizeondownload" )
 music_path        = __addon__.getSetting( "music_path" )
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list
+from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 from utils import clear_image_cache, _makedirs, get_unicode
 from file_item import Thumbnails
@@ -70,6 +70,8 @@ def get_filename( type, url, mode ):
             file_name = "fanart.jpg"
     elif type == "clearlogo":
         file_name = "logo.png"
+    elif type == "artistthumb":
+        file_name = "artist.jpg"
     else:
         file_name = "unknown"
     return file_name
@@ -98,8 +100,8 @@ def download_art( url_cdart, album, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
     percent = 1
-    #try:
-    #    pDialog.update( percent )
+    if mode == "auto":
+        pDialog.update( percent )
     #except:
     #    pDialog.create( _(32047) )
     #    #Onscreen Dialog - "Downloading...."
@@ -127,13 +129,14 @@ def download_art( url_cdart, album, type, mode, size ):
             if percent < 0:
                 precent = 1
             strProgressBar = str( percent )
-     #       if type == "fanart" or type == "clearlogo":
-     #           pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
-     #       else:
-     #           pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
+            if (type == "fanart" or type == "clearlogo" or type == "artistthumb") and mode == "auto":
+                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
+            elif mode == "auto":
+                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
             #Onscreen Dialog - *DOWNLOADING CDART*
-     #       if ( pDialog.iscanceled() ):
-     #           pass  
+            if mode == "auto":
+                if ( pDialog.iscanceled() ):
+                    pass  
         if exists( path ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
             #message = ["Download Sucessful!"]
@@ -189,10 +192,12 @@ def auto_download( type ):
         d_error=False
         percent = 0
         successfully_downloaded = []
-        if type in ( "clearlogo_allartists", "fanart_allartists" ):
+        if type in ( "clearlogo_allartists", "artistthumb_allartists", "fanart_allartists" ):
             local_artist = get_local_artists_db( mode="all_artists" )
             if type == "clearlogo_allartists":
                 type = "clearlogo"
+            elif type == "artistthumb_allartists":
+                type = "artistthumb"
             else:
                 type = "fanart"
         else:
@@ -209,7 +214,7 @@ def auto_download( type ):
             artist_count += 1
             percent = int( (artist_count / float(count_artist_local) ) * 100)
             xbmc.log( "[script.cdartmanager] - Artist: %-40s Local ID: %-10s   Distant ID: %s" % ( repr( artist["name"] ), artist["local_id"], artist["distant_id"] ), xbmc.LOGNOTICE )
-            if type in ( "fanart", "clearlogo" ):
+            if type in ( "fanart", "clearlogo", "artistthumb" ):
                 pDialog.update( percent , "%s%s" % ( _(32038) , get_unicode( artist["name"] ) ) )
                 auto_art = {}
                 temp_art = {}
@@ -222,8 +227,10 @@ def auto_download( type ):
                 path = os.path.join( music_path, artist["name"] )
                 if type == "fanart":
                     art = remote_fanart_list( auto_art )
-                else:
+                elif type == "clearlogo":
                     art = remote_clearlogo_list( auto_art )
+                else:
+                    art = remote_artistthumb_list( auto_art )
                 if art:
                     if type == "fanart":
                         temp_art["path"] = path
@@ -261,11 +268,18 @@ def auto_download( type ):
                                 d_error = True
                     else:
                         artwork = art[0]
-                        if exists( os.path.join( auto_art["path"], "logo.png" ) ):
-                            xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
-                            continue
-                        else:
-                            message, d_success, final_destination = download_art( artwork , auto_art, "clearlogo", "auto", 0 )
+                        if type == "artistthumb":
+                            if exists( os.path.join( auto_art["path"], "artist.jpg" ) ):
+                                xbmc.log( "[script.cdartmanager] - Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
+                                continue
+                            else:
+                                message, d_success, final_destination = download_art( artwork , auto_art, "artistthumb", "auto", 0 )
+                        else:    
+                            if exists( os.path.join( auto_art["path"], "logo.png" ) ):
+                                xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
+                                continue
+                            else:
+                                message, d_success, final_destination = download_art( artwork , auto_art, "clearlogo", "auto", 0 )
                         if d_success == 1:
                             download_count += 1
                             auto_art["path"] = final_destination

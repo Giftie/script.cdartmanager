@@ -1,6 +1,11 @@
+2.6.0
+- add 'Powered By' to logo for MusicBrainz and fanart.tv
+- add Artist Thumbs
+
 2.5.9
 - fix MusicBrainz Album matching(due to change with MusicBrainz)
 - fix fanart.tv API due to change
+- fix an bug in Cover Art View
 - remove unneeded progress dialogs
 
 2.5.8

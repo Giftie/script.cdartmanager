@@ -149,4 +149,6 @@
   <string id="32140">Old Database version found...</string>
   <string id="32141">Would you like to add Local Artists to Addon Database?</string>
   <string id="32142">Add all artists to Database during Database build or update?</string>
+  <string id="32143">Extra Settings</string>
+  <string id="32144">Artist Thumbs</string>
 </strings>
