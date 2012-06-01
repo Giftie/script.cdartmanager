@@ -21,31 +21,47 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "5-21-12"
+__date__             = "5-31-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
 __addon_path__       = __addon__.getAddonInfo('path')
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
+api_key = "e308cc6c6f76e502f98526f1694c62ac"
 
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
+BASE_RESOURCE_PATH   = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
-addon_work_folder = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode('utf-8')
-addon_db = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
-addon_db_update = os.path.join(addon_work_folder, "l_cdart." + __dbversionold__ + ".db").replace("\\\\","\\")
-addon_db_backup = os.path.join(addon_work_folder, "l_cdart.db.bak").replace("\\\\","\\")
-addon_db_crash = os.path.join(addon_work_folder, "l_cdart.db-journal").replace("\\\\","\\")
-settings_file = os.path.join(addon_work_folder, "settings.xml").replace("\\\\","\\")
-script_fail = False
-first_run = False
-rebuild = False
-soft_exit = False
-background_db = False
-image = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") ).decode('utf-8')
+addon_work_folder    = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode('utf-8')
+addon_db             = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
+addon_db_update      = os.path.join(addon_work_folder, "l_cdart." + __dbversionold__ + ".db").replace("\\\\","\\")
+addon_db_backup      = os.path.join(addon_work_folder, "l_cdart.db.bak").replace("\\\\","\\")
+addon_db_crash       = os.path.join(addon_work_folder, "l_cdart.db-journal").replace("\\\\","\\")
+settings_file        = os.path.join(addon_work_folder, "settings.xml").replace("\\\\","\\")
+image                = xbmc.translatePath( os.path.join( __addon_path__, "icon.png") ).decode('utf-8')
+script_fail          = False
+first_run            = False
+rebuild              = False
+soft_exit            = False
+background_db        = False
 
-from utils import empty_tempxml_folder, settings_to_log, _makedirs
+from utils import empty_tempxml_folder, settings_to_log, _makedirs, get_unicode
 from database import build_local_artist_table, store_counts, new_local_count
+from pre_eden_code import retrieve_album_details, retrieve_artist_details
+from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
+
+def artist_musicbrainz_id( id ):
+    artist_details = retrieve_artist_details( id )
+    if not artist_details["musicbrainzartistid"]:
+        name, id, sortname = get_musicbrainz_artist_id( get_unicode( artist_details["label"] ) )
+    else:
+        name = get_unicode( artist_details["label"] )
+        id   = artist_details["musicbrainzartistid"]
+    return name, id
+    
+def album_musicbrainz_id( album_details ):
+    album, albums = get_musicbrainz_album( get_unicode( album_details[0]["title"] ), get_unicode( album_details[0]["artist"] ), 0 )
+    return album
 
 if ( __name__ == "__main__" ):
     xbmc.executebuiltin('Dialog.Close(all, true)')  
@@ -91,6 +107,35 @@ if ( __name__ == "__main__" ):
                 xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "oneshot":
                 xbmc.log( "[script.cdartmanager] - Start method - One Shot Download method", xbmc.LOGNOTICE )
+                # sys.argv[ 2 ] = artwork type ( clearlogo, fanart, artistthumb, cdart, cover )
+                # sys.argv[ 3 ] = XBMC DB ID
+                # sys.argv[ 4 ] = artwork path( clearlogo, fanart, artistthumb)
+                try:
+                    if len(sys.argv) > 2:
+                        xbmc.log( "[script.cdartmanager] - Artwork: %s" % sys.argv[ 2 ], xbmc.LOGNOTICE )
+                        xbmc.log( "[script.cdartmanager] - ID: %s" % sys.argv[ 3 ], xbmc.LOGNOTICE )
+                        provided_id = int( sys.argv[ 3 ] )
+                        if sys.argv[ 2 ] in ( "clearlogo", "fanart", "artistthumb" ):
+                            artist, mbid = artist_musicbrainz_id( provided_id )
+                            if not artist:
+                                xbmc.log( "[script.cdartmanager] - No MBID found", xbmc.LOGNOTICE )
+                            else:
+                                xbmc.log( "[script.cdartmanager] - Artist: %s" % artist, xbmc.LOGDEBUG )
+                                xbmc.log( "[script.cdartmanager] - MBID: %s" % mbid, xbmc.LOGDEBUG )                        
+                        elif sys.argv[ 2 ] in ( "cdart", "cover" ):
+                            album_details = retrieve_album_details( provided_id )
+                            album = album_musicbrainz_id( album_details )
+                            print album_details
+                            print album
+                            if not album:
+                                xbmc.log( "[script.cdartmanager] - No MBID found", xbmc.LOGNOTICE )
+                        else:
+                           xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv: %s" % sys.argv, xbmc.LOGNOTICE )
+                    else:
+                        xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv: %s" % sys.argv, xbmc.LOGNOTICE )
+                except:
+                    traceback.print_exc()
+                    xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv: %s" % sys.argv, xbmc.LOGNOTICE )
             else:
                 xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv[ 1 ]: %s" % sys.argv[ 1 ], xbmc.LOGNOTICE )
     except IndexError:

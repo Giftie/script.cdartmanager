@@ -667,7 +667,7 @@ def update_database( background ):
             artist = {}
             percent = int( ( count/float( len( local_artists_unmatched ) ) ) * 100 )
             if not background:
-                pDialog.update( percent, _(32135), "%s%s" % ( _(32125), local_artist["local_id"] ), "%s%s" % ( _(32137), repr( local_artist["name"]) ) )
+                pDialog.update( percent, _(32135), "%s%s" % ( _(32125), local_artist["local_id"] ), "%s%s" % ( _(32137), repr( local_artist["name"] ) ) )
             count += 1
             artist["name"] = get_unicode( local_artist["name"] )
             artist["local_id"] = local_artist["local_id"]
@@ -684,7 +684,7 @@ def update_database( background ):
                 percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
                 count += 1
                 if not background:
-                    pDialog.update( percent, _(32132), "%s%s" % ( _(32125), update_artist["local_id"] ), "%s%s" % ( _(32137), repr( update_artist["name"]) ) )
+                    pDialog.update( percent, _(32132), "%s%s" % ( _(32125), update_artist["local_id"] ), "%s%s" % ( _(32137), repr( update_artist["name"] ) ) )
                     if (pDialog.iscanceled()):
                         break
                 if not update_artist["musicbrainz_artistid"]:
@@ -705,7 +705,7 @@ def update_database( background ):
                 if (pDialog.iscanceled()):
                     break
             if not album["musicbrainz_albumid"]:
-                musicbrainz_albuminfo, discard = get_musicbrainz_album( album["title"], album["artist"], 0, 1 )
+                musicbrainz_albuminfo, discard = get_musicbrainz_album( get_unicode( album["title"] ), get_unicode( album["artist"] ), 0, 1 )
                 print musicbrainz_albuminfo
                 update_album["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                 update_album["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
@@ -739,7 +739,7 @@ def update_database( background ):
         for artist in combined_artists:
             percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
             if not background:
-                pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), get_unicode( artist["name"] ) ) )
+                pDialog.update( percent, _(32124), "%s%s" % ( _(32125), artist["local_id"] ), "%s%s" % ( _(32028), ( repr( artist["name"] ) ) ) )
             try:
                 c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
                 count += 1

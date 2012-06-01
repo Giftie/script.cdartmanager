@@ -56,10 +56,10 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     album = {}
     albums = []
     count = e_count
-    album["artist"] = ""
-    album["artist_id"] = ""
     album["id"] = ""
     album["title"] = ""
+    album["artist"] = ""
+    album["artist_id"] = ""
     if not with_singles and not by_release:
         xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
     elif not by_release:
@@ -78,13 +78,21 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
         url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False )
     if limit == 1:
-        match = re.search( '''<release-group ext:score="(.*?)" type="(.*?)" id="(.*?)">(?:.*?)<title>(.*?)</title>(?:.*?)<artist id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</release-group>''', htmlsource )
+        match = re.search( '''<release-group ext:score="(.*?)"(?:.*?)</release-group>''', htmlsource )
         if match:
-            album["artist"] = match.group(6)
-            album["artist_id"] = match.group(5)
-            album["id"] = match.group(3)
-            album["title"] = match.group(4)
-        else:
+            if int( match.group(1) ) > 0:
+                try:
+                    mbid = re.search( '''id="(.*?)"''', htmlsource)
+                    mbtitle = re.search( '''<title>(.*?)</title>''', htmlsource)
+                    mbartist = re.search( '''<name>(.*?)</name>''', htmlsource)
+                    mbartistid = re.search( '''<artist id="(.*?)">''', htmlsource)
+                    album["id"] = mbid.group(1)
+                    album["title"] = mbtitle.group(1)
+                    album["artist"] = mbartist.group(1)
+                    album["artist_id"] = mbartistid.group(1)
+                except:
+                    pass            
+        if not album["id"]:
             if with_singles:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
                 album["artist"], album["artist_id"], sort_name = get_musicbrainz_artist_id( artist )

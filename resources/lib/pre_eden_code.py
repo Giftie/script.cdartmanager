@@ -6,18 +6,30 @@ import xbmc, xbmcaddon, xbmcvfs
 import os
 from json_utils import retrieve_json_dict
 
-def get_all_local_artists():
+def get_all_local_artists( all_artists = True ):
     xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving all local artists", xbmc.LOGDEBUG )
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "id": 1}'
+    if all_artists:
+        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": false }, "id": 1}'
+    else:
+        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartists_only": true }, "id": 1}'
     json_artists = retrieve_json_dict(json_query, items='artists', force_log=False )
     if json_artists:
         return json_artists
     else:
         return None
+
+def retrieve_artist_details( artist_id ):
+    xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Album Path", xbmc.LOGDEBUG )
+    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["musicbrainzartistid"], "artistid": %d}, "id": 1}' % artist_id
+    json_artist_details = retrieve_json_dict(json_query, items='artistdetails', force_log=False )
+    if json_artist_details:
+        return json_artist_details
+    else:
+        return None
         
 def retrieve_album_list():
     xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Album List"        , xbmc.LOGDEBUG )
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist"], "sort": {"order":"ascending"}}, "id": 1}'
+    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist", "musicbrainzalbumid", "musicbrainzalbumartistid"], "sort": {"order":"ascending"}}, "id": 1}'
     json_albums = retrieve_json_dict(json_query, items='albums', force_log=False )
     if json_albums:
         return json_albums, len(json_albums)
@@ -27,7 +39,7 @@ def retrieve_album_list():
 def retrieve_album_details( album_id ):
     xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Album Path", xbmc.LOGDEBUG )
     album_details = []
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["artist", "title"], "albumid": %d}, "id": 1}' % album_id
+    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["artist", "title", "musicbrainzalbumid", "musicbrainzalbumartistid"], "albumid": %d}, "id": 1}' % album_id
     json_album_details = retrieve_json_dict(json_query, items='albumdetails', force_log=False )
     if json_album_details:
         album_details.append( json_album_details )

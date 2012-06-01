@@ -18,13 +18,15 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+api_key           = sys.modules[ "__main__" ].api_key
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source, unescape
 from musicbrainz_utils import get_musicbrainz_album, get_musicbrainz_artist_id, update_musicbrainzid
 
-music_url = "http://fanart.tv/webservice/artist/e308cc6c6f76e502f98526f1694c62ac/%s/xml/all/2/2"
-artist_url = "http://fanart.tv/webservice/has-art/e308cc6c6f76e502f98526f1694c62ac/"
+music_url = "http://fanart.tv/webservice/artist/%s/%s/xml/%s/2/2"
+single_release_group = "http://fanart.tv/webservice/album/%s/%s/xml/%s/2/2"
+artist_url = "http://fanart.tv/webservice/has-art/%s/"
 lookup_id = False
 
 pDialog = xbmcgui.DialogProgress()
@@ -32,7 +34,6 @@ pDialog = xbmcgui.DialogProgress()
 def remote_cdart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote cdARTs", xbmc.LOGDEBUG )
     cdart_url = []
-    #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 2:
@@ -58,7 +59,6 @@ def remote_cdart_list( artist_menu ):
 def remote_coverart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote Cover ARTs", xbmc.LOGDEBUG )
     coverart_url = []
-    #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 2:
@@ -83,7 +83,6 @@ def remote_coverart_list( artist_menu ):
 def remote_fanart_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote fanart", xbmc.LOGDEBUG )
     backgrounds = ""
-    #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
@@ -95,7 +94,6 @@ def remote_fanart_list( artist_menu ):
 def remote_clearlogo_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote clearlogo", xbmc.LOGDEBUG )
     clearlogo = ""
-    #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
@@ -110,7 +108,6 @@ def remote_artistthumb_list( artist_menu ):
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
-        print art
         if not len(art) < 3:
             artistthumb = art[ 2 ]["artistthumb"]
     except:
@@ -119,7 +116,7 @@ def remote_artistthumb_list( artist_menu ):
     
 def retrieve_fanarttv_xml( id ):
     xbmc.log( "[script.cdartmanager] - Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )
-    url = music_url % id
+    url = music_url % ( api_key, id, "all" )
     htmlsource = get_html_source( url, id )
     music_id = '<music id="' + id + '" name="(.*?)">'
     match = re.search( music_id, htmlsource )
@@ -201,7 +198,7 @@ def get_distant_artists():
     """ This retrieve the distant artist list from fanart.tv """
     xbmc.log( "[script.cdartmanager] - Retrieving Distant Artists", xbmc.LOGDEBUG )
     distant_artists = []
-    htmlsource = get_html_source( artist_url, "distant" )
+    htmlsource = get_html_source( artist_url % api_key, "distant" )
     match = re.compile( '<artist id="(.*?)" name="(.*?)"/>', re.DOTALL )
     for item in match.finditer( htmlsource ):
         distant = {}
