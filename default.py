@@ -21,7 +21,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "5-31-12"
+__date__             = "6-3-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -32,6 +32,7 @@ api_key = "e308cc6c6f76e502f98526f1694c62ac"
 BASE_RESOURCE_PATH   = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
+music_path           = xbmc.translatePath( __addon__.getSetting( "music_path" ) ).decode('utf-8')
 addon_work_folder    = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode('utf-8')
 addon_db             = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
 addon_db_update      = os.path.join(addon_work_folder, "l_cdart." + __dbversionold__ + ".db").replace("\\\\","\\")
@@ -45,10 +46,14 @@ rebuild              = False
 soft_exit            = False
 background_db        = False
 
-from utils import empty_tempxml_folder, settings_to_log, _makedirs, get_unicode
-from database import build_local_artist_table, store_counts, new_local_count
-from pre_eden_code import retrieve_album_details, retrieve_artist_details
+from utils import empty_tempxml_folder, settings_to_log, get_unicode
+from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db
+from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
+try:
+    from xbmcvfs import mkdirs as _makedirs
+except:
+    from utils import _makedirs
 
 def artist_musicbrainz_id( id ):
     artist_details = retrieve_artist_details( id )
@@ -62,6 +67,62 @@ def artist_musicbrainz_id( id ):
 def album_musicbrainz_id( album_details ):
     album, albums = get_musicbrainz_album( get_unicode( album_details[0]["title"] ), get_unicode( album_details[0]["artist"] ), 0 )
     return album
+    
+def update_xbmc_thumbnails():
+    xbmc.log( "[script.cdartmanager] - Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
+    fanart = "fanart.jpg"
+    artistthumb = "artist.jpg"
+    albumthumb = "folder.jpg"
+    # Artists
+    artists = get_local_artists_db( mode="album_artists" )
+    # Albums
+    albums = get_local_albums_db( "all artists", False )
+    for artist in artists:
+        xbmc_thumbnail_path = ""
+        xbmc_fanart_path = ""
+        fanart_path = os.path.join( music_path, artist["name"], fanart ).replace( "\\\\","\\" )
+        artistthumb_path = os.path.join( music_path, artist["name"], artistthumb ).replace( "\\\\","\\" )
+        if exists( fanart_path ):
+            xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
+        elif exists( artistthumb_path ):
+            xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
+        else:
+            continue
+        if xbmc_fanart_path:
+            if file_copy( fanart_path, xbmc_fanart_path ):
+                xbmc.log( "[script.cdartmanager] - Successfully copied fanart", xbmc.LOGDEBUG )
+            else:
+                xbmc.log( "[script.cdartmanager] - Failed to copy fanart", xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( fanart_path ), xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
+        else:
+            pass
+        if xbmc_thumbnail_path:
+            if file_copy( artistthumb_path, xbmc_thumbnail_path ):
+                xbmc.log( "[script.cdartmanager] - Successfully copied Thumbnail", xbmc.LOGDEBUG )
+            else:
+                xbmc.log( "[script.cdartmanager] - Failed to copy Thumbnail", xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( artistthumb_path ), xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
+        else:
+            pass
+    for album in albums:
+        xbmc_thumbnail_path = ""
+        coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
+        if exists( coverart_path ):
+            xbmc_thumbnail_path = get_thumbnail_path( album["local_id"], "album" )
+            if xbmc_thumbnail_path:
+                if file_copy( coverart_path, xbmc_thumbnail_path ):
+                    xbmc.log( "[script.cdartmanager] - Successfully copied Thumbnail", xbmc.LOGDEBUG )
+                else:
+                    xbmc.log( "[script.cdartmanager] - Failed to copy Thumbnail", xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( coverart_path ), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
+            else:
+                continue
+        else:
+            continue
+    xbmc.log( "[script.cdartmanager] - Finished Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )      
 
 if ( __name__ == "__main__" ):
     xbmc.executebuiltin('Dialog.Close(all, true)')  
@@ -85,6 +146,7 @@ if ( __name__ == "__main__" ):
     empty_tempxml_folder()
     try:
         if sys.argv[ 1 ] and not soft_exit:
+            xbmc.executebuiltin('Dialog.Close(all, true)') 
             if sys.argv[ 1 ] == "database":
                 xbmc.log( "[script.cdartmanager] - Start method - Build Database in background", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "True") 
@@ -93,6 +155,9 @@ if ( __name__ == "__main__" ):
                 if notifyatfinish=="true":
                     xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32117), 2000, image) )
                 xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
+            elif sys.argv[ 1 ] == "update_thumbs":
+                xbmc.log( "[script.cdartmanager] - Start method - Update Thumbnails in background", xbmc.LOGNOTICE )
+                update_xbmc_thumbnails()
             elif sys.argv[ 1 ] == "update":
                 xbmc.log( "[script.cdartmanager] - Start method - Update Database in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "autocdart":

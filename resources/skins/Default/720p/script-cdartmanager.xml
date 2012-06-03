@@ -409,7 +409,7 @@ id      | description
                     <texture>default-menu.png</texture>
                 </control>
                 <control type="panel" id="199">
-                    <description>Fanart List</description>
+                    <description>Artist Thumbs List</description>
                     <posx>0</posx>
                     <posy>0</posy>
                     <width>980</width>
@@ -459,7 +459,7 @@ id      | description
                     <texture>default-menu.png</texture>
                 </control>
                 <control type="panel" id="167">
-                    <description>Fanart List</description>
+                    <description>ClearLOGO List</description>
                     <posx>0</posx>
                     <posy>0</posy>
                     <width>980</width>
@@ -511,7 +511,7 @@ id      | description
                     -->
                     <texture>default-menu.png</texture>
                 </control>
-                <control type="fixedlist" id="160">
+                <control type="panel" id="160">
                     <description>Fanart List</description>
                     <posx>0</posx>
                     <posy>0</posy>
@@ -525,22 +525,25 @@ id      | description
                     <preloaditems>4</preloaditems>
                     <viewtype label="Fanart List">list</viewtype>
                     <scrolltime>200</scrolltime>
-                    <itemlayout width="338" height="200">
+                    <itemlayout width="320" height="320">
                         <control type="image">
-                            <posx>321</posx>
+                            <posx>10</posx>
                             <posy>10</posy>
-                            <width>338</width>
-                            <height>190</height>
+                            <width>250</width>
+                            <height>250</height>
+                            <aspectratio scalediffuse="false">keep</aspectratio>
                             <info>Listitem.Thumb</info>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="930" height="523">
+                    <focusedlayout width="320" height="320">
                         <control type="image">
-                            <posx>25</posx>
-                            <posy>5</posy>
-                            <width>930</width>
-                            <height>523</height>
+                            <posx>10</posx>
+                            <posy>10</posy>
+                            <width>250</width>
+                            <height>250</height>
                             <info>Listitem.Thumb</info>
+                            <aspectratio scalediffuse="false">keep</aspectratio>
+                            <animation effect="zoom" end="0,0,300,300" time="100">focus</animation>
                             <visible>Control.HasFocus(160)</visible>
                         </control>
                     </focusedlayout>

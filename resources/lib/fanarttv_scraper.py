@@ -7,7 +7,7 @@ import urllib
 from traceback import print_exc
 from urllib import quote_plus, unquote_plus
 
-_                 = sys.modules[ "__main__" ].__language__
+__language__      = sys.modules[ "__main__" ].__language__
 __scriptname__    = sys.modules[ "__main__" ].__scriptname__
 __scriptID__      = sys.modules[ "__main__" ].__scriptID__
 __author__        = sys.modules[ "__main__" ].__author__
@@ -216,7 +216,7 @@ def get_recognized( distant, local ):
     recognized = []
     fanart_test = ""
     #percent = 0
-    pDialog.create( _(32048) )
+    pDialog.create( __language__(32048) )
     #Onscreen dialog - Retrieving Recognized Artist List....
     for artist in local:
         percent = int((float(count)/len(local))*100)
@@ -236,7 +236,7 @@ def get_recognized( distant, local ):
                 artist["distant_id"] = ""
         recognized.append(artist)
         artist_list.append(artist)
-        pDialog.update(percent, (_(32049) % true))
+        pDialog.update(percent, ( __language__(32049) % true))
         #Onscreen Dialog - Artists Matched: %
         count += 1
     print fanart_test

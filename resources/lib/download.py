@@ -22,17 +22,22 @@ addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 __useragent__     = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
 resizeondownload  = __addon__.getSetting( "resizeondownload" )
-music_path        = __addon__.getSetting( "music_path" )
+music_path        = sys.modules[ "__main__" ].music_path
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
-from utils import clear_image_cache, _makedirs, get_unicode
+from utils import clear_image_cache, get_unicode
 from file_item import Thumbnails
-from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path, get_thumbnail_path, get_fanart_path
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
+try:
+    #frodo code
+    from xbmcvfs import mkdirs as _makedirs
+except:
+    from utils import _makedirs
 
 pDialog = xbmcgui.DialogProgress()
  
@@ -96,7 +101,7 @@ def make_music_path( artist ):
                 xbmc.log( "[script.cdartmanager] - unable to make path to music artist", xbmc.LOGDEBUG )
                 return False
                 
-def download_art( url_cdart, album, type, mode, size ):
+def download_art( url_cdart, album, database_id, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
     percent = 1
@@ -111,6 +116,12 @@ def download_art( url_cdart, album, type, mode, size ):
         message = [ _(32026), _(32025), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart ) ]
         return message, download_success
     path = album["path"].replace( "\\\\" , "\\" )
+    if type in ( "artistthumb", "cover" ):
+        thumbnail_path = get_thumbnail_path( database_id, type )
+    else:
+        thumbnail_path = ""
+    if type == "fanart" and mode == "single":
+        thumbnail_path = get_fanart_path( database_id, type )
     if not exists( path ):
         try:
             pathsuccess = _makedirs( album["path"].replace( "\\\\" , "\\" ) )
@@ -142,6 +153,8 @@ def download_art( url_cdart, album, type, mode, size ):
             #message = ["Download Sucessful!"]
             message = [_(32023), _(32024), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart )]
             success = file_copy( destination, final_destination ) # copy it to album folder
+            if thumbnail_path:
+                success2 = file_copy( destination, thumbnail_path ) # copy to thumbnail image
             # update database
             try:
                 conn = sqlite3.connect(addon_db)
@@ -249,14 +262,14 @@ def auto_download( type ):
                         auto_art["path"] = path
                     if type == "fanart":
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
-                            message, d_success = download_art( art[0], temp_art, "fanart", "single", 0 )
+                            message, d_success = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0 )
                         for artwork in art:
                             fanart = {}
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):
                                 xbmc.log( "[script.cdartmanager] - Fanart already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
-                                message, d_success, final_destination = download_art( artwork, auto_art, "fanart", "auto", 0 )
+                                message, d_success, final_destination = download_art( artwork, auto_art, artist["local_id"], "fanart", "auto", 0 )
                             if d_success == 1:
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]
@@ -273,13 +286,13 @@ def auto_download( type ):
                                 xbmc.log( "[script.cdartmanager] - Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
-                                message, d_success, final_destination = download_art( artwork , auto_art, "artistthumb", "auto", 0 )
+                                message, d_success, final_destination = download_art( artwork , auto_art, artist["local_id"], "artistthumb", "auto", 0 )
                         else:    
                             if exists( os.path.join( auto_art["path"], "logo.png" ) ):
                                 xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
-                                message, d_success, final_destination = download_art( artwork , auto_art, "clearlogo", "auto", 0 )
+                                message, d_success, final_destination = download_art( artwork , auto_art, artist["local_id"], "clearlogo", "auto", 0 )
                         if d_success == 1:
                             download_count += 1
                             auto_art["path"] = final_destination
@@ -322,7 +335,7 @@ def auto_download( type ):
                                 xbmc.log( "[script.cdartmanager] - ALBUM MATCH FOUND", xbmc.LOGDEBUG )
                                 #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGDEBUG )
                                 if low_res:
-                                    message, d_success, final_destination = download_art( art["picture"], album, key_label, "auto", 0 )
+                                    message, d_success, final_destination = download_art( art["picture"], album, album["local_id"], key_label, "auto", 0 )
                                     if d_success == 1:
                                         download_count += 1
                                         album[key_label] = True

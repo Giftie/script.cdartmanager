@@ -10,7 +10,7 @@ try:
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
-_                 = sys.modules[ "__main__" ].__language__
+__language__      = sys.modules[ "__main__" ].__language__
 __scriptname__    = sys.modules[ "__main__" ].__scriptname__
 __scriptID__      = sys.modules[ "__main__" ].__scriptID__
 __version__       = sys.modules[ "__main__" ].__version__
@@ -26,6 +26,8 @@ artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d''
 release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
 release_group_url_using_release_name = '''http://musicbrainz.org/ws/2/release-group/?query=release:"%s" AND artist:"%s"&limit=%d'''
 release_group_url_singles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s"&limit=%d'''
+release_group_url_release_mbid = '''http://musicbrainz.org/ws/2/release-group/?release=%s'''
+release_groups_url_artist_mbid = '''http://musicbrainz.org/ws/2/release-group/?artist="%s"'''
 
 def split_album_info( album_result, index ):
     album = {}

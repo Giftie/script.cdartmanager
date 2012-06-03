@@ -8,7 +8,7 @@ try:
     from sqlite3 import dbapi2 as sqlite3
 except:
     from pysqlite2 import dbapi2 as sqlite3
-_                 = sys.modules[ "__main__" ].__language__
+__language__      = sys.modules[ "__main__" ].__language__
 __scriptname__    = sys.modules[ "__main__" ].__scriptname__
 __scriptID__      = sys.modules[ "__main__" ].__scriptID__
 __author__        = sys.modules[ "__main__" ].__author__
@@ -24,8 +24,7 @@ BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from file_item import Thumbnails
-
-from pre_eden_code import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
+from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
