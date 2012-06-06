@@ -12,6 +12,7 @@ except:
 from xbmcvfs import copy as file_copy
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
+from xbmcvfs import rename as file_rename
  
 __addon__            = xbmcaddon.Addon( "script.cdartmanager" )
 __language__         = __addon__.getLocalizedString
@@ -21,7 +22,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "6-3-12"
+__date__             = "6-5-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -71,7 +72,8 @@ def album_musicbrainz_id( album_details ):
 def update_xbmc_thumbnails():
     xbmc.log( "[script.cdartmanager] - Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
     fanart = "fanart.jpg"
-    artistthumb = "artist.jpg"
+    artistthumb_temp = "artist.jpg"
+    artistthumb = "folder.jpg"
     albumthumb = "folder.jpg"
     # Artists
     artists = get_local_artists_db( mode="album_artists" )
@@ -82,6 +84,9 @@ def update_xbmc_thumbnails():
         xbmc_fanart_path = ""
         fanart_path = os.path.join( music_path, artist["name"], fanart ).replace( "\\\\","\\" )
         artistthumb_path = os.path.join( music_path, artist["name"], artistthumb ).replace( "\\\\","\\" )
+        artistthumb_rename = os.path.join( music_path, artist["name"], artistthumb_temp ).replace( "\\\\","\\" )
+        if exists( artistthumb_rename ):
+            file_rename( artistthumb_rename, artistthumb_path )
         if exists( fanart_path ):
             xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
         elif exists( artistthumb_path ):

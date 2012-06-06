@@ -76,7 +76,7 @@ def get_filename( type, url, mode ):
     elif type == "clearlogo":
         file_name = "logo.png"
     elif type == "artistthumb":
-        file_name = "artist.jpg"
+        file_name = "folder.jpg"
     else:
         file_name = "unknown"
     return file_name
@@ -120,7 +120,7 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         thumbnail_path = get_thumbnail_path( database_id, type )
     else:
         thumbnail_path = ""
-    if type == "fanart" and mode == "single":
+    if type == "fanart" and mode == "manual":
         thumbnail_path = get_fanart_path( database_id, type )
     if not exists( path ):
         try:
@@ -262,7 +262,7 @@ def auto_download( type ):
                         auto_art["path"] = path
                     if type == "fanart":
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
-                            message, d_success = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0 )
+                            message, d_success = download_art( art[0], temp_art, artist["local_id"], "fanart", "manual", 0 )
                         for artwork in art:
                             fanart = {}
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):

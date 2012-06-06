@@ -2080,8 +2080,7 @@ id      | description
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <!--<label>$ADDON[script.cdartmanager 32006]</label>-->
-                    <label>5</label>
+                    <label>$ADDON[script.cdartmanager 32146]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
@@ -2102,8 +2101,7 @@ id      | description
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <!--<label>$ADDON[script.cdartmanager 32009]</label>-->
-                    <label>13012</label>
+                    <label>$ADDON[script.cdartmanager 32147]</label>
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>

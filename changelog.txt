@@ -1,6 +1,11 @@
+2.6.4
+- Fix - Changed artist thumb to be saved as folder.jpg <- which matches what XBMC looks for
+- Add - rename artist.jpg to folder.jpg during Update Fanarts/Thumbnails
+
 2.6.3
 - Add Overwrite thumbnail/fanart which path is supplied by XBMC during download
 - Add Overwrite thumbnail/fanart which path is supplied by XBMC via settings screen
+- Changed images to use preview images on fanart.tv
 
 2.6.2
 - Fixed MusicBrainz retrieval

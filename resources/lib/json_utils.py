@@ -17,8 +17,7 @@ def retrieve_json_dict(json_query, items='items', force_log=False ):
     false = False
     null = None
     json_response = xbmc.executeJSONRPC(json_query)
-    # disable debug logging if items = 'movies' as it can take a while logging the movie db
-    if items != 'movies' or force_log: 
+    if force_log: 
         xbmc.log( "[json_utils.py] - retrieve_json_dict - JSONRPC -\n%s" % json_response, level=xbmc.LOGDEBUG )
     response = json_response
     if response.startswith( "{" ):
