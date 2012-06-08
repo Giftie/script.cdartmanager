@@ -282,7 +282,7 @@ def auto_download( type ):
                     else:
                         artwork = art[0]
                         if type == "artistthumb":
-                            if exists( os.path.join( auto_art["path"], "artist.jpg" ) ):
+                            if exists( os.path.join( auto_art["path"], "folder.jpg" ) ):
                                 xbmc.log( "[script.cdartmanager] - Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
