@@ -137,14 +137,10 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         #and calculating the percentage
         def _report_hook( count, blocksize, totalsize ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
-            if percent < 0:
-                precent = 1
-            strProgressBar = str( percent )
             if type in ( "fanart", "clearlogo", "artistthumb" ):
                 pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
             else:
                 pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
-            #Onscreen Dialog - *DOWNLOADING CDART*
             if mode == "auto":
                 if ( pDialog.iscanceled() ):
                     pass  
