@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-06-18 23:42+0000 -->
-<!-- translator: giftie -->
+<!-- translation date: 2012-06-19 21:47+0000 -->
+<!-- translator: Wanilton Campos -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
   <string id="32001">Álbuns - Arte do Disco</string>
@@ -65,7 +65,7 @@
   <string id="32059">Imagens Copiadas</string>
   <string id="32060">Copiando Imagens</string>
   <string id="32061">Backup cdArt</string>
-  <string id="32062">Path for missing.txt file</string>
+  <string id="32062">Caminho para o arquivo missing.txt</string>
   <string id="32063">Copiar cdARTs Local que Seja Único</string>
   <string id="32064">Pasta de cdARTs Únicos: %s</string>
   <string id="32065">Comparando cdARTs Locais e Online...</string>
@@ -106,7 +106,7 @@
   <string id="32100">Contando Álbuns locais</string>
   <string id="32101">Ordenando Álbum Artistas</string>
   <string id="32102">Recuperando o Database Local</string>
-  <string id="32103">Saving Missing cdART List</string>
+  <string id="32103">Salvando lista dos cdART faltantes</string>
   <string id="32104">Uploading Lista de cdARTs faltantes para o website</string>
   <string id="32105">Recuperando detalhes do álbum</string>
   <string id="32106">Sobreponha CDARTs com baixa resolução</string>
