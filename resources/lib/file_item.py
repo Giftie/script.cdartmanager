@@ -54,6 +54,9 @@ class Thumbnails:
 
     def get_cached_picture_thumb( self, strPath ):
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Pictures" ), True )
+        
+    def get_cached_album_thumb( self, strPath ):
+        return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music" ), True )
 
     def get_cached_video_thumb( self, strPath ):
         if strPath.startswith( "stack://" ):

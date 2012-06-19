@@ -834,7 +834,6 @@ id      | description
                     <align>center</align>
                 </control>
             </control> 
-
             <control type="group" id="9006">  <!-- cdART Backup Menu -->
                 <posx>370</posx>
                 <posy>420</posy>
@@ -1126,9 +1125,10 @@ id      | description
                     <onleft>9000</onleft>
                     <onright>9005</onright>
                     <onup>132</onup>
-                    <ondown>134</ondown>
+                    <ondown>137</ondown>
                 </control>
-                <control type="button" id="134"> <!-- Copy Unique To Local cdARTs -->
+                <!--
+                <control type="button" id="134">
                     <description>Copy Unique Local cdARTs</description>
                     <posx>10</posx>
                     <posy>170</posy>
@@ -1149,10 +1149,11 @@ id      | description
                     <onup>133</onup>
                     <ondown>137</ondown>
                 </control>
+                -->
                 <control type="button" id="137"> <!-- Local cdART List -->
                     <description>Local cdART List</description>
                     <posx>10</posx>
-                    <posy>210</posy>
+                    <posy>170</posy>
                     <height>40</height>
                     <width>280</width>
                     <textoffsetx>10</textoffsetx>
@@ -1167,7 +1168,7 @@ id      | description
                     <pulseonselect>false</pulseonselect>
                     <onleft>9000</onleft>
                     <onright>9005</onright>
-                    <onup>134</onup>
+                    <onup>133</onup>
                     <ondown>130</ondown>
                 </control>
             </control>
@@ -1219,7 +1220,6 @@ id      | description
                 <aligny>center</aligny>
                 <align>center</align>
             </control>
-
             <control type="group" id="9001"> <!-- cdART Menu -->
                 <posx>0</posx>
                 <posy>300</posy>
@@ -1336,7 +1336,6 @@ id      | description
                     <ondown>150</ondown>
                 </control>
             </control>
-
             <control type="group" id="9021"> <!-- Artist Thumb Search Artists sub-Menu -->
                 <posx>0</posx>
                 <posy>460</posy>
@@ -1393,7 +1392,6 @@ id      | description
                     <ondown>197</ondown>
                 </control>
             </control>
-
             <control type="group" id="9022"> <!-- Artist Thumb Autodownload sub-Menu -->
                 <posx>0</posx>
                 <posy>500</posy>

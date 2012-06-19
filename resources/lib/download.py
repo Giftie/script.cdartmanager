@@ -33,6 +33,7 @@ from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_a
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
+
 try:
     #frodo code
     from xbmcvfs import mkdirs as _makedirs
@@ -104,6 +105,7 @@ def make_music_path( artist ):
 def download_art( url_cdart, album, database_id, type, mode, size ):
     xbmc.log( "[script.cdartmanager] - Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
+    thumb_path = ""
     percent = 1
     if mode == "auto":
         pDialog.update( percent )
@@ -120,7 +122,7 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         thumbnail_path = get_thumbnail_path( database_id, type )
     else:
         thumbnail_path = ""
-    if type == "fanart" and mode == "manual":
+    if type == "fanart" and mode in ( "manual", "single" ):
         thumbnail_path = get_fanart_path( database_id, type )
     if not exists( path ):
         try:
@@ -138,9 +140,15 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         def _report_hook( count, blocksize, totalsize ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
             if type in ( "fanart", "clearlogo", "artistthumb" ):
-                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
+                try:
+                    pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ).encode("utf-8") ) )
+                except:
+                    pDialog.update( percent, "%s%s" % ( _(32038) , repr( album["artist"] ) ) )
             else:
-                pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ), "%s%s" % ( _(32039) , get_unicode( album["title"] ) ) )
+                try:
+                    pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ).encode("utf-8") ), "%s%s" % ( _(32039) , get_unicode( album["title"] ).encode("utf-8") ) )
+                except:
+                    pDialog.update( percent, "%s%s" % ( _(32038) , repr( album["artist"] ) ), "%s%s" % ( _(32039) , repr( album["title"] ) ) )
             if mode == "auto":
                 if ( pDialog.iscanceled() ):
                     pass  
@@ -149,8 +157,14 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
             #message = ["Download Sucessful!"]
             message = [_(32023), _(32024), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart )]
             success = file_copy( destination, final_destination ) # copy it to album folder
-            if thumbnail_path:
-                success2 = file_copy( destination, thumbnail_path ) # copy to thumbnail image
+            if type == "fanart":
+                thumb_path = Thumbnails().get_cached_fanart_thumb( album["artist"], "artist" )
+            elif type == "artistthumb":
+                thumb_path = Thumbnails().get_cached_artist_thumb( album["artist"] )
+            elif type == "cover":
+                thumb_path = Thumbnails().get_cached_album_thumb( path )
+            if thumb_path:
+                success2 = file_copy( destination, thumb_path ) # copy to thumbnail image
             # update database
             try:
                 conn = sqlite3.connect(addon_db)
@@ -177,7 +191,7 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         message = [ _(32026), _(32025), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart ) ]
         #message = [Download Problem, Check file paths - Artwork Not Downloaded]           
         print_exc()
-    if mode == "auto":
+    if mode == "auto" or mode == "single":
         return message, download_success, final_destination  # returns one of the messages built based on success or lack of
     else:
         pDialog.close()
@@ -200,7 +214,7 @@ def auto_download( type ):
         cdart_existing = 0
         album_count = 0
         d_error=False
-        percent = 0
+        percent = 1
         successfully_downloaded = []
         if type in ( "clearlogo_allartists", "artistthumb_allartists", "fanart_allartists" ):
             local_artist = get_local_artists_db( mode="all_artists" )
@@ -215,7 +229,7 @@ def auto_download( type ):
         distant_artist = get_distant_artists()
         recognized_artists, artists_list = get_recognized( distant_artist, local_artist )
         count_artist_local = len( recognized_artists )
-        percent = 0
+        percent = 1
         pDialog.create( _(32046) )
         #Onscreen Dialog - Automatic Downloading of Artwork
         for artist in recognized_artists:
@@ -259,7 +273,7 @@ def auto_download( type ):
                         auto_art["path"] = path
                     if type == "fanart":
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
-                            message, d_success = download_art( art[0], temp_art, artist["local_id"], "fanart", "manual", 0 )
+                            message, d_success, final_destination = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0 )
                         for artwork in art:
                             fanart = {}
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):

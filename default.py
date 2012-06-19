@@ -22,17 +22,14 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "6-7-12"
+__date__             = "6-17-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
 __addon_path__       = __addon__.getAddonInfo('path')
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
-api_key = "e308cc6c6f76e502f98526f1694c62ac"
-
+api_key              = "e308cc6c6f76e502f98526f1694c62ac"
 BASE_RESOURCE_PATH   = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 music_path           = xbmc.translatePath( __addon__.getSetting( "music_path" ) ).decode('utf-8')
 addon_work_folder    = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode('utf-8')
 addon_db             = os.path.join(addon_work_folder, "l_cdart.db").replace("\\\\","\\")
@@ -47,7 +44,11 @@ rebuild              = False
 soft_exit            = False
 background_db        = False
 
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
+sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
+
 from utils import empty_tempxml_folder, settings_to_log, get_unicode
+from file_item import Thumbnails
 from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db
 from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
@@ -69,6 +70,15 @@ def album_musicbrainz_id( album_details ):
     album, albums = get_musicbrainz_album( get_unicode( album_details[0]["title"] ), get_unicode( album_details[0]["artist"] ), 0 )
     return album
     
+def thumbnail_copy( art_path, thumb_path, type="artwork" ):
+    if exists( art_path ):
+        if file_copy( art_path, thumb_path ):
+            xbmc.log( "[script.cdartmanager] - Successfully copied %s" % type, xbmc.LOGDEBUG )
+        else:
+            xbmc.log( "[script.cdartmanager] - Failed to copy to %s" % type, xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( art_path ), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
+            
 def update_xbmc_thumbnails():
     xbmc.log( "[script.cdartmanager] - Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
     fanart = "fanart.jpg"
@@ -76,7 +86,9 @@ def update_xbmc_thumbnails():
     artistthumb = "folder.jpg"
     albumthumb = "folder.jpg"
     # Artists
-    artists = get_local_artists_db( mode="album_artists" )
+    artists = get_local_artists_db( mode="local_artists" )
+    if not artists:
+        artists = get_local_artists_db( mode="album_artists" )
     # Albums
     albums = get_local_albums_db( "all artists", False )
     for artist in artists:
@@ -89,44 +101,27 @@ def update_xbmc_thumbnails():
             file_rename( artistthumb_rename, artistthumb_path )
         if exists( fanart_path ):
             xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
+            thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( artist["name"], "artist" )
+            thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
         elif exists( artistthumb_path ):
             xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
+            thumb_artist_path = Thumbnails().get_cached_artist_thumb( artist["name"] )
+            thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
         else:
             continue
-        if xbmc_fanart_path:
-            if file_copy( fanart_path, xbmc_fanart_path ):
-                xbmc.log( "[script.cdartmanager] - Successfully copied fanart", xbmc.LOGDEBUG )
-            else:
-                xbmc.log( "[script.cdartmanager] - Failed to copy fanart", xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( fanart_path ), xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
-        else:
-            pass
-        if xbmc_thumbnail_path:
-            if file_copy( artistthumb_path, xbmc_thumbnail_path ):
-                xbmc.log( "[script.cdartmanager] - Successfully copied Thumbnail", xbmc.LOGDEBUG )
-            else:
-                xbmc.log( "[script.cdartmanager] - Failed to copy Thumbnail", xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( artistthumb_path ), xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
-        else:
-            pass
+        if xbmc_fanart_path:  # copy to XBMC supplied fanart path
+            thumbnail_copy( fanart_path, xbmc_fanart_path, "fanart" )
+        if xbmc_thumbnail_path: # copy to XBMC supplied artist image path
+            thumbnail_copy( artistthumb_path, xbmc_thumbnail_path, "artist thumb" )    
     for album in albums:
         xbmc_thumbnail_path = ""
         coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
         if exists( coverart_path ):
             xbmc_thumbnail_path = get_thumbnail_path( album["local_id"], "album" )
-            if xbmc_thumbnail_path:
-                if file_copy( coverart_path, xbmc_thumbnail_path ):
-                    xbmc.log( "[script.cdartmanager] - Successfully copied Thumbnail", xbmc.LOGDEBUG )
-                else:
-                    xbmc.log( "[script.cdartmanager] - Failed to copy Thumbnail", xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( coverart_path ), xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( xbmc_thumbnail_path ), xbmc.LOGDEBUG )
-            else:
-                continue
-        else:
-            continue
+            thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
+            thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
+        if xbmc_thumbnail_path:
+            thumbnail_copy( coverart_path, xbmc_thumbnail_path, "album cover" )
     xbmc.log( "[script.cdartmanager] - Finished Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )      
 
 if ( __name__ == "__main__" ):

@@ -7,7 +7,7 @@
         <setting label="" type="lsep" />
         <setting label="32036" type="folder" id="music_path" default="" source="auto" option="writeable" />
         <setting label="32018" type="folder" id="backup_path" default="" source="auto" option="writeable" />
-        <setting label="32062" type="folder" id="unique_path" default="" source="auto" option="writeable" />
+        <setting label="32062" type="folder" id="missing_path" default="" source="auto" option="writeable" />
         <setting label="32097" type="bool" id="enableresize" default="false" />
         <setting id="folder" type="enum" label="32019" lvalues="32054|32055" default="0"/>
         <setting type="sep" />

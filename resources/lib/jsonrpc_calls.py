@@ -7,7 +7,7 @@ import os
 from json_utils import retrieve_json_dict
 
 def get_thumbnail_path( database_id, type ):
-    xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Thumbnail Path for %sid: %s" % ( type, database_id ), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Thumbnail Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
     if type in ( "cover", "cdart", "album" ) and database_id:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["thumbnail"], "albumid": %d}, "id": 1}''' % database_id
         json_thumb = retrieve_json_dict( json_query, items='albumdetails', force_log=False )
@@ -23,7 +23,7 @@ def get_thumbnail_path( database_id, type ):
         return None
         
 def get_fanart_path( database_id, type ):
-    xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Fanart Path for %sid: %s" % ( type, database_id ), xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - pre_eden_code - Retrieving Fanart Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
     if type in ( "cover", "cdart", "album" ) and database_id:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["fanart"], "albumid": %d}, "id": 1}''' % database_id
         json_fanart = retrieve_json_dict( json_query, items='albumdetails', force_log=False )
