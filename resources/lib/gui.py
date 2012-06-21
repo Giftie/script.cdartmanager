@@ -729,11 +729,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not artists:
             artists = get_local_artists_db( mode="album_artists" )
         pDialog.create( __language__(32103), __language__(20186) )
-        if not missing_path:
-            filename=os.path.join(addon_work_folder, "missing.txt")
+        temp_destination = os.path.join(missing_path, "missing.txt")
+        if missing_path:
+            final_destination = os.path.join(missing_path, "missing.txt")
+            path_provided = True
         else:
-            filename=os.path.join(missing_path, "missing.txt")
-        missing=open(filename, "wb")
+            xbmc.log( "[script.cdartmanager] - Path for missing.txt file not provided", xbmc.LOGNOTICE )
+            path_provided = False
+        missing=open(temp_destination, "wb")
         try:
             pDialog.update( percent )
             missing.write("Albums Missing Artwork\n")
@@ -798,6 +801,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         except:
             xbmc.log( "[script.cdartmanager] - Error saving missing.txt file", xbmc.LOGNOTICE )
             print_exc()
+        if exists( temp_destination ) and path_provided:
+            file_copy( final_destination, temp_destination )
         pDialog.close()
                     
     def refresh_counts( self, local_album_count, local_artist_count, local_cdart_count ):
@@ -950,7 +955,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     pDialog.close()
                 except:
                     pass # pDialog not open anyways
-                xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+                try:
+                    xbmcgui.Dialog().ok( message[0], message[1], message[2], message[3] )
+                except:
+                    xbmcgui.Dialog().ok( message[0], message[1], repr( message[2] ), repr( message[3] ) )
             else : # If it is not a recognized Album...
                 xbmc.log( "[script.cdartmanager] - Oops --  Some how I got here... - ControlID(122)", xbmc.LOGDEBUG )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
@@ -982,12 +990,18 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32139), 2000, image) )
         if controlId == 191 : #Refresh Local database selected from Advanced Menu
             refresh_db( False )
-            pDialog.close()
+            try:
+                pDialog.close()
+            except:
+                pass
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 192: #Update database
             update_database( False )
-            pDialog.close()
+            try:
+                pDialog.close()
+            except:
+                pass
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 136 : #Restore from Backup
@@ -1117,7 +1131,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         pDialog.close()
                     except:
                         pass
-                    xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+                    try:
+                        xbmcgui.Dialog().ok( message[0], message[1], message[2], message[3] )
+                    except:
+                        xbmcgui.Dialog().ok( message[0], message[1], repr( message[2] ), repr( message[3] ) )
                 else:
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "clearlogo" )
@@ -1135,7 +1152,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         pDialog.close()
                     except:
                         pass
-                    xbmcgui.Dialog().ok(message[0] ,message[1] ,message[2] ,message[3])
+                    try:
+                        xbmcgui.Dialog().ok( message[0], message[1], message[2], message[3] )
+                    except:
+                        xbmcgui.Dialog().ok( message[0], message[1], repr( message[2] ), repr( message[3] ) )
                 else:
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "fanart" )

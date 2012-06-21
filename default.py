@@ -22,7 +22,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "6-17-12"
+__date__             = "6-21-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -71,14 +71,17 @@ def album_musicbrainz_id( album_details ):
     return album
     
 def thumbnail_copy( art_path, thumb_path, type="artwork" ):
-    if exists( art_path ):
-        if file_copy( art_path, thumb_path ):
-            xbmc.log( "[script.cdartmanager] - Successfully copied %s" % type, xbmc.LOGDEBUG )
-        else:
-            xbmc.log( "[script.cdartmanager] - Failed to copy to %s" % type, xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( art_path ), xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
-            
+    if not thumb_path.startswith("http://"):
+        if exists( art_path ):
+            if file_copy( art_path, thumb_path ):
+                xbmc.log( "[script.cdartmanager] - Successfully copied %s" % type, xbmc.LOGDEBUG )
+            else:
+                xbmc.log( "[script.cdartmanager] - Failed to copy to %s" % type, xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( art_path ), xbmc.LOGDEBUG )
+                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
+    elif thumb_path.startswith("http://"):
+        xbmc.log( "[script.cdartmanager] - Destination Path is not able to be copied to: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
+        
 def update_xbmc_thumbnails():
     xbmc.log( "[script.cdartmanager] - Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
     fanart = "fanart.jpg"

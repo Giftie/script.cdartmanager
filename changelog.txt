@@ -1,3 +1,10 @@
+2.6.7
+- Fix - make sure dialog during artist check is printable
+- Fix - provide proper saving of missing.txt to VFS path
+- Fix - correct artist query during database update to be Album Artist only
+- Fix - json code for artists
+- Add - added code for matching artists via Aliases, ie John Cougar, John Cougar Mellancamp and Johnny Cougar all match to John Mellancamp.
+
 2.6.6
 - Fix - Make all single downloads to act the same
 - Fix - Make sure not to close progress dialog when autodownloading fanarts
@@ -5,7 +12,6 @@
 - Add - Selectable path for missing.txt file
 - remove - removed Unique cdart functions(pretty much useless)
 - Fix/Add - copy artwork to thumbnail folder
-- Add - Korean Language strings
 
 2.6.5
 - Add required <language></language> in addon.xml

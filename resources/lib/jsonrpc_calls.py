@@ -43,7 +43,7 @@ def get_all_local_artists( all_artists = True ):
     if all_artists:
         json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": false }, "id": 1}'
     else:
-        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartists_only": true }, "id": 1}'
+        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": true }, "id": 1}'
     json_artists = retrieve_json_dict(json_query, items='artists', force_log=False )
     if json_artists:
         return json_artists
