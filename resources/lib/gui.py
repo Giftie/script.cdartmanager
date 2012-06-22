@@ -729,14 +729,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not artists:
             artists = get_local_artists_db( mode="album_artists" )
         pDialog.create( __language__(32103), __language__(20186) )
-        temp_destination = os.path.join(missing_path, "missing.txt")
+        temp_destination = os.path.join( addon_work_folder, "missing.txt")
         if missing_path:
-            final_destination = os.path.join(missing_path, "missing.txt")
+            final_destination = os.path.join( missing_path, "missing.txt" )
             path_provided = True
         else:
             xbmc.log( "[script.cdartmanager] - Path for missing.txt file not provided", xbmc.LOGNOTICE )
             path_provided = False
-        missing=open(temp_destination, "wb")
+        missing=open( temp_destination, "wb" )
         try:
             pDialog.update( percent )
             missing.write("Albums Missing Artwork\n")
@@ -744,8 +744,20 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("|  %-45s|  %-75s              |  %-50s|  cdART  |  Cover  |\n" % ( "MusicBrainz ID", "Album Title", "Album Artist" ) )
             missing.write("-" * 214)
             missing.write("\n")
+            percent = 1
             for album in albums:
-                count += 1
+                percent = percent = int( ( count/float( len( albums ) ) ) * 100 ) 
+                count +=1
+                if percent == 0:
+                    percent = 1
+                if percent > 100:
+                    percent = 100
+                if ( pDialog.iscanceled() ):
+                    break
+                try:
+                    pDialog.update( percent, __language__(32103), " %s: %s" % ( __language__( 32039 ), album["title"].encode("utf-8") ) )
+                except:
+                    pDialog.update( percent, __language__( 32103 ), " %s: %s" % ( __language__( 32039 ), repr( album["title"] ) ) )
                 cdart = " "
                 cover = " "
                 if album["cdart"]:
@@ -776,7 +788,21 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("|  %-45s| %-70s|  Fanart  |  clearLogo  |  Artist Thumb |\n" % ( "MusicBrainz ID", "Artist Name" ) )
             missing.write("-" * 162)
             missing.write("\n")
+            count = 0
+            percent =1
             for artist in artists:
+                count +=1
+                percent = percent = int( ( count/float( len( artists ) ) ) * 100 ) 
+                if percent == 0:
+                    percent = 1
+                if percent > 100:
+                    percent = 100
+                if ( pDialog.iscanceled() ):
+                    break
+                try:
+                    pDialog.update( percent, __language__( 32103 ), " %s: %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
+                except:
+                    pDialog.update( percent, __language__( 32103 ), " %s: %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
                 fanart = " "
                 clearlogo = " "
                 artistthumb = " "

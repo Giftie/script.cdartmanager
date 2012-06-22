@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-06-18 23:42+0000 -->
+<!-- translation date: 2012-06-22 22:27+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">인식된 아티스트</string>
@@ -106,7 +106,7 @@
   <string id="32100">로컬 앨범 카운트</string>
   <string id="32101">앨범 아티스트 정렬</string>
   <string id="32102">로컬 데이터베이스 검색 중</string>
-  <string id="32103">Saving Missing cdART List</string>
+  <string id="32103">Saving Missing Artwork List</string>
   <string id="32104">cdART 누락 목록을 웹사이트에 업로드</string>
   <string id="32105">앨범 상세정보 검색 중</string>
   <string id="32106">기존 저해상도 cdART를 덮어 씀</string>
@@ -114,6 +114,8 @@
   <string id="32109">다시 작성하겠습니까?</string>
   <string id="32110">폴더 접속에 문제 있음, 스크립트 종료</string>
   <string id="32111">다운로드한 아트워크</string>
+  <string id="32112">Updating Thumbnails and Fanarts</string>
+  <string id="32113">Finished updating Thumbnails and Fanarts</string>
   <string id="32115">백그라운드 데이터베이스 작성 알림</string>
   <string id="32116">백그라운드 데이터베이스 작성이 끝나면 알림 (2초간 표시)</string>
   <string id="32117">데이터베이스 작성 완료</string>

@@ -22,7 +22,7 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "6-21-12"
+__date__             = "6-22-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -43,6 +43,7 @@ first_run            = False
 rebuild              = False
 soft_exit            = False
 background_db        = False
+pDialog              = xbmcgui.DialogProgress()
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
@@ -88,13 +89,30 @@ def update_xbmc_thumbnails():
     artistthumb_temp = "artist.jpg"
     artistthumb = "folder.jpg"
     albumthumb = "folder.jpg"
+    #xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32112), 2000, image) )
+    xbmc.sleep( 500 )
+    pDialog.create( __language__( 32042 ) )
     # Artists
     artists = get_local_artists_db( mode="local_artists" )
     if not artists:
         artists = get_local_artists_db( mode="album_artists" )
     # Albums
     albums = get_local_albums_db( "all artists", False )
+    percent = 1
+    count = 0
     for artist in artists:
+        percent = percent = int( ( count/float( len( artists ) ) ) * 100 ) 
+        count += 1
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        if ( pDialog.iscanceled() ):
+            break
+        try:
+            pDialog.update( percent, __language__( 32112 ), " %s: %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
+        except:
+            pDialog.update( percent, __language__( 32112 ), " %s: %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
         xbmc_thumbnail_path = ""
         xbmc_fanart_path = ""
         fanart_path = os.path.join( music_path, artist["name"], fanart ).replace( "\\\\","\\" )
@@ -115,8 +133,21 @@ def update_xbmc_thumbnails():
         if xbmc_fanart_path:  # copy to XBMC supplied fanart path
             thumbnail_copy( fanart_path, xbmc_fanart_path, "fanart" )
         if xbmc_thumbnail_path: # copy to XBMC supplied artist image path
-            thumbnail_copy( artistthumb_path, xbmc_thumbnail_path, "artist thumb" )    
+            thumbnail_copy( artistthumb_path, xbmc_thumbnail_path, "artist thumb" )            
+    percent = 1
+    count = 1
     for album in albums:
+        percent = percent = int( ( count/float( len( albums ) ) ) * 100 ) 
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        if ( pDialog.iscanceled() ):
+            break
+        try:
+            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s: %s" % ( __language__( 32039 ), album["title"].encode("utf-8") ) )
+        except:
+            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s: %s" % ( __language__( 32039 ), repr( album["title"] ) ) )
         xbmc_thumbnail_path = ""
         coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
         if exists( coverart_path ):
@@ -125,8 +156,10 @@ def update_xbmc_thumbnails():
             thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
         if xbmc_thumbnail_path:
             thumbnail_copy( coverart_path, xbmc_thumbnail_path, "album cover" )
-    xbmc.log( "[script.cdartmanager] - Finished Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )      
-
+        count += 1
+    xbmc.log( "[script.cdartmanager] - Finished Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
+    #xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32113), 2000, image) )
+    
 if ( __name__ == "__main__" ):
     xbmc.executebuiltin('Dialog.Close(all, true)')  
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
