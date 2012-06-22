@@ -333,7 +333,7 @@ def check_local_albumartist( album_artist, local_artist_list, background ):
         for local in local_artist_list:
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( local["artist"] )..encode("utf-8") ) ) )
+                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( local["artist"] ).encode("utf-8") ) ) )
                 except:
                     pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( repr( local["artist"] ) ) ) )
                 if (pDialog.iscanceled()):

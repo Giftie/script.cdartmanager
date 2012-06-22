@@ -1,3 +1,8 @@
+2.6.8
+- Fix - in missing.txt show albums missing all artwork
+- Fix - in missing.txt don't show albums that have all artwork
+- Fix - one to many periods
+
 2.6.7
 - Fix - make sure dialog during artist check is printable
 - Fix - provide proper saving of missing.txt to VFS path

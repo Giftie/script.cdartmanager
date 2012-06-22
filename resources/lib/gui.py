@@ -748,11 +748,13 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 count += 1
                 cdart = " "
                 cover = " "
-                if album["cdart"] or album["cover"]:
-                    if album["cdart"]:
-                        cdart = "X"
-                    if album["cover"]:
-                        cover = "X"
+                if album["cdart"]:
+                    cdart = "X"
+                if album["cover"]:
+                    cover = "X"
+                if album["cdart"] and album["cover"]:
+                    continue
+                else:
                     if int( album["disc"] ) > 1:
                         line = "|  %-45s| %-75s     disc#: %2s |  %-50s|    %s    |    %s    |\n" % ( album["musicbrainz_albumid"], album["title"], album["disc"], album["artist"], cdart, cover )
                     elif int( album["disc"] ) == 1:
