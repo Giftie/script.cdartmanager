@@ -8,6 +8,7 @@
 - Change - Redo some of the menu animations, allowing for more levels to the Advanced menu
 - Fix - properly fix saving of missing.txt file to a VFS folder
 - Add - Change MBID for Albums and Artists
+- Change - moved matching of recognized artists to the start of the script, so it is only done once per run of program(also will run after a database update) 
 
 2.6.9
 - Fix - Properly handle VFS file paths for saving missing.txt
