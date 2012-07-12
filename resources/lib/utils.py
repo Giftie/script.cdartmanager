@@ -19,7 +19,7 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 tempxml_folder    = os.path.join( addon_work_folder, "tempxml" )
-__useragent__  = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
+__useragent__     = sys.modules[ "__main__" ].__useragent__
 BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )

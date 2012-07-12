@@ -22,11 +22,15 @@ __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "6-22-12"
+__date__             = "6-25-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
 __addon_path__       = __addon__.getAddonInfo('path')
+__useragent__        = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
+__XBMCisFrodo__      = False
+if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0-ALPHA4" ): # required GIT version
+    __XBMCisFrodo__  = True
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
 api_key              = "e308cc6c6f76e502f98526f1694c62ac"
 BASE_RESOURCE_PATH   = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
@@ -72,15 +76,15 @@ def album_musicbrainz_id( album_details ):
     return album
     
 def thumbnail_copy( art_path, thumb_path, type="artwork" ):
-    if not thumb_path.startswith("http://"):
+    if not thumb_path.startswith("http://") or not thumb_path.startswith("image://"):
         if exists( art_path ):
             if file_copy( art_path, thumb_path ):
                 xbmc.log( "[script.cdartmanager] - Successfully copied %s" % type, xbmc.LOGDEBUG )
             else:
                 xbmc.log( "[script.cdartmanager] - Failed to copy to %s" % type, xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( art_path ), xbmc.LOGDEBUG )
-                xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
-    elif thumb_path.startswith("http://"):
+            xbmc.log( "[script.cdartmanager] - Source Path: %s" % repr( art_path ), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
+    elif thumb_path.startswith("http://") or thumb_path.startswith("image://"):
         xbmc.log( "[script.cdartmanager] - Destination Path is not able to be copied to: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
         
 def update_xbmc_thumbnails():
@@ -90,7 +94,7 @@ def update_xbmc_thumbnails():
     artistthumb = "folder.jpg"
     albumthumb = "folder.jpg"
     #xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32112), 2000, image) )
-    xbmc.sleep( 500 )
+    xbmc.sleep( 1000 )
     pDialog.create( __language__( 32042 ) )
     # Artists
     artists = get_local_artists_db( mode="local_artists" )
@@ -110,9 +114,9 @@ def update_xbmc_thumbnails():
         if ( pDialog.iscanceled() ):
             break
         try:
-            pDialog.update( percent, __language__( 32112 ), " %s: %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
+            pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
         except:
-            pDialog.update( percent, __language__( 32112 ), " %s: %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
+            pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
         xbmc_thumbnail_path = ""
         xbmc_fanart_path = ""
         fanart_path = os.path.join( music_path, artist["name"], fanart ).replace( "\\\\","\\" )
@@ -122,12 +126,14 @@ def update_xbmc_thumbnails():
             file_rename( artistthumb_rename, artistthumb_path )
         if exists( fanart_path ):
             xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
-            thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( artist["name"], "artist" )
-            thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
+            if not __XBMCisFrodo__:
+                thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( artist["name"], "artist" )
+                thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
         elif exists( artistthumb_path ):
             xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
-            thumb_artist_path = Thumbnails().get_cached_artist_thumb( artist["name"] )
-            thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
+            if not __XBMCisFrodo__:
+                thumb_artist_path = Thumbnails().get_cached_artist_thumb( artist["name"] )
+                thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
         else:
             continue
         if xbmc_fanart_path:  # copy to XBMC supplied fanart path
@@ -145,15 +151,16 @@ def update_xbmc_thumbnails():
         if ( pDialog.iscanceled() ):
             break
         try:
-            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s: %s" % ( __language__( 32039 ), album["title"].encode("utf-8") ) )
+            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s %s" % ( __language__( 32039 ), album["title"].encode("utf-8") ) )
         except:
-            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s: %s" % ( __language__( 32039 ), repr( album["title"] ) ) )
+            pDialog.update( percent, __language__( 32042 ), __language__( 32112 ), " %s %s" % ( __language__( 32039 ), repr( album["title"] ) ) )
         xbmc_thumbnail_path = ""
         coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
         if exists( coverart_path ):
             xbmc_thumbnail_path = get_thumbnail_path( album["local_id"], "album" )
-            thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
-            thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
+            if not __XBMCisFrodo__:
+                thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
+                thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
         if xbmc_thumbnail_path:
             thumbnail_copy( coverart_path, xbmc_thumbnail_path, "album cover" )
         count += 1
@@ -161,7 +168,7 @@ def update_xbmc_thumbnails():
     #xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32113), 2000, image) )
     
 if ( __name__ == "__main__" ):
-    xbmc.executebuiltin('Dialog.Close(all, true)')  
+    xbmc.executebuiltin('Dialog.Close(all, true)')
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __scriptname__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #        default.py module                                 #", xbmc.LOGNOTICE )
@@ -171,6 +178,7 @@ if ( __name__ == "__main__" ):
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
+    xbmc.log( "[script.cdartmanager] - #    %-50s    #" % ( "Eden", "Frodo" )[__XBMCisFrodo__], xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - Looking for settings.xml", xbmc.LOGNOTICE )
     if not exists(settings_file): # Open Settings if settings.xml does not exists
@@ -327,9 +335,19 @@ if ( __name__ == "__main__" ):
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
             elif not rebuild and not soft_exit:
                 import gui
-                ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
-                ui.doModal()
-                del ui
+                try:
+                    ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
+                    ui.doModal()
+                    del ui
+                except:
+                    try:
+                        pDialog.close()
+                    except:
+                        pass
+                    try:
+                        del ui
+                    except:
+                        pass
         elif not background_db and not soft_exit:
             xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
             xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )

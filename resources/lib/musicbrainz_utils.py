@@ -21,7 +21,7 @@ BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
-from utils import get_html_source
+from utils import get_html_source, unescape
 artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d'''
 alias_url = '''http://musicbrainz.org/ws/2/artist/?query=alias:"%s"&limit=%d'''
 release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND artist:"%s" NOT type:single&limit=%d'''
@@ -32,6 +32,8 @@ release_group_url_using_release_name_alias = '''http://musicbrainz.org/ws/2/rele
 release_group_url_singles_alias = '''http://musicbrainz.org/ws/2/release-group/?query="%s" AND alias:"%s"&limit=%d'''
 release_group_url_release_mbid = '''http://musicbrainz.org/ws/2/release-group/?release=%s'''
 release_groups_url_artist_mbid = '''http://musicbrainz.org/ws/2/release-group/?artist="%s"'''
+artist_id_check = '''http://www.musicbrainz.org/ws/2/artist/%s'''
+release_group_id_check = '''http://www.musicbrainz.org/ws/2/release-group/%s'''
 
 def split_album_info( album_result, index ):
     album = {}
@@ -63,6 +65,7 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     album = {}
     albums = []
     count = e_count
+    album["score"] = ""
     album["id"] = ""
     album["title"] = ""
     album["artist"] = ""
@@ -71,26 +74,26 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     xbmc.log( "[script.cdartmanager] - Album: %s" % repr(album_title), xbmc.LOGDEBUG )
     artist = artist.replace('"','?')
     album_title = album_title.replace('"','?')
-    if not with_singles and not by_release and not use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
-        url = release_group_url_nosingles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    elif not with_singles and not by_release and use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
-        url = release_group_url_nosingles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    elif not by_release and not use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
-        url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    elif not by_release and use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
-        url = release_group_url_singles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    elif not with_singles and not use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
-        url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    elif not with_singles and use_alias:
-        xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
-        url = release_group_url_using_release_name_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
-    htmlsource = get_html_source( url, "", False )
     if limit == 1:
+        if not with_singles and not by_release and not use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+            url = release_group_url_nosingles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        elif not with_singles and not by_release and use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+            url = release_group_url_nosingles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        elif not by_release and not use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
+            url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        elif not by_release and use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
+            url = release_group_url_singles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        elif not with_singles and not use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
+            url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        elif not with_singles and use_alias:
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
+            url = release_group_url_using_release_name_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        htmlsource = get_html_source( url, "", False )
         match = re.search( '''<release-group ext:score="(.*?)"(?:.*?)</release-group>''', htmlsource )
         if match:
             if int( match.group(1) ) > 0:
@@ -131,10 +134,77 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
                 album["artist"], album["artist_id"], sort_name = get_musicbrainz_artist_id( artist )
             
     else:
-        # future code coming soon
-        pass
+        url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
+        htmlsource = get_html_source( url, "", False )
+        match = re.findall( '''<release-group ext:(.*?)</release-group>''', htmlsource )
+        if match:
+            for item in match:
+                album = {}
+                album["score"] = ""
+                album["id"] = ""
+                album["title"] = ""
+                album["artist"] = ""
+                album["artist_id"] = ""
+                try:
+                    mbscore = re.search( '''score="(.*?)"''', item)
+                    mbid = re.search( '''id="(.*?)"''', item)
+                    mbtitle = re.search( '''<title>(.*?)</title>''', item)
+                    mbartist = re.search( '''<name>(.*?)</name>''', item)
+                    mbartistid = re.search( '''<artist id="(.*?)">''', item)
+                    album["score"] = mbscore.group(1)
+                    album["id"] = mbid.group(1)
+                    album["title"] = unescape( mbtitle.group(1) )
+                    album["artist"] = unescape( mbartist.group(1) )
+                    album["artist_id"] = mbartistid.group(1)
+                    xbmc.log( "[script.cdartmanager] - Score     : %s" % album["score"], xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Title     : %s" % repr( album["title"] ), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Id        : %s" % album["id"], xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Artist    : %s" % repr( album["artist"] ), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Artist ID : %s" % album["artist_id"], xbmc.LOGDEBUG )
+                    albums.append(album)
+                except:
+                    print_exc()
+                
+        else:
+            pass
     xbmc.sleep( 910 ) # sleep for allowing proper use of webserver
     return album, albums
+
+def get_musicbrainz_artists( artist_search, limit=1 ):
+    xbmc.log( "[script.cdartmanager] - Artist: %s" % repr(artist_search), xbmc.LOGDEBUG )
+    score = ""
+    name = ""
+    id = ""
+    sortname = ""
+    artists = []
+    url = artist_url % ( quote_plus( artist_search.encode("utf-8") ), limit )
+    htmlsource = get_html_source( url, "", False)
+    match = re.findall( '''<artist(.*?)</artist>''', htmlsource )
+    if match:
+        for item in match:
+            artist = {}
+            artist["score"] = ""
+            artist["name"] = ""
+            artist["id"] = ""
+            artist["sortname"] = ""
+            artist_match = re.search( '''score="(.*?)" type="(.*?)" id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)''', item )
+            try:
+                if artist_match:
+                    xbmc.log( "[script.cdartmanager] - Score     : %s" % artist_match.group(1), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Type      : %s" % repr( artist_match.group(2) ), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Id        : %s" % artist_match.group(3), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( artist_match.group(4) ), xbmc.LOGDEBUG )
+                    xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( artist_match.group(5) ), xbmc.LOGDEBUG )
+                    artist["score"] = artist_match.group(1)
+                    artist["name"] = unescape( artist_match.group(4) )
+                    artist["id"] = artist_match.group(3)
+                    artist["sortname"] = artist_match.group(5)
+                    artists.append(artist)
+            except:
+                print_exc()
+    else:
+        xbmc.log( "[script.cdartmanager] - No Artist ID found for Artist: %s" % repr( artist_search ), xbmc.LOGDEBUG )
+    return artists
 
 def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
     name = ""
@@ -189,3 +259,37 @@ def update_musicbrainzid( type, info ):
     except:
         print_exc()
     return artist_id
+    
+def check_mbid( database_mbid, type ):
+    xbmc.log( "[script.cdartmanager] - Looking up %s MBID. Current MBID: %s" % ( type, database_mbid ), xbmc.LOGNOTICE )
+    current_mbid = ""
+    mbid_match = False
+    if type == "release-group":
+        url = release_group_id_check % database_mbid
+    elif type == "artist":
+        url = artist_id_check % database_mbid
+    htmlsource = get_html_source( url, "", False)
+    if type == "release-group":
+        match = re.search( '''<release-group type="(.*?)" id="(.*?)">''', htmlsource )
+        if match:
+            current_mbid = match.group( 2 )
+        if current_mbid == database_mbid:
+            mbid_match = True
+        else:
+            mbid_match = False
+    elif type == "artist":
+        match = re.search( '''<artist type="(.*?)" id="(.*?)">''', htmlsource )
+        if match:
+            current_mbid = match.group( 2 )
+        if current_mbid == database_mbid:
+            mbid_match = True
+        else:
+            mbid_match = False
+    else:
+        pass
+    if mbid_match:
+        xbmc.log( "[script.cdartmanager] - MBID is current. No Need to change", xbmc.LOGDEBUG )
+    else:
+        xbmc.log( "[script.cdartmanager] - MBID is not current. Need to change", xbmc.LOGDEBUG )
+    return mbid_match, current_mbid
+            

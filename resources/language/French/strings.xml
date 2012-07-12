@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-06-22 22:27+0000 -->
+<!-- translation date: 2012-07-03 05:43+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistes Reconnus</string>
   <string id="32001">Tout les artistes</string>
-  <string id="32002">Artistes Recherche</string>
+  <string id="32002">Select Artist</string>
   <string id="32003">Albums Recherche</string>
   <string id="32004">Téléchargement Réussi</string>
   <string id="32005">Enregistrer Local cdART Liste</string>
@@ -31,7 +31,7 @@
   <string id="32025">Check file paths-Artwork Not Downloaded</string>
   <string id="32026">Erreur de téléchargement</string>
   <string id="32027">cdART non téléchargé !</string>
-  <string id="32028">Téléchargement annulé !</string>
+  <string id="32028">Download aborted!</string>
   <string id="32029">Pas de cdARTs trouvé ?</string>
   <string id="32030">Contribuez ! Partagez les votres</string>
   <string id="32031">Sur fanart.tv</string>
@@ -116,6 +116,7 @@
   <string id="32111">Downloaded Artwork</string>
   <string id="32112">Updating Thumbnails and Fanarts</string>
   <string id="32113">Finished updating Thumbnails and Fanarts</string>
+  <string id="32114">Check Database MBID's to be current during an Update</string>
   <string id="32115">Notify During Background Database Build</string>
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
@@ -123,12 +124,12 @@
   <string id="32119">Stopping Background Database Building</string>
   <string id="32120">All Artists</string>
   <string id="32121">Album Artists</string>
-  <string id="32122">Edit By Artist</string>
+  <string id="32122">Edit Artist</string>
   <string id="32123">Backup Database</string>
   <string id="32124">Retrieving All Local Artists</string>
   <string id="32125">Artist ID: </string>
   <string id="32126">Modify Local Database</string>
-  <string id="32127">Edit by Album</string>
+  <string id="32127">Edit Album</string>
   <string id="32128">MusicBrainz Search Limit</string>
   <string id="32129">Update Database</string>
   <string id="32130">XBMC Music Database missing...</string>
@@ -138,8 +139,8 @@
   <string id="32134">Updating Addon Database</string>
   <string id="32135">Updating Addon Database - Local Artists</string>
   <string id="32136">Enable MusicBrainz ID update during Addon Database update(for missing IDs)</string>
-  <string id="32137">Artist: </string>
-  <string id="32138">Album: </string>
+  <string id="32137">Artist</string>
+  <string id="32138">Album</string>
   <string id="32139">Successfully backed up Addon Database</string>
   <string id="32140">Old Database version found...</string>
   <string id="32141">Would you like to add Local Artists to Addon Database?</string>
@@ -149,4 +150,23 @@
   <string id="32145">Update XBMC Thumbnails and Fanarts</string>
   <string id="32146">Settings</string>
   <string id="32147">Exit</string>
+  <string id="32148">(this can take a long time to complete)</string>
+  <string id="32149">Checking Artist MBIDs</string>
+  <string id="32150">Checking Album MBIDs</string>
+  <string id="32151">Find Missing MBIDs</string>
+  <string id="32152">Refresh MBIDs</string>
+  <string id="32153">Change MBID</string>
+  <string id="32154">Check All MBIDs</string>
+  <string id="32155">Enter MBID</string>
+  <string id="32156">Select from search(manual entry)</string>
+  <string id="32157">Select from search(automatic)</string>
+  <string id="32158">Enable saving of missing.txt file</string>
+  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32160">Please Enter 36 Characters including dashes</string>
+  <string id="32161">Do you want to re-enter?</string>
+  <string id="32162">Is this MBID Correct?</string>
+  <string id="32163">Are you sure you want to delete MBID?</string>
+  <string id="32164">Enter Artist name to search</string>
+  <string id="32165">Enter Album title to search</string>
+  <string id="32166">Select Album</string>
 </strings>

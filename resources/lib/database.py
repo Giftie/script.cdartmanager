@@ -27,7 +27,7 @@ image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.
 safe_db_version = "1.5.3"
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 pDialog = xbmcgui.DialogProgress()
-from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
+from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, check_mbid
 from fanarttv_scraper import retrieve_fanarttv_xml, remote_cdart_list
 from utils import get_unicode
 
@@ -52,7 +52,7 @@ def artwork_search( cdart_url, id, disc, type ):
             break
     return art
 
-def get_xbmc_database_info( background ):
+def get_xbmc_database_info( background=False ):
     xbmc.log( "[script.cdartmanager] - Retrieving Album Info from XBMC's Music DB", xbmc.LOGDEBUG )
     if not background:
         pDialog.create( __language__(32021), __language__(32105) )
@@ -66,7 +66,7 @@ def get_xbmc_database_info( background ):
         pDialog.close()
     return album_detail_list 
 
-def retrieve_album_details_full( album_list, total, background, simple, update ):
+def retrieve_album_details_full( album_list, total, background=False, simple=False, update=False ):
     xbmc.log( "[script.cdartmanager] - Retrieving Album Details", xbmc.LOGDEBUG )
     album_detail_list = []
     album_count = 0
@@ -82,9 +82,9 @@ def retrieve_album_details_full( album_list, total, background, simple, update )
             percent = int((album_count/float(total)) * 100)
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32138), ( get_unicode( detail['title'] ).encode("utf-8") ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), ( get_unicode( detail['title'] ).encode("utf-8") ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
                 except:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32138), ( repr( detail['title'] ) ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), ( repr( detail['title'] ) ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
             try:
                 album_id = detail['local_id']
             except:
@@ -200,7 +200,7 @@ def get_album_coverart( album_path ):
     else:
         return False
     
-def store_alblist( local_album_list, background ):
+def store_alblist( local_album_list, background=False ):
     xbmc.log( "[script.cdartmanager] - Storing alblist", xbmc.LOGDEBUG )
     album_count = 0
     cdart_existing = 0
@@ -211,9 +211,9 @@ def store_alblist( local_album_list, background ):
         for album in local_album_list:
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf-8") ), "%s%6s" % ( __language__(32100), album_count ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf-8") ), "%s%6s" % ( __language__(32100), album_count ) )
                 except:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32138), repr( album["title"] ) ), "%s%6s" % ( __language__(32100), album_count ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), repr( album["title"] ) ), "%s%6s" % ( __language__(32100), album_count ) )
             xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album["local_id"], xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGDEBUG )
@@ -256,7 +256,7 @@ def recount_cdarts():
     c.close()
     return cdart_existing
         
-def store_lalist( local_artist_list, count_artist_local, background ):
+def store_lalist( local_artist_list, count_artist_local, background=False ):
     xbmc.log( "[script.cdartmanager] - Storing lalist", xbmc.LOGDEBUG )
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
@@ -318,7 +318,7 @@ def store_counts( local_artists_count, artist_count, album_count, cdart_existing
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Storing Counts", xbmc.LOGDEBUG )
     
-def check_local_albumartist( album_artist, local_artist_list, background ):
+def check_local_albumartist( album_artist, local_artist_list, background=False ):
     xbmc.log( "[script.cdartmanager] - Checking Local Artists", xbmc.LOGNOTICE )
     artist_count = 0
     percent = 0
@@ -354,7 +354,7 @@ def check_local_albumartist( album_artist, local_artist_list, background ):
                 print_exc()
     return local_album_artist_list, artist_count
     
-def new_database_setup( background ):
+def new_database_setup( background=False ):
     global local_artist    
     download_count = 0
     cdart_existing = 0
@@ -408,7 +408,7 @@ def new_database_setup( background ):
     return album_count, artist_count, cdart_existing
     
 #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
-def get_local_albums_db( artist_name, background ):
+def get_local_albums_db( artist_name, background=False ):
     xbmc.log( "[script.cdartmanager] - Retrieving Local Albums Database", xbmc.LOGDEBUG )
     local_album_list = []
     query = ""
@@ -416,8 +416,8 @@ def get_local_albums_db( artist_name, background ):
     c = conn_l.cursor()
     try:
         if artist_name == "all artists":
-            #if not background:
-            #    pDialog.create( __language__(32102), __language__(20186) )
+            if not background:
+                pDialog.create( __language__(32102), __language__(20186) )
             query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist"
             c.execute(query)
         else:
@@ -446,12 +446,12 @@ def get_local_albums_db( artist_name, background ):
             local_album_list.append(album)
     except:
         print_exc()
-        #if not background:
-        #    pDialog.close()
+        if not background:
+            pDialog.close()
     #xbmc.log( local_album_list, xbmc.LOGDEBUG )
-    #if artist_name == "all artists":
-    #    if not background:
-    #        pDialog.close()
+    if artist_name == "all artists":
+        if not background:
+            pDialog.close()
     xbmc.log( "[script.cdartmanager] - Finished Retrieving Local Albums from Database", xbmc.LOGDEBUG )
     return local_album_list
         
@@ -483,7 +483,7 @@ def get_local_artists_db( mode="album_artists" ):
     #xbmc.log( local_artist_list, xbmc.LOGDEBUG )
     return local_artist_list
     
-def build_local_artist_table( background ):
+def build_local_artist_table( background=False ):
     xbmc.log( "[script.cdartmanager] - Retrieving All Local Artists From XBMC", xbmc.LOGDEBUG )
     new_local_artist_list = []
     local_artist_list = get_all_local_artists()
@@ -504,9 +504,9 @@ def build_local_artist_table( background ):
             percent = int( ( count/float( total ) ) * 100 )
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32125), local_artist["artistid"] ), "%s%s" % ( __language__(32137), get_unicode( local_artist["artist"] ).encode("utf-8") ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), get_unicode( local_artist["artist"] ).encode("utf-8") ) )
                 except:
-                    pDialog.update( percent, __language__(20186), "%s%s" % ( __language__(32125), local_artist["artistid"] ), "%s%s" % ( __language__(32137), repr( local_artist["artist"] ) ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), repr( local_artist["artist"] ) ) )
             count += 1
             for album_artist in local_album_artist_list:
                 if not background:
@@ -579,7 +579,7 @@ def new_local_count():
     
 #user call from Advanced menu to refresh the addon's database
 
-def refresh_db( background ):
+def refresh_db( background=False ):
     xbmc.log( "[script.cdartmanager] - Refreshing Local Database", xbmc.LOGDEBUG )
     local_album_count = 0
     local_artist_count = 0
@@ -620,7 +620,158 @@ def refresh_db( background ):
     xbmc.log( "[script.cdartmanager] - Finished Refeshing Database", xbmc.LOGDEBUG )
     return local_album_count, local_artist_count, local_cdart_count
 
-def update_database( background ):
+def check_album_mbid( albums, background=False ):
+    updated_albums = []
+    canceled = False
+    percent = 1
+    count = 0
+    if not background:
+        pDialog.create( __language__( 32150 ) )
+        xbmc.sleep(500)
+    if not albums:
+        albums = get_local_albums_db( "all artists", background )
+    for album in albums:
+        update_album = album
+        percent = int( ( count/float( len( albums ) ) ) * 100 )
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        count += 1
+        if not background:
+            if (pDialog.iscanceled()):
+                canceled = True
+                break
+            try:
+                pDialog.update( percent, __language__( 32150 ), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf8") ), "%s: %s" % ( __language__(32137), get_unicode( album["artist"] ).encode("utf8") ) )
+            except:
+                pDialog.update( percent, __language__( 32150 ), "%s: %s" % ( __language__(32138), repr( album["title"] ) ), "%s: %s" % ( __language__(32137), repr( album["artist"] ) ) )
+            if album["musicbrainz_albumid"]:
+                mbid_match, current_mbid = check_mbid( album["musicbrainz_albumid"], "release-group" )
+            if not mbid_match:
+                update_album["musicbrainz_albumid"] = current_mbid
+            xbmc.sleep(910)
+        if album["musicbrainz_artistid"]:
+            mbid_match, current_mbid = check_mbid( album["musicbrainz_artistid"], "artist" )
+            if not mbid_match:
+                update_album["musicbrainz_artistid"] = current_mbid
+            xbmc.sleep(910)
+        updated_albums.append( update_album )
+    pDialog.close()
+    return updated_albums, canceled
+
+def check_artist_mbid( artists, background=False, mode = "all_artists" ):
+    updated_artists = []
+    canceled = False
+    percent = 1
+    count = 0
+    if not background:
+        pDialog.create( __language__( 32149 ) )
+        xbmc.sleep(500)
+    if not artists:
+        if not mode == "all_artists":
+            artists = get_local_artists_db( "album_artists" )
+        else:
+            artists = get_local_artists_db( "all_artists" )
+    for artist in artists:
+        update_artist = artist
+        percent = int( ( count/float( len( artists ) ) ) * 100 )
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        count += 1
+        if not background:
+            if (pDialog.iscanceled()):
+                canceled = True
+                break
+        if update_artist["musicbrainz_artistid"]:
+            if not background:
+                try:
+                    pDialog.update( percent, __language__( 32159 ), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ).encode("utf8") ) )
+                except:
+                    pDialog.update( percent, __language__( 32149 ), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), repr( update_artist["name"] ) ) )
+            mbid_match, current_mbid = check_mbid( update_artist["musicbrainz_artistid"], "artist" )
+            if not mbid_match:
+                update_artist["musicbrainz_artistid"] = current_mbid
+            xbmc.sleep(910)
+        updated_artists.append( update_artist )
+    pDialog.close()
+    return updated_artists, canceled
+
+def update_missing_artist_mbid( artists, background=False, mode = "all_artists" ):
+    updated_artists = []
+    canceled = False
+    percent = 1
+    count = 0
+    if not background:
+        pDialog.create( __language__( 32132 ) )
+        xbmc.sleep(500)
+    if not artists:
+        if not mode == "all_artists":
+            artists = get_local_artists_db( "album_artists" )
+        else:
+            artists = get_local_artists_db( "all_artists" )
+    for artist in artists:
+        update_artist = artist
+        percent = int( ( count/float( len( artists ) ) ) * 100 )
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        count += 1
+        if not update_artist["musicbrainz_artistid"]:
+            if not background:
+                if (pDialog.iscanceled()):
+                    canceled = True
+                    break
+                try:
+                    pDialog.update( percent, __language__( 32132 ), "%s%s" % ( __language__( 32125 ), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ).encode("utf8") ) )
+                except:
+                    pDialog.update( percent, __language__( 32132 ), "%s%s" % ( __language__( 32125 ), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), repr( update_artist["name"] ) ) )
+            try:
+                name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( update_artist["name"] ) )
+            except:
+                name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( update_artist["name"] )
+        updated_artists.append( update_artist )
+    pDialog.close()
+    return updated_artists, canceled
+    
+def update_missing_album_mbid( albums, background=False ):
+    updated_albums = []
+    canceled = False
+    percent = 1
+    count = 0
+    if not background:
+        pDialog.create( __language__( 32150 ) )
+        xbmc.sleep(500)
+    if not albums:
+        albums = get_local_albums_db( "all artists", background )
+    for album in albums:
+        update_album = album
+        percent = int( ( count/float( len( albums ) ) ) * 100 )
+        if percent == 0:
+            percent = 1
+        if percent > 100:
+            percent = 100
+        count += 1
+        if not album["musicbrainz_albumid"]:
+            if not background:
+                if (pDialog.iscanceled()):
+                    canceled = True
+                    break
+                try:
+                    pDialog.update( percent, __language__( 32133 ), "%s: %s" % ( __language__( 32138 ), get_unicode( album["title"] ).encode("utf8") ), "%s: %s" % ( __language__( 32137 ), get_unicode( album["artist"] ).encode("utf8") ) )
+                except:
+                    pDialog.update( percent, __language__( 32133 ), "%s: %s" % ( __language__( 32138 ), repr( album["title"] ) ), "%s: %s" % ( __language__( 32137 ), repr( album["artist"] ) ) )
+            musicbrainz_albuminfo, discard = get_musicbrainz_album( get_unicode( album["title"] ), get_unicode( album["artist"] ), 0, 1 )
+            update_album["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
+            update_album["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
+        updated_albums.append( update_album )
+    pDialog.close()
+    return updated_albums, canceled
+    
+def update_database( background=False ):
     xbmc.log( "[script.cdartmanager] - Updating Addon's DB", xbmc.LOGNOTICE )
     update_list = []
     new_list = []
@@ -637,10 +788,11 @@ def update_database( background ):
     artist = {}
     updated_artists = []
     updated_albums = []
+    canceled = False
     xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Checking Albums", xbmc.LOGNOTICE )
     if not background:
         pDialog.create( __language__(32134), __language__(32105) ) # retrieving all artist from xbmc
-    local_album_list = get_local_albums_db( "all artists", False )
+    local_album_list = get_local_albums_db( "all artists", background )
     if not background:
         pDialog.create( __language__(32134), __language__(32105) ) # retrieving album list
     album_list, total = retrieve_album_list()
@@ -662,96 +814,57 @@ def update_database( background ):
     unmatched_details = retrieve_album_details_full( unmatched, len( unmatched ), background, False, True )
     combined = matched
     combined.extend( unmatched_details )
-    local_artists = get_all_local_artists()
-    xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Checking Artists", xbmc.LOGNOTICE )
-    for artist in local_artists:
-        new_artist = {}
-        new_artist["name"] = get_unicode( artist["artist"] )
-        new_artist["local_id"] = artist["artistid"]
-        temp_local_artists.append( new_artist )
-    local_artists = temp_local_artists
-    local_artists_db = get_local_artists_db( "all artists" )
-    for item in local_artists:
-        local_artists_indexed[( item["local_id"],  get_unicode( item["name"] ) )] = item
-    for item in local_artists_db:
-        if ( item["local_id"], get_unicode( item["name"] ) ) in local_artists_indexed:
-            local_artists_matched.append( item )
-    for item in local_artists_matched:
-        local_artists_matched_indexed[( item["local_id"], get_unicode( item["name"] ) )] = item
-    for item in local_artists:
-        if not ( item["local_id"], get_unicode( item["name"] ) ) in local_artists_matched_indexed:
-            local_artists_unmatched.append( item )
-    combined_artists = local_artists_matched
+    if __addon__.getSetting("enable_all_artists") == "true":
+        local_artists = get_all_local_artists( True )
+        xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Checking Artists", xbmc.LOGNOTICE )
+        for artist in local_artists:
+            new_artist = {}
+            new_artist["name"] = get_unicode( artist["artist"] )
+            new_artist["local_id"] = artist["artistid"]
+            new_artist["musicbrainz_artistid"] = ""
+            temp_local_artists.append( new_artist )
+        local_artists = temp_local_artists
+        local_artists_db = get_local_artists_db( "all artists" )
+        for item in local_artists:
+            local_artists_indexed[( item["local_id"],  get_unicode( item["name"] ) )] = item
+        for item in local_artists_db:
+            if ( item["local_id"], get_unicode( item["name"] ) ) in local_artists_indexed:
+                local_artists_matched.append( item )
+        for item in local_artists_matched:
+            local_artists_matched_indexed[( item["local_id"], get_unicode( item["name"] ) )] = item
+        for item in local_artists:
+            if not ( item["local_id"], get_unicode( item["name"] ) ) in local_artists_matched_indexed:
+                local_artists_unmatched.append( item )
+        if __addon__.getSetting("update_musicbrainz") == "true" and not canceled:  # update missing MusicBrainz ID's
+            combined_artists, canceled = update_missing_artist_mbid( local_artists_matched, background, mode = "all_artists" )
+        else:
+            combined_artists = local_artists_matched
+        if __addon__.getSetting( "check_mbid" ) == "true" and not canceled:
+            temp_local_artists, canceled = check_artist_mbid( combined_artists, background, mode = "all_artists" )
+            combined_artists = temp_local_artists
+        if local_artists_unmatched:
+            updated_artists, canceled = update_missing_artist_mbid( local_artists_unmatched, background, mode = "all_artists" )
+            combined_artists.extend( updated_artists )    
     percent = 0
     count = 0
-    xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Getting MusicBrainz ID's for missing artists", xbmc.LOGNOTICE )
-    if __addon__.getSetting("enable_all_artists") == "true":
-        for local_artist in local_artists_unmatched:
-            artist = {}
-            percent = int( ( count/float( len( local_artists_unmatched ) ) ) * 100 )
-            if not background:
-                try:
-                    pDialog.update( percent, __language__(32135), "%s%s" % ( __language__(32125), local_artist["local_id"] ), "%s%s" % ( __language__(32137), get_unicode( local_artist["name"] ).encode("utf8") ) )
-                except:
-                    pDialog.update( percent, __language__(32135), "%s%s" % ( __language__(32125), local_artist["local_id"] ), "%s%s" % ( __language__(32137), repr( local_artist["name"] ) ) )
-            count += 1
-            artist["name"] = get_unicode( local_artist["name"] )
-            artist["local_id"] = local_artist["local_id"]
-            try:
-                name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( local_artist["name"] ) )
-            except:
-                name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( local_artist["name"] )
-            local_artists_unmatched_detail.append( artist )
-            if not background:
-                if (pDialog.iscanceled()):
-                    break
-    xbmc.sleep(1000)
     xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Getting MusicBrainz ID's for Artist and Albums", xbmc.LOGNOTICE )
-    if __addon__.getSetting("update_musicbrainz") == "true":  # update missing MusicBrainz ID's
-        count = 1
-        if __addon__.getSetting("enable_all_artists") == "true":
-            for artist in combined_artists:
-                update_artist = artist
-                percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
-                count += 1
-                if not update_artist["musicbrainz_artistid"]:
-                    if not background:
-                        try:
-                            pDialog.update( percent, __language__(32132), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s%s" % ( __language__(32137), get_unicode( update_artist["name"] ).encode("utf8") ) )
-                        except:
-                            pDialog.update( percent, __language__(32132), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s%s" % ( __language__(32137), repr( update_artist["name"] ) ) )
-                    try:
-                        name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( update_artist["name"] ) )
-                    except:
-                        name, update_artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( update_artist["name"] )
-                updated_artists.append( update_artist )
-                if not background:
-                    if (pDialog.iscanceled()):
-                        break
-            count = 1
-        else:
-            updated_artists = combined_artists
-        xbmc.sleep(1000)
-        for album in combined:
-            update_album = album
-            percent = int( ( count/float( len( combined ) ) ) * 100 )
-            count += 1
-            if not album["musicbrainz_albumid"]:
-                if not background:
-                    try:
-                        pDialog.update( percent, __language__(32133), "%s%s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf8") ), "%s%s" % ( __language__(32137), get_unicode( album["artist"] ).encode("utf8") ) )
-                    except:
-                        pDialog.update( percent, __language__(32133), "%s%s" % ( __language__(32138), repr( album["title"] ) ), "%s%s" % ( __language__(32137), repr( album["artist"] ) ) )
-                musicbrainz_albuminfo, discard = get_musicbrainz_album( get_unicode( album["title"] ), get_unicode( album["artist"] ), 0, 1 )
-                update_album["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
-                update_album["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
-            updated_albums.append( update_album )
-            if not background:
-                if (pDialog.iscanceled()):
-                    break            
+    if __addon__.getSetting("update_musicbrainz") == "true" and not canceled:  # update missing MusicBrainz ID's
+        if not canceled:
+            updated_albums, canceled = update_missing_album_mbid( combined, background )  
         combined_artists = updated_artists
         combined = updated_albums    
     combined_artists.extend( local_artists_unmatched_detail )
+    if __addon__.getSetting( "check_mbid" ) == "true" and not canceled:
+        updated_albums, canceled = check_album_mbid( combined, background )
+        combined = updated_albums
+        if __addon__.getSetting("enable_all_artists") == "true" and not canceled:
+            updated_artists, canceled = check_artist_mbid( combined_artists, background, mode = "all_artists" )
+            combined_artist = updated_artists
+        __addon__.setSetting( id="check_mbid", value="false" ) 
+    if canceled:
+        if not background:
+            pDialog.close()
+        return
     conn = sqlite3.connect( addon_db )
     c = conn.cursor()
     if exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
@@ -778,6 +891,7 @@ def update_database( background ):
     c = conn.cursor()
     if len( combined_artists ) > 0:
         xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Adding All Artists to Database", xbmc.LOGNOTICE )
+        pDialog.create( __language__(32135) )
         for artist in combined_artists:
             percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
             if not background:
@@ -792,8 +906,6 @@ def update_database( background ):
                 print_exc()
                 continue            
     conn.commit()
-    if not background:
-        pDialog.close()
     c.close()
     if not background:
         pDialog.close()

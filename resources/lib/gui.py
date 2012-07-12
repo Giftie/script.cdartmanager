@@ -32,7 +32,7 @@ __dbversion__        = sys.modules[ "__main__" ].__dbversion__
 addon_db             = sys.modules[ "__main__" ].addon_db
 addon_db_backup      = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder    = sys.modules[ "__main__" ].addon_work_folder
-__useragent__        = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+__useragent__        = sys.modules[ "__main__" ].__useragent__
 image                = sys.modules[ "__main__" ].image
 BASE_RESOURCE_PATH   = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 #variables
@@ -52,8 +52,8 @@ from folder import dirEntries
 from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode
 from download import download_art, auto_download
-from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database
-from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid
+from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
+from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, get_musicbrainz_artists
 from file_item import Thumbnails
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
@@ -63,8 +63,9 @@ try:
     from xbmcvfs import mkdirs as _makedirs
 except:
     from utils import _makedirs
-    
-pDialog              = xbmcgui.DialogProgress()
+
+kb      = xbmc.Keyboard()
+pDialog = xbmcgui.DialogProgress()
 #time socket out at 30 seconds
 socket.setdefaulttimeout(30)
 
@@ -100,7 +101,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def retrieve_settings( self ):
         backup_path  = xbmc.translatePath( __addon__.getSetting( "backup_path" ) )
-        missing_path  = xbmc.translatePath( __addon__.getSetting( "missing_path" ) )
+        missing_path = xbmc.translatePath( __addon__.getSetting( "missing_path" ) )
         enableresize = xbmc.translatePath( __addon__.getSetting( "enableresize" ) )
         folder       = xbmc.translatePath( __addon__.getSetting( "folder" ) )
         enablecustom = xbmc.translatePath( __addon__.getSetting( "enablecustom" ) )
@@ -261,7 +262,82 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmcgui.Dialog().ok( __language__(32033), __language__(32030), __language__(32031) )
                 #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
         return
-       
+        
+    def populate_album_list_mbid( self, local_album_list, selected_item=0 ):
+        xbmc.log( "[script.cdartmanager] - MBID Edit - Populating Album List", xbmc.LOGNOTICE )
+        if not local_album_list:
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+            return
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        try:
+            for album in local_album_list:
+                label2 = "%s MBID: %s[CR][COLOR=7fffffff]%s MBID: %s[/COLOR]" % ( __language__( 32138 ), album["musicbrainz_albumid"], __language__( 32137 ), album["musicbrainz_artistid"] )
+                label1 = "%s: %s[CR][COLOR=7fffffff]%s: %s[/COLOR][CR][COLOR=FFE85600]%s[/COLOR]" % (  __language__( 32138 ), album["title"],  __language__( 32137 ), album["artist"], album["path"] )
+                listitem = xbmcgui.ListItem( label=label1 , label2=label2 )
+                self.getControl( 145 ).addItem( listitem )
+                listitem.setLabel( label1 )
+                listitem.setLabel2( label2 )
+        except:
+            print_exc()
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        self.setFocus( self.getControl( 145 ) )
+        self.getControl( 145 ).selectItem( selected_item )
+        return
+
+    def populate_search_list_mbid( self, mbid_list, type="artist", selected_item=0 ):
+        xbmc.log( "[script.cdartmanager] - MBID Search - Populating Search List", xbmc.LOGNOTICE )
+        if not mbid_list:
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+            return
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        if type == "artists":
+            try:
+                for item in mbid_list:
+                    label2 = "MBID: %s" % item["id"]
+                    label1 = "%-3s%%: %s" % ( item["score"], item["name"] )
+                    listitem = xbmcgui.ListItem( label=self.coloring( label1 , "white" , label1 ), label2=label2 )
+                    self.getControl( 161 ).addItem( listitem )
+                    listitem.setLabel( self.coloring( label1 , "white" , label1 ) )
+                    listitem.setLabel2( label2 )
+            except:
+                print_exc()
+        elif type == "albums":
+            try:
+                for item in mbid_list:
+                    label2 = "%s MBID: %s[CR][COLOR=7fffffff]%s MBID: %s[/COLOR]" % ( __language__( 32138 ), item["id"], __language__( 32137 ), item["artist_id"] )
+                    label1 = "%-3s%%  %s: %s[CR][COLOR=7fffffff]%s: %s[/COLOR]" % ( item["score"], __language__( 32138 ), item["title"], __language__( 32137 ), item["artist"] )
+                    listitem = xbmcgui.ListItem( label=label1, label2=label2 )
+                    self.getControl( 161 ).addItem( listitem )
+                    listitem.setLabel( label1  )
+                    listitem.setLabel2( label2 )
+            except:
+                print_exc()
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        self.setFocus( self.getControl( 161 ) )
+        self.getControl( 161 ).selectItem( selected_item )
+        return
+        
+    def populate_artist_list_mbid( self, local_artist_list, selected_item=0 ):
+        xbmc.log( "[script.cdartmanager] - MBID Edit - Populating Artist List", xbmc.LOGNOTICE )
+        if not local_artist_list:
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+            return
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        try:
+            for artist in local_artist_list:
+                label2 = "MBID: %s" % artist["musicbrainz_artistid"]
+                label1 = artist["name"]
+                listitem = xbmcgui.ListItem( label=label1, label2=label2 )
+                self.getControl( 145 ).addItem( listitem )
+                listitem.setLabel( label1 )
+                listitem.setLabel2( label2 )
+        except:
+            print_exc()
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        self.setFocus( self.getControl( 145 ) )
+        self.getControl( 145 ).selectItem( selected_item )
+        return
+        
     #creates the artist list on the skin        
     def populate_artist_list( self, local_artist_list):
         xbmc.log( "[script.cdartmanager] - Populating Artist List", xbmc.LOGNOTICE )
@@ -271,17 +347,22 @@ class GUI( xbmcgui.WindowXMLDialog ):
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         try:
             for artist in local_artist_list:
-                label2 = str( artist["local_id"] )
                 if not artist["distant_id"] == "":                    
-                    listitem = xbmcgui.ListItem( label=self.coloring( artist["name"] , "green" , artist["name"] ), label2=label2 )
+                    listitem = xbmcgui.ListItem( label=self.coloring( artist["name"] , "green" , artist["name"] ) )
                     self.getControl( 120 ).addItem( listitem )
                     listitem.setLabel( self.coloring( artist["name"] , self.recognized_color , artist["name"] ) )
-                    listitem.setLabel2( label2 )
                 else:
-                    listitem = xbmcgui.ListItem( label=artist["name"], label2=label2 )
+                    listitem = xbmcgui.ListItem( label=artist["name"] )
                     self.getControl( 120 ).addItem( listitem )
                     listitem.setLabel( self.coloring( artist["name"] , self.unrecognized_color , artist["name"] ) )
-                    listitem.setLabel2( label2 )
+        except KeyError:
+            for artist in local_artist_list:
+                label2 = "MBID: %s" % artist["musicbrainz_artistid"]
+                label1 = artist["name"]
+                listitem = xbmcgui.ListItem( label=label1, label2=label2 )
+                self.getControl( 120 ).addItem( listitem )
+                listitem.setLabel( label1 )
+                listitem.setLabel2( label2 )
         except:
             print_exc()
         xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -367,7 +448,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
 
-            
     def populate_downloaded( self, successfully_downloaded, type ):
         xbmc.log( "[script.cdartmanager] - Populating ClearLOGO List", xbmc.LOGNOTICE )
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
@@ -719,10 +799,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
 # Search for missing cdARTs and save to missing.txt in Missing List path
     def missing_list( self ):
-        xbmc.log( "[script.cdartmanager] - Saving Missing cdART list to backup folder", xbmc.LOGNOTICE )
+        xbmc.log( "[script.cdartmanager] - Saving missing.txt file", xbmc.LOGNOTICE )
         count = 0
         percent = 0
         line = ""
+        path_provided = False
         missing_path = xbmc.translatePath( __addon__.getSetting( "missing_path" ) )
         albums = get_local_albums_db("all artists", self.background)
         artists = get_local_artists_db( mode="local_artists" )
@@ -736,8 +817,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             xbmc.log( "[script.cdartmanager] - Path for missing.txt file not provided", xbmc.LOGNOTICE )
             path_provided = False
-        missing=open( temp_destination, "wb" )
         try:
+            missing=open( temp_destination, "wb" )
             pDialog.update( percent )
             missing.write("Albums Missing Artwork\n")
             missing.write("\n")
@@ -830,7 +911,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.log( "[script.cdartmanager] - Error saving missing.txt file", xbmc.LOGNOTICE )
             print_exc()
         if exists( temp_destination ) and path_provided:
-            file_copy( final_destination, temp_destination )
+            file_copy( temp_destination, final_destination )
         pDialog.close()
                     
     def refresh_counts( self, local_album_count, local_artist_count, local_cdart_count ):
@@ -880,6 +961,43 @@ class GUI( xbmcgui.WindowXMLDialog ):
         pDialog.close()
         #self.getControl( 9012 ).setVisible( False ) 
 
+    def get_mbid_keyboard( self ):
+        mbid = "canceled"
+        kb.setHeading( __language__( 32159 ) )
+        kb.doModal()
+        while(1):
+            if not (kb.isConfirmed()):
+                canceled = True
+                break
+            else:
+                mbid = kb.getText()
+                if len(mbid) == 0 and not len(self.artist_menu["musicbrainz_artistid"]) == 0:
+                    if xbmcgui.Dialog().yesno( __language__( 32163 ), self.artist_menu["musicbrainz_artistid"] ):
+                        canceled = False
+                        break
+                if len(mbid) == 36:
+                    if xbmcgui.Dialog().ok( __language__( 32162 ), mbid ):
+                        canceled = False
+                        break
+                    else:
+                        kb.doModal()
+                        continue
+                if len(mbid) == 32: # user did not enter dashes
+                    temp_mbid = list( mbid )
+                    temp_mbid.insert( 8, "-" )
+                    temp_mbid.insert( 13, "-" )
+                    temp_mbid.insert( 18, "-" )
+                    temp_mbid.insert( 23, "-" )
+                    mbid = "".join( temp_mbid )
+                else:
+                    if xbmcgui.Dialog().yesno( __language__(32160), __language__(32161) ):
+                        kb.doModal()
+                        continue
+                    else:
+                        canceled = True
+                        break
+        return mbid
+
     # setup self. strings and initial local counts
     def setup_all( self ):
         self.background = False
@@ -891,10 +1009,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.all_artists = []
         self.cdart_url = []
         self.local_artists = []
+        self.local_albums = []
         self.label_1 = ""
         self.label_2 = addon_img
         self.cdartimg = ""
         self.artwork_type = ""
+        self.artists = []
+        self.albums = []
+        self.album_artists = []
+        self.album_artists_recognized = []
+        self.all_artists_recognized = []
+        self.all_artists_list = []
+        self.recognized_artists = []
+        self.selected_item = 0
         listitem = xbmcgui.ListItem( label=self.label_1, label2=self.label_2, thumbnailImage=self.cdartimg )
         self.getControl( 122 ).addItem( listitem )
         listitem.setLabel2(self.label_2)
@@ -908,30 +1035,48 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         self.local_artists = get_local_artists_db() # retrieve data from addon's database
         self.setFocusId( 100 ) # set menu selection to the first option(cdARTs)
+        distant_artist = get_distant_artists()
+        local_artists = get_local_artists_db( mode="album_artists" )
+        if __addon__.getSetting("enable_all_artists") == "true":
+            all_artists = get_local_artists_db( mode="all_artists" )
+        else:
+            all_artists = []
+        if distant_artist:
+            self.album_recognized_artists, self.all_artists_recognized, self.all_artists_list, self.album_artists = get_recognized( distant_artist, all_artists, local_artists )
+        
 
     def onClick( self, controlId ):
         #print controlId
-        if controlId == 105 : #cdARTs Search Artists 
-            self.menu_mode = 1
-            self.artwork_type = "cdart"
+        empty = []
+        if controlId in ( 105, 150 ) : #cdARTs Search Artists 
+            if controlId == 105:
+                self.menu_mode = 1
+                self.artwork_type = "cdart"
+            elif controlId == 150:
+                self.menu_mode = 3
+                self.artwork_type = "cover"
+            self.recognized_artists = self.album_recognized_artists
+            self.local_artists = self.album_artists
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 120 ).reset()
             self.getControl( 140 ).reset()
-            distant_artist = get_distant_artists()
-            local_artists = get_local_artists_db( mode="album_artists" )
-            if distant_artist:
-                self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
             self.populate_artist_list( self.recognized_artists )
-        if controlId == 120 : #Retrieving information from Artists List
+        if controlId == 120: #Retrieving information from Artists List
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             #self.clear_artwork()
             self.artist_menu = {}
-            self.artist_menu["local_id"] = ( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"] )
-            self.artist_menu["name"] = get_unicode( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"] )
-            self.artist_menu["musicbrainz_artistid"] = get_unicode( self.local_artists[self.getControl( 120 ).getSelectedPosition()]["musicbrainz_artistid"] )
-            self.artist_menu["distant_id"] = get_unicode( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"] )
-            if not self.artist_menu["musicbrainz_artistid"]:
-                self.artist_menu["musicbrainz_artistid"] = update_musicbrainzid( "artist", self.artist_menu )
+            if not self.menu_mode == 11:
+                self.artist_menu["local_id"] = ( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"] )
+                self.artist_menu["name"] = get_unicode( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["name"] )
+                self.artist_menu["musicbrainz_artistid"] = get_unicode( self.local_artists[self.getControl( 120 ).getSelectedPosition()]["musicbrainz_artistid"] )
+            else:
+                self.artist_menu["local_id"] = ( self.local_artists[self.getControl( 120 ).getSelectedPosition()]["local_id"] )
+                self.artist_menu["name"] = get_unicode( self.local_artists[self.getControl( 120 ).getSelectedPosition()]["name"] )
+                self.artist_menu["musicbrainz_artistid"] = get_unicode( self.local_artists[self.getControl( 120 ).getSelectedPosition()]["musicbrainz_artistid"] )
+            if not self.menu_mode in ( 10, 11, 12, 14):
+                self.artist_menu["distant_id"] = get_unicode( self.recognized_artists[self.getControl( 120 ).getSelectedPosition()]["distant_id"] )
+                if not self.artist_menu["musicbrainz_artistid"]:
+                    self.artist_menu["musicbrainz_artistid"] = update_musicbrainzid( "artist", self.artist_menu )
             artist_name = get_unicode( self.artist_menu["name"] )
             self.getControl( 204 ).setLabel( __language__(32038) + "[CR]%s" % artist_name )
             if self.menu_mode == 1:
@@ -951,6 +1096,63 @@ class GUI( xbmcgui.WindowXMLDialog ):
             elif self.menu_mode == 9:
                 xbmcgui.Window(10001).setProperty( "artwork", "artistthumb" )
                 self.populate_artistthumbs( self.artist_menu, 0 )
+            elif self.menu_mode == 11:
+                self.local_albums = get_local_albums_db( self.artist_menu["name"] )
+                self.getControl( 145 ).reset()
+                self.populate_album_list_mbid( self.local_albums )
+        if controlId == 145:
+            self.selected_item = self.getControl( 145 ).getSelectedPosition()
+            if self.menu_mode == 10: # Artist
+                self.artist_menu = {}
+                self.artist_menu["local_id"] = ( self.local_artists[self.getControl( 145 ).getSelectedPosition()]["local_id"] )
+                self.artist_menu["name"] = get_unicode( self.local_artists[self.getControl( 145 ).getSelectedPosition()]["name"] )
+                self.artist_menu["musicbrainz_artistid"] = get_unicode( self.local_artists[self.getControl( 145 ).getSelectedPosition()]["musicbrainz_artistid"] )
+                self.setFocusId( 157 )
+                try:
+                    self.getControl( 156 ).setLabel( __language__(32038) + "[CR]%s" % self.artist_menu["name"].encode("utf-8") )
+                except:
+                    self.getControl( 156 ).setLabel( __language__(32038) + "[CR]%s" % repr( self.artist_menu["name"] ) )
+            if self.menu_mode in ( 11, 12 ): # Album
+                self.album_menu = {}
+                self.album_menu["local_id"] = ( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["local_id"] )
+                self.album_menu["title"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["title"] )
+                self.album_menu["musicbrainz_albumid"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["musicbrainz_albumid"] )
+                self.album_menu["artist"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["artist"] )
+                self.album_menu["path"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["path"] )
+                self.album_menu["musicbrainz_artistid"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["musicbrainz_artistid"] )
+                self.setFocusId( 157 )
+                try:
+                    self.getControl( 156 ).setLabel( __language__(32039) + "[CR]%s" % self.album_menu["title"].encode("utf-8") )
+                except:
+                    self.getControl( 156 ).setLabel( __language__(32039) + "[CR]%s" % repr( self.album_menu["title"] ) )
+        if controlId == 157: #Manual Edit
+            if self.menu_mode == 10: # Artist
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                mbid = self.get_mbid_keyboard()
+                if not mbid == "canceled":
+                    try:
+                        c.execute('''UPDATE lalist SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( mbid, self.artist_menu["musicbrainz_artistid"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        traceback.print_exc()
+                    try:
+                        c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( mbid, self.artist_menu["musicbrainz_artistid"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        traceback.print_exc()
+            if self.menu_mode == 11: # album
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                mbid = self.get_mbid_keyboard()
+                if not mbid == "canceled":
+                    try:
+                        c.execute('''UPDATE alblist SET musicbrainz_albumid="%s" WHERE album_id=%s and path="%s"''' % ( mbid, self.album_menu["local_id"], self.album_menu["path"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        traceback.print_exc()
+        if controlId == 158: #Search
+            pass
+        if controlId == 159: #Search By Artist
+            pass
         if controlId == 122 : #Retrieving information from Album List
             self.getControl( 140 ).reset()
             select = None
@@ -973,7 +1175,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 cdart_path["artist"] = ( self.getControl( 204 ).getLabel().decode('utf-8') ).replace( __language__(32038) + "[CR]","")
             cdart_path["title"] = self.getControl( 122 ).getSelectedItem().getLabel()
             cdart_path["title"] = self.remove_color(cdart_path["title"])
-            selected_item = self.getControl( 122 ).getSelectedPosition()
+            self.selected_item = self.getControl( 122 ).getSelectedPosition()
             if not url =="" : # If it is a recognized Album...
                 if self.menu_mode == 1:
                     message, d_success = download_art( url, cdart_path, database_id, "cdart", "manual", 0 )
@@ -996,11 +1198,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             if self.menu_mode == 1:
                 self.remote_cdart_url = remote_cdart_list( self.artist_menu )
                 xbmcgui.Window(10001).setProperty( "artwork", "cdart" )
-                self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item, "cdart" )
+                self.populate_album_list( self.artist_menu, self.remote_cdart_url, self.selected_item, "cdart" )
             elif self.menu_mode == 3:
                 self.remote_cdart_url = remote_coverart_list( self.artist_menu )
                 xbmcgui.Window(10001).setProperty( "artwork", "cover" )
-                self.populate_album_list( self.artist_menu, self.remote_cdart_url, selected_item, "cover" )
+                self.populate_album_list( self.artist_menu, self.remote_cdart_url, self.selected_item, "cover" )
         if controlId == 132 : #Clean Music database selected from Advanced Menu
             xbmc.log( "[script.cdartmanager] - #  Executing Built-in - CleanLibrary(music)", xbmc.LOGNOTICE )
             xbmc.executebuiltin( "CleanLibrary(music)") 
@@ -1030,6 +1232,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 pDialog.close()
             except:
                 pass
+            distant_artist = get_distant_artists()
+            local_artists = get_local_artists_db( mode="album_artists" )
+            if __addon__.getSetting("enable_all_artists") == "true":
+                all_artists = get_local_artists_db( mode="all_artists" )
+            else:
+                all_artists = []
+            if distant_artist:
+                self.album_recognized_artists, self.all_artists_recognized, self.all_artists_list, self.album_artists = get_recognized( distant_artist, all_artists, local_artists )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 136 : #Restore from Backup
@@ -1091,19 +1301,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 111 : #Exit
             self.menu_mode = 0
             empty_tempxml_folder()
-            self.missing_list()
+            if __addon__.getSetting("enable_missing") == "true":
+                self.missing_list()
             self.close()
-        if controlId == 150 : #Cover Art Search Artists 
-            self.menu_mode = 3
-            self.artwork_type = "cover"
-            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
-            self.getControl( 120 ).reset()
-            self.getControl( 140 ).reset()
-            distant_artist = get_distant_artists()
-            local_artists = get_local_artists_db( mode="album_artists" )
-            if distant_artist:
-                self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
-            self.populate_artist_list( self.recognized_artists )
         if controlId in ( 180, 181 ): # fanart Search Album Artists
             self.menu_mode = 6
         if controlId in ( 184, 185 ): # Clear Logo Search Artists
@@ -1116,7 +1316,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 170:
             self.setFocusId( 180 )
         if controlId == 171:
-            self.setFocusId( 181 )
+            self.setFocusId( 182 )
         if controlId == 168:
             self.setFocusId( 184 )
         if controlId == 169:
@@ -1140,11 +1340,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.getControl( 120 ).reset()
             distant_artist = get_distant_artists()
             if controlId in ( 180, 184, 197 ):
-                local_artists = get_local_artists_db( mode="album_artists" )
+                self.recognized_artists = self.album_recognized_artists
+                self.local_artists = self.album_artists
             else:
-                local_artists = get_local_artists_db( mode="local_artists" )
-            if distant_artist:
-                self.recognized_artists, self.local_artists = get_recognized( distant_artist , local_artists )
+                self.recognized_artists = self.all_artists_recognized
+                self.local_artists = self.all_artists
             self.populate_artist_list( self.recognized_artists )
         if controlId == 167:
             artist = {}
@@ -1230,7 +1430,191 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             if successfully_downloaded:
                 self.populate_downloaded( successfully_downloaded, self.artwork_type )
-
+        if controlId == 113:
+            self.setFocusId( 107 )
+        if controlId == 114: # Refresh Artist MBIDs
+            self.setFocusId( 139 ) # change to 138 when selected artist is added to script
+        if controlId == 189: # Edit By Album
+            self.setFocusId( 123 )
+        if controlId == 115: # Find Missing Artist MBIDs
+            if __addon__.getSetting("enable_all_artists") == "true":
+                updated_artists, canceled = update_missing_artist_mbid( empty, False, mode="all_artists" )
+            else:
+                updated_artists, canceled = update_missing_artist_mbid( empty, False, mode="album_artists" )
+            conn = sqlite3.connect(addon_db)
+            c = conn.cursor()
+            for updated_artist in updated_artists:
+                if updated_artist["musicbrainz_artistid"]:
+                    try:
+                        c.execute('''UPDATE lalist SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( updated_artist["musicbrainz_artistid"], updated_artist["local_id"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        print_exc()
+                    try:
+                        c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( updated_artist["musicbrainz_artistid"], updated_artist["local_id"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        print_exc()
+            conn.commit()
+            c.close()
+        if controlId == 139: # Automatic Refresh Artist MBIDs
+            check_artist_mbid( empty, False, mode = "album_artists" )
+        if controlId == 123:
+            self.setFocusId( 126 )
+        if controlId == 124: # Refresh Album MBIDs
+            self.setFocusId( 148 ) # change to 147 when selected album is added to script
+        if controlId == 125:
+            updated_albums, canceled = update_missing_album_mbid( empty, False )
+            conn = sqlite3.connect(addon_db)
+            c = conn.cursor()
+            for updated_album in updated_albums:
+                if updated_album["musicbrainz_albumid"]:
+                    try:
+                        c.execute('''UPDATE alblist SET musicbrainz_albumid="%s", musicbrainz_artistid="%s" WHERE album_id=%s''' % ( updated_album["musicbrainz_albumid"], updated_album["musicbrainz_artistid"], updated_album["local_id"] ) )
+                    except:
+                        xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                        print_exc()
+            conn.commit()
+            c.close()
+        if controlId == 126:
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+            self.getControl( 120 ).reset()
+            self.menu_mode = 11
+            self.local_artists = get_local_artists_db( "album_artists")
+            self.populate_artist_list( self.local_artists )
+        if controlId == 127: # Change Album MBID
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+            self.getControl( 145 ).reset()
+            self.local_albums = get_local_albums_db( "all artists" )
+            self.menu_mode = 12
+            self.populate_album_list_mbid( self.local_albums )
+        if controlId == 148: # Automatic Refresh Album MBIDs
+            check_album_mbid( empty, False )
+        if controlId == 113:
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+            self.getControl( 145 ).reset()
+            self.menu_mode = 10
+            if __addon__.getSetting("enable_all_artists") == "true":
+                self.local_artists = get_local_artists_db( "all_artists")
+            else:
+                self.local_artists = get_local_artists_db( "album_artists")
+            self.populate_artist_list_mbid( self.local_artists )
+        if controlId == 158:
+            self.getControl( 161 ).reset()
+            artist = ""
+            album = ""
+            albums = []
+            artists = []
+            canceled = False
+            if self.menu_mode == 10:
+                kb.setHeading( __language__( 32164 ) )
+                try:
+                    kb.setDefault( self.artist_menu["name"] )
+                except:
+                    kb.setDefault( repr(self.artist_menu["name"] ) )
+                kb.doModal()
+                while(1):
+                    if not (kb.isConfirmed()):
+                        canceled = True
+                        break
+                    else:
+                        artist = kb.getText()
+                        canceled = False
+                        break
+                if not canceled:
+                    self.artists = get_musicbrainz_artists( artist, 10 )
+                    if artists:
+                        self.populate_search_list_mbid( self.artists, "artists" )
+            if self.menu_mode in ( 11, 12 ):
+                kb.setHeading( __language__( 32165 ) )
+                try:
+                    kb.setDefault( self.album_menu["title"] )
+                except:
+                    kb.setDefault( repr(self.album_menu["title"] ) )
+                kb.doModal()
+                while(1):
+                    if not (kb.isConfirmed()):
+                        canceled = True
+                        break
+                    else:
+                        album = kb.getText()
+                        canceled = False
+                        break
+                if not canceled:
+                    kb.setHeading( __language__( 32164 ) )
+                    try:
+                        kb.setDefault( self.album_menu["artist"] )
+                    except:
+                        kb.setDefault( repr(self.album_menu["artist"] ) )
+                    kb.doModal()
+                    while(1):
+                        if not (kb.isConfirmed()):
+                            canceled = True
+                            break
+                        else:
+                            artist = kb.getText()
+                            canceled = False
+                            break
+                    if not canceled:
+                        album, self.albums = get_musicbrainz_album( album, artist, 0, 10 )
+                if self.albums:
+                    self.populate_search_list_mbid( self.albums, "albums" )
+        if controlId == 159:
+            self.getControl( 161 ).reset()
+            if self.menu_mode == 10:
+                self.artists = get_musicbrainz_artists( self.artist_menu["name"], 10 )
+                if self.artists:
+                    self.populate_search_list_mbid( self.artists, "artists" )
+            if self.menu_mode in ( 11, 12 ):
+                album, self.albums = get_musicbrainz_album( self.album_menu["title"], self.album_menu["artist"], 0, 10 )
+                if self.albums:
+                    self.populate_search_list_mbid( self.albums, "albums" )
+        if controlId == 161:
+            conn = sqlite3.connect(addon_db)
+            c = conn.cursor()
+            if self.menu_mode == 10:
+                artist_musicbrainzid = self.artists[self.getControl( 161 ).getSelectedPosition()]["id"]
+                artist_name = self.artists[self.getControl( 161 ).getSelectedPosition()]["name"]
+                try:
+                    c.execute('''UPDATE lalist SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( artist_musicbrainzid, artist_name, self.artist_menu["local_id"] ) )
+                except:
+                    xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                    print_exc()
+                try:
+                    c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( artist_musicbrainzid, artist_name, self.artist_menu["local_id"] ) )
+                except:
+                    xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                    print_exc()
+                conn.commit()
+                c.close()
+                self.getControl( 145 ).reset()
+                xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+                if __addon__.getSetting("enable_all_artists") == "true":
+                    self.local_artists = get_local_artists_db( "all_artists")
+                else:
+                    self.local_artists = get_local_artists_db( "album_artists")
+                self.populate_artist_list_mbid( self.local_artists, self.selected_item )
+            if self.menu_mode in ( 11, 12 ):
+                artist_name = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist"]
+                album_title = self.albums[self.getControl( 161 ).getSelectedPosition()]["title"]
+                artist_musicbrainzid = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist_id"]
+                album_musicbrainzid = self.albums[self.getControl( 161 ).getSelectedPosition()]["id"]
+                try:
+                    c.execute('''UPDATE alblist SET artist="%s", title="%s", musicbrainz_albumid="%s", musicbrainz_artistid="%s" WHERE album_id=%s and path="%s"''' % ( artist_name, album_title, album_musicbrainzid, artist_musicbrainzid, self.album_menu["local_id"], self.album_menu["path"] ) )
+                except:
+                    xbmc.log( "[script.cdartmanager] - Error updating database", xbmc.LOGERROR )
+                    print_exc()
+                conn.commit()
+                c.close()
+                self.getControl( 145 ).reset()
+                xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+                if self.menu_mode == 12:
+                    self.local_albums = get_local_albums_db( "all artists" )
+                    self.populate_album_list_mbid( self.local_albums, self.selected_item )
+                else:
+                    self.local_albums = get_local_albums_db( self.artist_menu["name"] )
+                    self.populate_album_list_mbid( self.local_albums, self.selected_item )
+                    
     def onFocus( self, controlId ):
         if not controlId in( 122, 140, 160, 167, 199 ):
             xbmcgui.Window(10001).clearProperty( "artwork" )
@@ -1248,7 +1632,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
             empty_tempxml_folder()
-            self.missing_list()
+            if __addon__.getSetting("enable_missing") == "true":
+                self.missing_list()
         if actionID == 10:
             xbmc.log( "[script.cdartmanager] - Closing", xbmc.LOGNOTICE )
             try:
@@ -1256,16 +1641,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
             except:
                 pass
             empty_tempxml_folder()
-            self.missing_list()
+            if __addon__.getSetting("enable_missing") == "true":
+                self.missing_list()
             self.close()
 
 def onAction( self, action ):
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             empty_tempxml_folder()
-            self.missing_list()
+            if __addon__.getSetting("enable_missing") == "true":
+                self.missing_list()
             self.close()
     if ( action.getButtonCode() in CANCEL_DIALOG ):
         xbmc.log( "[script.cdartmanager] - Closing", xbmc.LOGNOTICE )
         empty_tempxml_folder()
-        self.missing_list()
+        if __addon__.getSetting("enable_missing") == "true":
+            self.missing_list()
         self.close()

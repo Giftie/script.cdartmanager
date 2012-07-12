@@ -7,7 +7,8 @@
         <setting label="" type="lsep" />
         <setting label="32036" type="folder" id="music_path" default="" source="auto" option="writeable" />
         <setting label="32018" type="folder" id="backup_path" default="" source="auto" option="writeable" />
-        <setting label="32062" type="folder" id="missing_path" default="" source="auto" option="writeable" />
+        <setting label="32158" type="bool" id="enable_missing" default="true" />
+        <setting label="32062" type="folder" id="missing_path" default="" source="auto" enable="eq(-1,true)" option="writeable" />
         <setting label="32097" type="bool" id="enableresize" default="false" />
         <setting id="folder" type="enum" label="32019" lvalues="32054|32055" default="0"/>
         <setting type="sep" />
@@ -40,5 +41,7 @@
         <setting label="32145" type="action"  action="RunScript($CWD/default.py,update_thumbs)" />
         <setting label="32142" type="bool" id="enable_all_artists" default="false" />
         <setting label="32136" type="bool" id="update_musicbrainz" default="true" />
+        <setting label="32114" type="bool" id="check_mbid" default="false"        />
+        <setting label="32148" type="lsep" />
     </category>
 </settings>

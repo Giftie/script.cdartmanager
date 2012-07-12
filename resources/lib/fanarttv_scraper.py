@@ -207,19 +207,14 @@ def get_distant_artists():
         distant_artists.append(distant)
     return distant_artists
 
-def get_recognized( distant, local ):
-    xbmc.log( "[script.cdartmanager] - Retrieving Recognized Artists from fanart.tv", xbmc.LOGDEBUG )
-    true = 0
-    count = 0
-    name = ""
+def match_artists( distant, artists ):
     artist_list = []
     recognized = []
-    fanart_test = ""
-    #percent = 0
-    pDialog.create( __language__(32048) )
-    #Onscreen dialog - Retrieving Recognized Artist List....
-    for artist in local:
-        percent = int((float(count)/len(local))*100)
+    matched = False
+    matched_count = 0
+    count = 0
+    for artist in artists:
+        percent = int((float(count)/len( artists ))*100)
         if ( pDialog.iscanceled() ):
             break
         if not artist["musicbrainz_artistid"] and lookup_id:
@@ -228,23 +223,42 @@ def get_recognized( distant, local ):
             if ( pDialog.iscanceled() ):
                 break
             if artist["musicbrainz_artistid"] == d_artist["id"] and d_artist["name"]:
-                true += 1
+                matched_count += 1
+                matched = True
                 artist["distant_id"] = d_artist["id"]
-                fanart_test = fanart_test + d_artist["id"] + "|"
                 break                
             else:
                 artist["distant_id"] = ""
+                matched = False
         recognized.append(artist)
         artist_list.append(artist)
-        pDialog.update(percent, ( __language__(32049) % true))
-        #Onscreen Dialog - Artists Matched: %
+        pDialog.update(percent, ( __language__(32049) % matched_count ))
+        #Onscreen Dialog - Artists Matched: #
         count += 1
-    print fanart_test
-    xbmc.log( "[script.cdartmanager] - Total Artists Matched: %s" % true, xbmc.LOGDEBUG )
-    if true == 0:
-        xbmc.log( "[script.cdartmanager] - No Matches found.  Compare Artist and Album names with xbmcstuff.com", xbmc.LOGDEBUG )
+    return recognized, artist_list, matched
+    
+def get_recognized( distant, all_artists, album_artists ):
+    xbmc.log( "[script.cdartmanager] - Retrieving Recognized Artists from fanart.tv", xbmc.LOGDEBUG )
+    true = 0
+    count = 0
+    name = ""
+    artist_list = []
+    all_artist_list = []
+    recognized = []
+    recognized_album = []
+    fanart_test = ""
+    #percent = 0
+    pDialog.create( __language__(32048) )
+    #Onscreen dialog - Retrieving Recognized Artist List....
+    recognized, artist_list, matched = match_artists( distant, album_artists )
+    if __addon__.getSetting("enable_all_artists") == "true" and all_artists:
+        recognized_album, all_artist_list, matched = match_artists( distant, all_artists )
+    if not matched:
+        xbmc.log( "[script.cdartmanager] - No Matches found.  Compare Artist and Album names with fanart.tv", xbmc.LOGNOTICE )
+    else:
+        xbmc.log( "[script.cdartmanager] - Matches found. Completed retrieving recognized artists", xbmc.LOGNOTICE )
     pDialog.close()   
-    return recognized, artist_list    
+    return recognized, recognized_album, all_artist_list, artist_list    
 
 def match_library( local_artist_list ):
     available_artwork = []

@@ -26,11 +26,122 @@ id      | description
 9022    - Artist Thumb Autodownload Sub Menu
 9023    - Artist Thumb list
 9024    - Clearlogo list
+9025    - Edit By Artist
+9026    - Edit By Album
+9027    - Artist - Change MBID(s)
+9028    - Artist - Refresh MBID(s)
+9029    - Album - Change MBID(s)
+9030    - Album - Refresh MBID(s)
+9031    - Album List MBID
+9032    - MBID Popup
+9033    - MBID Select from search List pop up
 9050    - cdART image for album List
 9051    - Image to replace script logo with artist name label
 
 Control type button
 id      | description
+-------------------------
+100     - Main Menu - cdARTs button
+101     - Main Menu - cover art button
+102     - Main Menu - Fanart button
+103     - Main Menu - Advance button
+104     - Main Menu - Settings Button
+105     - cdART Menu - Search Artist button
+106     - cdART Menu - Autodownload button
+107     - Artist Change MBID sub-Menu - Manual Entry
+108     - Artist Change MBID sub-Menu - Automatic
+109     - Album Artist Count
+110     - Local Disc Count
+111     - Main Menu - Exit Button
+112     - cdART count
+113     - Edit by Artist sub-Menu - Change MBID
+114     - Edit by Artist sub-Menu - Refresh MBID
+115     - Edit by Artist sub-Menu - Update Missing MBID
+116     - Edit By Artist - Change MBID sub-Menu - Manual
+117     - Edit By Artist - Change MBID sub-Menu - Automatic
+118     - Edit By Artist - Refresh MBID sub-Menu - Select Artist
+119     - Edit By Artist - Refresh MBID sub-Menu - Automatic
+120     - Artist ListItem
+121     - Artist ListItem - Scroll bar
+122     - Album ListItem
+123     - Edit by Album sub-Menu - Change MBID
+124     - Edit by Album sub-Menu - Refresh MBID
+125     - Edit by Album sub-Menu - Update Missing MBID
+126     - Edit By Album - Change MBID sub-Menu - Manual
+127     - Edit By Album - Change MBID sub-Menu - Automatic
+128     - Edit By Album - Refresh MBID sub-Menu - Select Artist
+129     - Edit By Album - Refresh MBID sub-Menu - Automatic
+130     - Advanced Menu - cdART Backup button
+131     - Advanced Menu - Modify Local Database button
+132     - Advanced Menu - Clean Music Database button
+133     - Advanced Menu - Update Music Database button
+135     - cdART Backup sub-Menu - Backup cdART button
+136     - cdART Backup sub-Menu - Restore from backup button
+137     - Advanced Menu - Local cdART List button
+138     - Artist Refresh MBID sub-Menu - Select Artist
+139     - Artist Refresh MBID sub-Menu - All Artists
+140     - Local cdART ListItem
+141     - 
+142     - Local cdART Pop-Up Menu - Back up cdART button
+143     - Local cdART Pop-Up Menu - restore from Backup button
+144     - Local cdART Pop-Up Menu - copy to unique folder for upload
+145     - Album List - MBID
+146     - Album List - MBID - scroll
+147     - 1
+148     - 2
+149     - 3
+150     - Cover Art Menu - Search Artist button
+151     - Cover Art Menu - Autodownload button
+152     - Main Menu - ClearLogo button
+153     - Main Menu - Artist Thumb button
+154     -
+155     -
+156     - MBID Popup - Title label
+157     - MBID Popup - Label 1
+158     - MBID Popup - Label 2
+159     - MBID Popup - Label 3
+160     - Fanart ListItem
+161     - MBID Select from search
+162     - MBID Select scroll bar
+163     -
+164     -
+165     -
+166     -
+167     - ClearLOGO ListItem
+168     - ClearLOGO Menu - Search Artist button
+169     - ClearLOGO Menu - Autodownload button
+170     - Fanart menu - search Artist button
+171     - Fanart Menu - Autodownload button
+180     - Fanart Search Artists sub-Menu - Album Artist button
+181     - Fanart Search Artists sub-Menu - All Artist button
+182     - Fanart Autodownload sub-Menu - Album Artist button
+183     - Fanart Autodownload sub-Menu - All Artist button
+184     - ClearLOGO Search Artists sub-Menu - Album Artist button
+185     - ClearLOGO Search Artists sub-Menu - All Artist button
+186     - ClearLOGO Autodownload sub-Menu - Album Artist button
+187     - ClearLOGO Autodownload sub-Menu - All Artist button
+188     - Modify Local Database Menu - Edit by Artist button
+189     - Modify Local Database Menu - Edit by Album button
+190     - Modify Local Database Menu - Backup Database button
+191     - Modify Local Database Menu - Refresh Database button
+192     - Modify Local Database Menu - Update Database button
+193     - Artist Thumb Menu - Search Artist button
+194     - Artist Thumb Menu - Autodownload button
+195     - Artist Thumb Autodownload sub-Menu - Album Artist button
+196     - Artist Thumb Autodownload sub-Menu - All Artist button
+197     - Artist Thumb Search Artists sub-Menu - Album Artist button
+198     - Artist Thumb Search Artists sub-Menu - All Artist button
+199     - Artist Thumb ListItem
+
+203     - Artwork Label - appears under cdART that replaces cdART Manager's logo
+204     - Artist Label - appears under cdART Manager's logo
+
+300     - Local cdART Pop-Up Menu - Album title label
+400     - Pop-up screen line 1
+401     - Pop-up screen line 2
+402     - Pop-up screen line 3
+403     - Pop-up screen line 4
+404     - Downloaded ListItem
 
 Control type image
 id      | description
@@ -88,7 +199,7 @@ id      | description
                     <wrapmultiline>true</wrapmultiline>
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo)|SubString(Window(10001).Property(artwork),artistthumb) + !Control.HasFocus(120)</visible>
+                    <visible>SubString(Window(10001).Property(artwork),fanart)|SubString(Window(10001).Property(artwork),cover)|SubString(Window(10001).Property(artwork),cdart)|SubString(Window(10001).Property(artwork),clearlogo)|SubString(Window(10001).Property(artwork),artistthumb)| Control.HasFocus(145) + !Control.HasFocus(120) </visible>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>Artist</label>
@@ -121,7 +232,139 @@ id      | description
                     <label>Local cdART</label>
                 </control>
             </control>
-           
+            <control type="group" id="9031"> <!-- MBID List -->
+                <posx>0</posx>
+                <posy>0</posy>            
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9031).HasFocus + !Control.HasFocus(145) + !ControlGroup(9032).HasFocus">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(145) | ControlGroup(9031).HasFocus | ControlGroup(9032).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(145) | ControlGroup(9031).HasFocus | ControlGroup(9032).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="300,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(145) | ControlGroup(9031).HasFocus | ControlGroup(9032).HasFocus">conditional</animation>
+                <visible>Control.HasFocus(145) | Control.HasFocus(146) | Control.HasFocus(161) | ControlGroup(9031).HasFocus | ControlGroup(9032).HasFocus | ControlGroup(9033).HasFocus</visible>
+                <control type="image" id ="220">
+                    <!--
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    -->
+                    <width>980</width>
+                    <height>670</height>
+                    <!--<aspectratio scalediffuse="false">keep</aspectratio>-->
+                    <texture>default-menu.png</texture>
+                </control>
+                <control type="list" id="145">
+                    <description>Artist List</description>
+                    <posx>0</posx>
+                    <posy>25</posy>
+                    <width>930</width>
+                    <height>670</height>
+                    <onleft>9019</onleft>
+                    <onright>146</onright>
+                    <onup>145</onup>
+                    <ondown>1145</ondown>
+                    <viewtype label="Album List">list</viewtype>
+                    <pagecontrol>146</pagecontrol>
+                    <scrolltime>200</scrolltime>
+                    <itemlayout width="930" height="80">
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>75</posy>
+                            <width>930</width>
+                            <height>80</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        <control type="label">
+                            <posx>40</posx>
+                            <posy>0</posy>
+                            <width>400</width>
+                            <height>60</height>
+                            <font>font13</font>
+                            <aligny>top</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>60</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="930" height="80">
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>75</posy>
+                            <width>930</width>
+                            <height>80</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>0</posy>
+                            <width>930</width>
+                            <height>80</height>
+                            <texture>cdman-button-focus.png</texture>
+                            <visible>Control.HasFocus(145)</visible>
+                        </control>
+                        <control type="label">
+                            <posx>40</posx>
+                            <posy>0</posy>
+                            <width>400</width>
+                            <height>60</height>
+                            <font>font13</font>
+                            <aligny>top</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>60</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
+                    </focusedlayout>
+                </control>
+                <control type="group">
+                    <posx>940</posx>
+                    <posy>10</posy>
+                    <control type="scrollbar" id="146">
+                        <description>scroll bar indicator for lists</description>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>12</width>
+                        <height>650</height>
+                        <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
+                        <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
+                        <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
+                        <textureslidernib>-</textureslidernib>
+                        <textureslidernibfocus>-</textureslidernibfocus>
+                        <onleft>145</onleft>
+                        <onright>145</onright>
+                        <orientation>vertical</orientation>
+                        <showonepage>false</showonepage>
+                        <visible>Control.IsVisible(145)</visible>
+                    </control>
+                </control>
+            </control>
+
             <control type="group" id="9003"> <!-- Artist List -->
                 <posx>0</posx>
                 <posy>0</posy>            
@@ -135,17 +378,16 @@ id      | description
                     <posx>0</posx>
                     <posy>0</posy>
                     -->
-                    <width>680</width>
+                    <width>980</width>
                     <height>670</height>
                     <!--<aspectratio scalediffuse="false">keep</aspectratio>-->
                     <texture>default-menu.png</texture>
                 </control>
-
                 <control type="list" id="120">
                     <description>Artist List</description>
                     <posx>0</posx>
                     <posy>25</posy>
-                    <width>606</width>
+                    <width>930</width>
                     <height>670</height>
                     <onleft>9000</onleft>
                     <onright>121</onright>
@@ -154,18 +396,18 @@ id      | description
                     <viewtype label="Artist List">list</viewtype>
                     <pagecontrol>121</pagecontrol>
                     <scrolltime>200</scrolltime>
-                    <itemlayout width="606" height="36">
+                    <itemlayout width="930" height="36">
                         <control type="image">
-                            <posx>30</posx>
+                            <posx>10</posx>
                             <posy>36</posy>
-                            <width>606</width>
+                            <width>930</width>
                             <height>38</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
                         <control type="label">
                             <posx>40</posx>
                             <posy>0</posy>
-                            <width>560</width>
+                            <width>400</width>
                             <height>38</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -175,19 +417,32 @@ id      | description
                             <align>left</align>
                             <info>ListItem.Label</info>
                         </control>
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
                     </itemlayout>
-                    <focusedlayout width="670" height="36">
+                    <focusedlayout width="930" height="36">
                         <control type="image">
-                            <posx>30</posx>
+                            <posx>10</posx>
                             <posy>36</posy>
-                            <width>670</width>
+                            <width>930</width>
                             <height>38</height>
                             <texture>cdman-default-list-nofocus.png</texture>
                         </control>
                         <control type="image">
-                            <posx>30</posx>
+                            <posx>10</posx>
                             <posy>0</posy>
-                            <width>670</width>
+                            <width>930</width>
                             <height>38</height>
                             <texture>cdman-button-focus.png</texture>
                             <visible>Control.HasFocus(120)</visible>
@@ -195,7 +450,7 @@ id      | description
                         <control type="label">
                             <posx>40</posx>
                             <posy>0</posy>
-                            <width>660</width>
+                            <width>400</width>
                             <height>38</height>
                             <font>font13</font>
                             <aligny>center</aligny>
@@ -205,11 +460,23 @@ id      | description
                             <align>left</align>
                             <info>ListItem.Label</info>
                         </control>
-
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
                     </focusedlayout>
                 </control>
                 <control type="group">
-                    <posx>640</posx>
+                    <posx>940</posx>
                     <posy>10</posy>
                     <control type="scrollbar" id="121">
                         <description>scroll bar indicator for lists</description>
@@ -333,7 +600,7 @@ id      | description
                     <textcolor>FFFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <label>$ADDON[script.cdartmanager 32111]</label>
-                </control>                        
+                </control>
                 <control type="panel" id="404">
                     <description>Album List</description>
                     <posx>10</posx>
@@ -500,7 +767,7 @@ id      | description
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(160) | ControlGroup(9010).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(160) | ControlGroup(9010).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="300,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(160) | ControlGroup(9010).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(160) | Control.HasFocus(160) | Control.HasFocus(161) </visible>
+                <visible>Control.HasFocus(160)</visible>
                 <control type="image" id = "215">
                     <posx>0</posx>
                     <posy>0</posy>
@@ -550,6 +817,136 @@ id      | description
                 </control>
             </control>
 
+            <control type="group" id="9033">  <!--  MBID select from search -->
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9033).HasFocus + !Control.HasFocus(161) + !Control.HasFocus(162)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(161) | Control.HasFocus(162) | ControlGroup(9033).HasFocus">conditional</animation>
+                <animation effect="slide" end="300,0" time="300" tween="quadratic" easing="out" condition="Control.HasFocus(161) | Control.HasFocus(162) | ControlGroup(9033).HasFocus">conditional</animation>
+                <visible>Control.HasFocus(161) | Control.HasFocus(162) | ControlGroup(9033).HasFocus</visible>
+                <control type="image" id = "215">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>980</width>
+                    <height>670</height>
+                    <!--
+                    <aspectratio scalediffuse="false">keep</aspectratio>
+                    -->
+                    <texture>default-menu.png</texture>
+                </control>
+                <control type="list" id="161">
+                    <description>MBID Select List</description>
+                    <posx>0</posx>
+                    <posy>25</posy>
+                    <width>930</width>
+                    <height>670</height>
+                    <onleft>145</onleft>
+                    <onright>162</onright>
+                    <onup>161</onup>
+                    <ondown>161</ondown>
+                    <viewtype label="MBID List">list</viewtype>
+                    <pagecontrol>162</pagecontrol>
+                    <scrolltime>200</scrolltime>
+                    <itemlayout width="930" height="36">
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>36</posy>
+                            <width>930</width>
+                            <height>38</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        <control type="label">
+                            <posx>40</posx>
+                            <posy>0</posy>
+                            <width>400</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="930" height="36">
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>36</posy>
+                            <width>930</width>
+                            <height>38</height>
+                            <texture>cdman-default-list-nofocus.png</texture>
+                        </control>
+                        <control type="image">
+                            <posx>10</posx>
+                            <posy>0</posy>
+                            <width>930</width>
+                            <height>38</height>
+                            <texture>cdman-button-focus.png</texture>
+                            <visible>Control.HasFocus(161)</visible>
+                        </control>
+                        <control type="label">
+                            <posx>40</posx>
+                            <posy>0</posy>
+                            <width>400</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="label">
+                            <posx>440</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>38</height>
+                            <font>font13</font>
+                            <aligny>center</aligny>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <focusedcolor>FFFFFFFF</focusedcolor>
+                            <selectedcolor>green</selectedcolor>
+                            <align>left</align>
+                            <info>ListItem.Label2</info>
+                        </control>
+                    </focusedlayout>
+                </control>
+                <control type="group">
+                    <posx>940</posx>
+                    <posy>10</posy>
+                    <control type="scrollbar" id="162">
+                        <description>scroll bar indicator for lists</description>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>12</width>
+                        <height>650</height>
+                        <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
+                        <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
+                        <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
+                        <textureslidernib>-</textureslidernib>
+                        <textureslidernibfocus>-</textureslidernibfocus>
+                        <onleft>120</onleft>
+                        <onright>120</onright>
+                        <orientation>vertical</orientation>
+                        <showonepage>false</showonepage>
+                        <visible>Control.IsVisible(161)</visible>
+                    </control>
+                </control>
+            </control>
+
             <control type="group" id="9007"> <!-- Local cdART List -->
                 <posx>0</posx>
                 <posy>0</posy>
@@ -561,7 +958,7 @@ id      | description
                 <control type="image" id = "220">
                     <posx>0</posx>
                     <posy>0</posy>
-                    <width>680</width>
+                    <width>980</width>
                     <height>670</height>
                     <texture>default-menu.png</texture>
                 </control>
@@ -569,7 +966,7 @@ id      | description
                     <description>Local cdART List</description>
                     <posx>0</posx>
                     <posy>25</posy>
-                    <width>606</width>
+                    <width>900</width>
                     <height>670</height>
                     <onleft>137</onleft>
                     <onright>141</onright>
@@ -648,7 +1045,7 @@ id      | description
                     </focusedlayout>
                 </control>
                 <control type="group">
-                    <posx>640</posx>
+                    <posx>940</posx>
                     <posy>10</posy>
                     <control type="scrollbar" id="141">
                         <description>scroll bar indicator for lists</description>
@@ -764,6 +1161,102 @@ id      | description
                     <onup>143</onup>
                     <ondown>142</ondown>
                 </control>
+            </control>
+            
+            <control type="group" id="9032">  <!--  MBID pop up menu -->
+                <posx>650</posx>
+                <posy>50</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9033).HasFocus + !ControlGroup(9032).HasFocus + !Control.HasFocus(157) + !Control.HasFocus(158) + !Control.HasFocus(159)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(157) | Control.HasFocus(158) | Control.HasFocus(159) | !ControlGroup(9033).HasFocus | ControlGroup(9032).HasFocus">conditional</animation>
+                <visible>ControlGroup(9032).HasFocus</visible>
+                <control type="image"> <!-- Box image -->
+                    <posx>-5</posx>
+                    <posy>0</posy>
+                    <width>400</width>
+                    <height>200</height>
+                    <texture border="40">default-black.png</texture>
+                    <visible>ControlGroup(9032).HasFocus</visible>
+                </control>
+                <control type="label" id="156">
+                    <posx>5</posx>
+                    <posy>0</posy>
+                    <width>390</width>
+                    <height>40</height>
+                    <font>font13</font>
+                    <aligny>center</aligny>
+                    <textcolor>green</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <selectedcolor>green</selectedcolor>
+                    <label>Album Title Goes Here</label>
+                    <scroll>true</scroll>
+                    <align>center</align>
+                </control>
+                <control type="button" id="157">
+                    <description>Manual Entry</description>
+                    <posx>10</posx>
+                    <posy>60</posy>
+                    <height>40</height>
+                    <width>380</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>360</textwidth>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32155]</label>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>145</onleft>
+                    <onright>9032</onright>
+                    <onup>159</onup>
+                    <ondown>158</ondown>
+                </control>
+                <control type="button" id="158">
+                    <description>Select From Search(Manual Entry)</description>
+                    <posx>10</posx>
+                    <posy>100</posy>
+                    <height>40</height>
+                    <width>380</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>360</textwidth>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32156]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>145</onleft>
+                    <onright>9032</onright>
+                    <onup>157</onup>
+                    <ondown>159</ondown>                       
+                </control>
+                <control type="button" id="159">
+                    <description>Select from search(automatic)</description>
+                    <posx>10</posx>
+                    <posy>140</posy>
+                    <height>40</height>
+                    <width>380</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>360</textwidth>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32157]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>145</onleft>
+                    <onright>9032</onright>
+                    <onup>158</onup>
+                    <ondown>157</ondown>
+                </control>
             </control>   
 
             <control type="group" id="9012"> <!-- pop up screen not used -->
@@ -840,13 +1333,14 @@ id      | description
                 <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9006).HasFocus + !Control.HasFocus(130)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(130) | ControlGroup(9006).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(135) | Control.HasFocus(130) | Control.HasFocus(136)</visible>
+                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(130)">conditional</animation>
+                <animation effect="slide" end="-70,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9006).HasFocus">conditional</animation>
+                <visible>true</visible>
                 <control type="image"> <!-- Box image -->
                     <posx>-5</posx>
                     <posy>0</posy>
-                    <width>280</width>
-                    <height>110</height>
+                    <width>300</width>
+                    <height>90</height>
                     <texture border="40">default-menu.png</texture>
                 </control>
                 <control type="button" id="135"> <!-- Backup cdART -->
@@ -854,9 +1348,9 @@ id      | description
                     <posx>10</posx>
                     <posy>5</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>240</textwidth>
+                    <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -875,9 +1369,9 @@ id      | description
                     <posx>10</posx>
                     <posy>45</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>240</textwidth>
+                    <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -892,28 +1386,379 @@ id      | description
                     <ondown>135</ondown>
                 </control>
             </control>
-            
-            <control type="group" id="9019">  <!-- Modify Database Menu -->
-                <posx>370</posx>
-                <posy>460</posy>
-                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9019).HasFocus + !Control.HasFocus(131)">conditional</animation>
-                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(131) | ControlGroup(9019).HasFocus">conditional</animation>
-                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(131) | ControlGroup(9019).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(131) | ControlGroup(9019).HasFocus">conditional</animation>
+            <control type="group" id="9030"> <!-- Album - Refresh MBID(s) -->
+                <posx>0</posx>
+                <posy>540</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9030).HasFocus + !Control.HasFocus(124)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(124) | ControlGroup(9030).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(124) | ControlGroup(9030).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="570,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(124) | ControlGroup(9030).HasFocus">conditional</animation>
+                <visible>true</visible>                
+                <control type="image"> <!-- Box image -->
+                    <width>260</width>
+                    <height>90</height>
+                    <texture>default-menu.png</texture>
+                </control>
+                <control type="button" id="147"> <!-- Select Album -->
+                    <description>Select Album</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32166]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9026</onleft>
+                    <onright>9030</onright>
+                    <onup>148</onup>
+                    <ondown>148</ondown>
+                </control>
+                <control type="button" id="148"> <!-- Check All MBIDs -->
+                    <description>Check All MBIDs</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32154]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9026</onleft>
+                    <onright>9030</onright>
+                    <onup>148</onup>
+                    <ondown>148</ondown>
+                </control>
+            </control>
+            <control type="group" id="9029"> <!-- Album - Change MBID(s) -->
+                <posx>0</posx>
+                <posy>500</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!Control.HasFocus(123) + !ControlGroup(9029).HasFocus + !Control.HasFocus(126) + !Control.HasFocus(127)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(123) | Control.HasFocus(126) | Control.HasFocus(127) | ControlGroup(9029).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(123) | Control.HasFocus(126) | Control.HasFocus(127) | ControlGroup(9029).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="570,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(123) | Control.HasFocus(126) | Control.HasFocus(127) | ControlGroup(9029).HasFocus">conditional</animation>
+                <visible>true</visible>                
+                <control type="image"> <!-- Box image -->
+                    <width>260</width>
+                    <height>90</height>
+                    <texture>default-menu.png</texture>
+                </control>
+                <control type="button" id="126"> <!-- Select Artist -->
+                    <description>Select Artist</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32002]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9026</onleft>
+                    <onright>90329</onright>
+                    <onup>127</onup>
+                    <ondown>127</ondown>
+                </control>
+                <control type="button" id="127"> <!-- Select Album -->
+                    <description>Select Album</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32166]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9026</onleft>
+                    <onright>9029</onright>
+                    <onup>126</onup>
+                    <ondown>126</ondown>
+                </control>
+            </control>
+            <control type="group" id="9026">  <!-- Edit By Album Menu -->
+                <posx>380</posx>
+                <posy>500</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9026).HasFocus + !Control.HasFocus(189) + !ControlGroup(9029).HasFocus + !ControlGroup(9030).HasFocus">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(189) | ControlGroup(9026).HasFocus | ControlGroup(9029).HasFocus | ControlGroup(9030).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(189) | ControlGroup(9026).HasFocus | ControlGroup(9029).HasFocus | ControlGroup(9030).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(189)">conditional</animation>
+                <animation effect="slide" end="-90,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9026).HasFocus | ControlGroup(9029).HasFocus | ControlGroup(9030).HasFocus">conditional</animation>
                 <visible>true</visible>
                 <control type="image"> <!-- Box image -->
                     <posx>0</posx>
                     <posy>0</posy>
-                    <width>280</width>
+                    <width>300</width>
+                    <height>130</height>
+                    <texture border="40">default-menu.png</texture>
+                </control>
+                <control type="radiobutton" id="123"> <!-- Change MBID -->
+                    <description>Change MBID</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>250</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>240</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32153]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <radioposx>260</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
+                    <onleft>9019</onleft>
+                    <onright>126</onright>
+                    <onup>125</onup>
+                    <ondown>124</ondown>
+                </control>
+                <control type="radiobutton" id="124"> <!-- Refresh MBID -->
+                    <description>Refresh MBID</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>250</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>240</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32152]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <radioposx>260</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
+                    <onleft>9019</onleft>
+                    <onright>148</onright>
+                    <!-- <onright>147</onright> Remove previous line once added to script -->
+                    <onup>123</onup>
+                    <ondown>125</ondown>
+                </control>
+                <control type="button" id="125"> <!-- Find Missing MBIDs -->
+                    <description>Find Missing MBIDs</description>
+                    <posx>10</posx>
+                    <posy>85</posy>
+                    <height>40</height>
+                    <width>285</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>260</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32151]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9019</onleft>
+                    <onright>9026</onright>
+                    <onup>124</onup>
+                    <ondown>123</ondown>
+                </control>
+            </control>
+            <control type="group" id="9028"> <!-- Artist - Refresh MBID(s) -->
+                <posx>0</posx>
+                <posy>500</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9028).HasFocus + !Control.HasFocus(114)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(114) | ControlGroup(9028).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(114) | ControlGroup(9028).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="570,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(114) | ControlGroup(9028).HasFocus">conditional</animation>
+                <visible>true</visible>                
+                <control type="image"> <!-- Box image -->
+                    <width>260</width>
+                    <height>90</height>
+                    <texture>default-menu.png</texture>
+                </control>
+                <control type="button" id="138"> <!-- Select Artist -->
+                    <description>Select Artist</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32002]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9025</onleft>
+                    <onright>9028</onright>
+                    <onup>139</onup>
+                    <ondown>139</ondown>
+                </control>
+                <control type="button" id="139"> <!-- Check All MBIDs -->
+                    <description>Check All MBIDs</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>230</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>220</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32154]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9025</onleft>
+                    <onright>9028</onright>
+                    <onup>139</onup>
+                    <ondown>139</ondown>
+                </control>
+            </control>
+            
+            <control type="group" id="9025">  <!-- Edit By Artist Menu -->
+                <posx>380</posx>
+                <posy>460</posy>
+                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9025).HasFocus + !Control.HasFocus(188) + !ControlGroup(9027).HasFocus + !ControlGroup(9028).HasFocus">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(188) | ControlGroup(9025).HasFocus | ControlGroup(9027).HasFocus | ControlGroup(9028).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(188) | ControlGroup(9025).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(188)">conditional</animation>
+                <animation effect="slide" end="-90,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9025).HasFocus | ControlGroup(9027).HasFocus | ControlGroup(9028).HasFocus">conditional</animation>
+                <visible>true</visible>
+                <control type="image"> <!-- Box image -->
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>300</width>
+                    <height>130</height>
+                    <texture border="40">default-menu.png</texture>
+                </control>
+                <control type="button" id="113"> <!-- Change MBID -->
+                    <description>Change MBID</description>
+                    <posx>10</posx>
+                    <posy>5</posy>
+                    <height>40</height>
+                    <width>250</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>240</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32153]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9019</onleft>
+                    <onright>113</onright>
+                    <onup>115</onup>
+                    <ondown>114</ondown>
+                </control>
+                <control type="radiobutton" id="114"> <!-- Refresh MBID -->
+                    <description>Refresh MBID</description>
+                    <posx>10</posx>
+                    <posy>45</posy>
+                    <height>40</height>
+                    <width>250</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>240</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32152]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <radioposx>260</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
+                    <onleft>9019</onleft>
+                    <onright>139</onright>
+                    <!-- <onright>138</onright> Remove previous line once added to script -->
+                    <onup>113</onup>
+                    <ondown>115</ondown>
+                </control>
+                <control type="button" id="115"> <!-- Find Missing MBIDs -->
+                    <description>Find Missing MBIDs</description>
+                    <posx>10</posx>
+                    <posy>85</posy>
+                    <height>40</height>
+                    <width>285</width>
+                    <textoffsetx>10</textoffsetx>
+                    <textwidth>260</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <label>$ADDON[script.cdartmanager 32151]</label>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <onleft>9019</onleft>
+                    <onright>9025</onright>
+                    <onup>114</onup>
+                    <ondown>113</ondown>
+                </control>
+            </control>
+            
+            <control type="group" id="9019">  <!-- Modify Database Menu -->
+                <posx>370</posx>
+                <posy>460</posy>
+                <animation effect="fade" start="100" end="0" time="600" condition="!ControlGroup(9019).HasFocus + !Control.HasFocus(131)">conditional</animation>
+                <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(131) | ControlGroup(9019).HasFocus | ControlGroup(9025).HasFocus | ControlGroup(9026).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="600" condition="Control.HasFocus(131) | ControlGroup(9019).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="220,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(131)">conditional</animation>
+                <animation effect="slide" end="-70,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9019).HasFocus">conditional</animation>
+                <animation effect="slide" end="-300,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9025).HasFocus | ControlGroup(9026).HasFocus">conditional</animation>
+                <visible>true</visible>
+                <control type="image"> <!-- Box image -->
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>300</width>
                     <height>210</height>
                     <texture border="40">default-menu.png</texture>
                 </control>
-                <control type="button" id="188"> <!-- Edit By Artist -->
+                <control type="radiobutton" id="188"> <!-- Edit By Artist -->
                     <description>Edit By Artist</description>
                     <posx>10</posx>
                     <posy>5</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>250</width>
                     <textoffsetx>10</textoffsetx>
                     <textwidth>240</textwidth>
                     <aligny>center</aligny>
@@ -924,17 +1769,24 @@ id      | description
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
+                    <radioposx>260</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
                     <onleft>9005</onleft>
-                    <onright>9019</onright>
+                    <onright>113</onright>
+                    <onclick>113</onclick>
                     <onup>190</onup>
-                    <ondown>191</ondown>
+                    <ondown>189</ondown>
                 </control>
-                <control type="button" id="189"> <!-- Edit By Album -->
+                <control type="radiobutton" id="189"> <!-- Edit By Album -->
                     <description>Edit By Album</description>
                     <posx>10</posx>
                     <posy>45</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>250</width>
                     <textoffsetx>10</textoffsetx>
                     <textwidth>240</textwidth>
                     <aligny>center</aligny>
@@ -945,8 +1797,18 @@ id      | description
                     <texturefocus border="5">cdman-button-focus.png</texturefocus>
                     <texturenofocus>-</texturenofocus>
                     <pulseonselect>false</pulseonselect>
+                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
+                    <texturenofocus>-</texturenofocus>
+                    <pulseonselect>false</pulseonselect>
+                    <radioposx>260</radioposx>
+                    <radioposy>10</radioposy>
+                    <radiowidth>18</radiowidth>
+                    <radioheight>18</radioheight>
+                    <textureradioon>HomeHasSub.png</textureradioon>
+                    <textureradiooff>HomeHasSub.png</textureradiooff>
                     <onleft>9005</onleft>
-                    <onright>9019</onright>
+                    <onright>123</onright>
+                    <onclick>123</onclick>
                     <onup>188</onup>
                     <ondown>190</ondown>
                 </control>
@@ -955,9 +1817,9 @@ id      | description
                     <posx>10</posx>
                     <posy>85</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>240</textwidth>
+                    <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -968,7 +1830,7 @@ id      | description
                     <pulseonselect>false</pulseonselect>
                     <onleft>9005</onleft>
                     <onright>9019</onright>
-                    <onup>192</onup>
+                    <onup>189</onup>
                     <ondown>191</ondown>
                 </control>
                 <control type="button" id="191"> <!-- Refresh Database -->
@@ -976,9 +1838,9 @@ id      | description
                     <posx>10</posx>
                     <posy>125</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>240</textwidth>
+                    <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -997,9 +1859,9 @@ id      | description
                     <posx>10</posx>
                     <posy>165</posy>
                     <height>40</height>
-                    <width>260</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>240</textwidth>
+                    <textwidth>260</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1011,18 +1873,18 @@ id      | description
                     <onleft>9005</onleft>
                     <onright>9019</onright>
                     <onup>191</onup>
-                    <ondown>190</ondown>
+                    <ondown>188</ondown>
                 </control>
             </control>
-            
             <control type="group" id="9005"> <!-- Advanced Menu -->
                 <description>Advanced Menu</description>
                 <posx>0</posx>
                 <posy>420</posy>
-                <animation effect="fade" start="100" end="0" time="0" condition="!ControlGroup(9005).HasFocus + !Control.HasFocus(103) + !Control.HasFocus(135) + !ControlGroup(9006).HasFocus + !ControlGroup(9019).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="600" condition="!ControlGroup(9005).HasFocus + !Control.HasFocus(103)">conditional</animation>
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus | ControlGroup(9019).HasFocus">conditional</animation>
-                <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus | ControlGroup(9019).HasFocus">WindowClose</animation>
-                <animation effect="slide" end="300,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus | ControlGroup(9019).HasFocus">conditional</animation>
+                <animation effect="fade" start="100" end="0" time="600" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | ControlGroup(9006).HasFocus | ControlGroup(9019).HasFocus">WindowClose</animation>
+                <animation effect="slide" end="300,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(103) | ControlGroup(9005).HasFocus | Control.HasFocus(135) | ControlGroup(9006).HasFocus">conditional</animation>
+                <animation effect="slide" end="-300,0" time="600" tween="quadratic" easing="in" condition="ControlGroup(9019).HasFocus | ControlGroup(9006).HasFocus">conditional</animation>
                 <visible>true</visible>
                 <control type="image"> <!-- menu box -->
                     <width>300</width>
@@ -1034,9 +1896,9 @@ id      | description
                     <posx>10</posx>
                     <posy>10</posy>
                     <height>40</height>
-                    <width>280</width>
+                    <width>250</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>260</textwidth>
+                    <textwidth>240</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1062,9 +1924,9 @@ id      | description
                     <posx>10</posx>
                     <posy>50</posy>
                     <height>40</height>
-                    <width>280</width>
+                    <width>250</width>
                     <textoffsetx>10</textoffsetx>
-                    <textwidth>250</textwidth>
+                    <textwidth>240</textwidth>
                     <aligny>center</aligny>
                     <font>font13</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1080,8 +1942,8 @@ id      | description
                     <textureradioon>HomeHasSub.png</textureradioon>
                     <textureradiooff>HomeHasSub.png</textureradiooff>
                     <onleft>9000</onleft>
-                    <onright>190</onright>
-                    <onclick>190</onclick>
+                    <onright>188</onright>
+                    <onclick>188</onclick>
                     <onup>130</onup>
                     <ondown>132</ondown>
                 </control>
@@ -1090,7 +1952,7 @@ id      | description
                     <posx>10</posx>
                     <posy>90</posy>
                     <height>40</height>
-                    <width>280</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
                     <textwidth>260</textwidth>
                     <aligny>center</aligny>
@@ -1111,7 +1973,7 @@ id      | description
                     <posx>10</posx>
                     <posy>130</posy>
                     <height>40</height>
-                    <width>280</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
                     <textwidth>260</textwidth>
                     <aligny>center</aligny>
@@ -1127,35 +1989,12 @@ id      | description
                     <onup>132</onup>
                     <ondown>137</ondown>
                 </control>
-                <!--
-                <control type="button" id="134">
-                    <description>Copy Unique Local cdARTs</description>
-                    <posx>10</posx>
-                    <posy>170</posy>
-                    <height>40</height>
-                    <width>280</width>
-                    <textoffsetx>10</textoffsetx>
-                    <textwidth>260</textwidth>
-                    <aligny>center</aligny>
-                    <font>font13</font>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <label>$ADDON[script.cdartmanager 32063]</label>
-                    <texturefocus border="5">cdman-button-focus.png</texturefocus>
-                    <texturenofocus>-</texturenofocus>
-                    <pulseonselect>false</pulseonselect>
-                    <onleft>9000</onleft>
-                    <onright>9005</onright>
-                    <onup>133</onup>
-                    <ondown>137</ondown>
-                </control>
-                -->
                 <control type="button" id="137"> <!-- Local cdART List -->
                     <description>Local cdART List</description>
                     <posx>10</posx>
                     <posy>170</posy>
                     <height>40</height>
-                    <width>280</width>
+                    <width>285</width>
                     <textoffsetx>10</textoffsetx>
                     <textwidth>260</textwidth>
                     <aligny>center</aligny>
@@ -1279,7 +2118,6 @@ id      | description
                     <ondown>105</ondown>
                 </control>
             </control>
-
             <control type="group" id="9002"> <!-- Cover Art Menu -->
                 <posx>0</posx>
                 <posy>340</posy>
@@ -1448,7 +2286,6 @@ id      | description
                     <ondown>195</ondown>
                 </control>
             </control>
-            
             <control type="group" id="9020"> <!-- Artist Thumb menu -->
                 <posx>0</posx>
                 <posy>460</posy>
@@ -1519,7 +2356,6 @@ id      | description
                     <ondown>193</ondown>
                 </control>
             </control>
-            
             <control type="group" id="9017"> <!-- Clearlogo Search Artists sub-Menu -->
                 <posx>0</posx>
                 <posy>420</posy>
@@ -1576,7 +2412,6 @@ id      | description
                     <ondown>184</ondown>
                 </control>
             </control>
-            
             <control type="group" id="9018"> <!-- Clearlogo Autodownload sub-Menu -->
                 <posx>0</posx>
                 <posy>460</posy>
@@ -1633,7 +2468,6 @@ id      | description
                     <ondown>186</ondown>
                 </control>
             </control>
-            
             <control type="group" id="9008"> <!-- Clearlogo menu -->
                 <posx>0</posx>
                 <posy>420</posy>
@@ -1761,7 +2595,6 @@ id      | description
                     <ondown>180</ondown>
                 </control>
             </control>
-
             <control type="group" id="9016"> <!-- Fanart Autodownload sub-Menu -->
                 <posx>0</posx>
                 <posy>420</posy>
@@ -1980,7 +2813,7 @@ id      | description
                     <onleft>9000</onleft>
                     <onright>170</onright>
                     <onup>101</onup>
-                    <ondown>152</ondown>				
+                    <ondown>152</ondown>
                 </control>                
                 <control type="radiobutton" id="152">  <!-- ClearLOGO -->
                     <description>ClearLOGO</description>

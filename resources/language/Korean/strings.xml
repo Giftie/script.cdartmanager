@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-06-22 22:27+0000 -->
+<!-- translation date: 2012-07-03 05:43+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">인식된 아티스트</string>
   <string id="32001">앨범 cdART</string>
-  <string id="32002">아티스트 찾기</string>
+  <string id="32002">Select Artist</string>
   <string id="32003">앨범 커버 아트</string>
   <string id="32004">자동 다운로드</string>
   <string id="32005">로컬 cdART 목록 저장</string>
@@ -31,7 +31,7 @@
   <string id="32025">파일 경로를 확인하세요 - 아트워크가 다운로드되지 않았습니다</string>
   <string id="32026">다운로드 오류 발생!</string>
   <string id="32027">아트워크 다운로드 안 됨!</string>
-  <string id="32028">다운도드 실패!</string>
+  <string id="32028">Download aborted!</string>
   <string id="32029">아트워크 찾을 수 없음?</string>
   <string id="32030">참여를 부탁합니다. 여러분의 아트워크를 업로드 해 주세요.</string>
   <string id="32031">fanart.tv 에서</string>
@@ -65,7 +65,7 @@
   <string id="32059">복사된 cdART</string>
   <string id="32060">cdART 복사중...</string>
   <string id="32061">cdART 백업</string>
-  <string id="32062">Path for missing.txt file</string>
+  <string id="32062">missing.txt 파일 경로</string>
   <string id="32063">로컬 개인 cdART 복사</string>
   <string id="32064">개인 cdART 폴더:%s</string>
   <string id="32065">로컬 cdART와 온라인 cdART 비교중...</string>
@@ -106,7 +106,7 @@
   <string id="32100">로컬 앨범 카운트</string>
   <string id="32101">앨범 아티스트 정렬</string>
   <string id="32102">로컬 데이터베이스 검색 중</string>
-  <string id="32103">Saving Missing Artwork List</string>
+  <string id="32103">아트워크 누락 목록 저장</string>
   <string id="32104">cdART 누락 목록을 웹사이트에 업로드</string>
   <string id="32105">앨범 상세정보 검색 중</string>
   <string id="32106">기존 저해상도 cdART를 덮어 씀</string>
@@ -114,8 +114,9 @@
   <string id="32109">다시 작성하겠습니까?</string>
   <string id="32110">폴더 접속에 문제 있음, 스크립트 종료</string>
   <string id="32111">다운로드한 아트워크</string>
-  <string id="32112">Updating Thumbnails and Fanarts</string>
-  <string id="32113">Finished updating Thumbnails and Fanarts</string>
+  <string id="32112">미리보기와 팬아트 업데이트 중</string>
+  <string id="32113">미리보기와 팬아트 업데이트 완료</string>
+  <string id="32114">Check Database MBID's to be current during an Update</string>
   <string id="32115">백그라운드 데이터베이스 작성 알림</string>
   <string id="32116">백그라운드 데이터베이스 작성이 끝나면 알림 (2초간 표시)</string>
   <string id="32117">데이터베이스 작성 완료</string>
@@ -123,12 +124,12 @@
   <string id="32119">백그라운드 데이터베이스 작성 중지</string>
   <string id="32120">모든 아티스트</string>
   <string id="32121">앨범 아티스트</string>
-  <string id="32122">Edit By Artist</string>
+  <string id="32122">Edit Artist</string>
   <string id="32123">데이터베이스 백업</string>
   <string id="32124">모든 로컬 아티스트 검색 중</string>
   <string id="32125">아티스트 ID: </string>
   <string id="32126">로컬 데이터베이스 수정</string>
-  <string id="32127">Edit by Album</string>
+  <string id="32127">Edit Album</string>
   <string id="32128">MusicBrainz 검색 제한</string>
   <string id="32129">데이터베이스 업데이트</string>
   <string id="32130">XBMC 음악 라이브러리 없음...</string>
@@ -138,8 +139,8 @@
   <string id="32134">추가기능 데이터베이스 업데이트</string>
   <string id="32135">추가기능 데이터베이스 업데이트 - 로컬 아티스트</string>
   <string id="32136">데이터베이스를 업데이트할 때 MusicBrainz ID 업데이트 (누락된 ID)</string>
-  <string id="32137">아티스트: </string>
-  <string id="32138">앨범: </string>
+  <string id="32137">Artist</string>
+  <string id="32138">Album</string>
   <string id="32139">추가기능 데이터베이스 백업 성공</string>
   <string id="32140">구버전 데이터베이스 발견...</string>
   <string id="32141">로컬 아티스트를 추가기능 데이터베이스에 추가하겠습니까?</string>
@@ -149,4 +150,23 @@
   <string id="32145">XBMC 미리보기 및 팬아트 업데이트</string>
   <string id="32146">설정</string>
   <string id="32147">나가기</string>
+  <string id="32148">(this can take a long time to complete)</string>
+  <string id="32149">Checking Artist MBIDs</string>
+  <string id="32150">Checking Album MBIDs</string>
+  <string id="32151">Find Missing MBIDs</string>
+  <string id="32152">Refresh MBIDs</string>
+  <string id="32153">Change MBID</string>
+  <string id="32154">Check All MBIDs</string>
+  <string id="32155">Enter MBID</string>
+  <string id="32156">Select from search(manual entry)</string>
+  <string id="32157">Select from search(automatic)</string>
+  <string id="32158">Enable saving of missing.txt file</string>
+  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32160">Please Enter 36 Characters including dashes</string>
+  <string id="32161">Do you want to re-enter?</string>
+  <string id="32162">Is this MBID Correct?</string>
+  <string id="32163">Are you sure you want to delete MBID?</string>
+  <string id="32164">Enter Artist name to search</string>
+  <string id="32165">Enter Album title to search</string>
+  <string id="32166">Select Album</string>
 </strings>

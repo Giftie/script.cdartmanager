@@ -20,7 +20,7 @@ __addon__         = sys.modules[ "__main__" ].__addon__
 addon_db          = sys.modules[ "__main__" ].addon_db
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
-__useragent__     = "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"
+__useragent__     = sys.modules[ "__main__" ].__useragent__
 resizeondownload  = __addon__.getSetting( "resizeondownload" )
 music_path        = sys.modules[ "__main__" ].music_path
 
@@ -142,6 +142,10 @@ def download_art( url_cdart, album, database_id, type, mode, size ):
         #and calculating the percentage
         def _report_hook( count, blocksize, totalsize ):
             percent = int( float( count * blocksize * 100 ) / totalsize )
+            if percent == 0:
+                percent = 1
+            if percent > 100:
+                percent = 100
             if type in ( "fanart", "clearlogo", "artistthumb" ):
                 try:
                     pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ).encode("utf-8") ) )
@@ -235,7 +239,6 @@ def auto_download( type ):
         distant_artist = get_distant_artists()
         recognized_artists, artists_list = get_recognized( distant_artist, local_artist )
         count_artist_local = len( recognized_artists )
-        percent = 1
         pDialog.create( _(32046) )
         #Onscreen Dialog - Automatic Downloading of Artwork
         for artist in recognized_artists:
@@ -243,6 +246,10 @@ def auto_download( type ):
                 break
             artist_count += 1
             percent = int( (artist_count / float(count_artist_local) ) * 100)
+            if percent == 0:
+                percent = 1
+            if percent > 100:
+                percent = 100
             xbmc.log( "[script.cdartmanager] - Artist: %-40s Local ID: %-10s   Distant ID: %s" % ( repr( artist["name"] ), artist["local_id"], artist["distant_id"] ), xbmc.LOGNOTICE )
             if type in ( "fanart", "clearlogo", "artistthumb" ):
                 try:
