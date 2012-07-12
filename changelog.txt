@@ -1,12 +1,13 @@
 2.7.0
 - Add - 'Edit by Artist' and 'Edit by Album' functions on Modify Database tab
+- Add - Change MBIDs for both Artists and albums.  3 methods available - Manually Change the MBID, Manual Search MusicBrainz, Automatic Search using XBMC supplied info(the search provides upto 10 matches)
 - Add - 'Find Missing MBIDs' for Albums and Artists
 - Add - 'Refresh MBIDs - Automatic' For Albums and Artist, keeps database current with MusicBrainz
 - Add - Setting to enable 'Refresh MBIDs' during database update - This will cause the script to take a while to update the database since it checks all MBIDs
 - Add - Ability to Disable saving of missing.txt file
 - Change - Redo some of the menu animations, allowing for more levels to the Advanced menu
 - Fix - properly fix saving of missing.txt file to a VFS folder
-- Disable thumbnail saving in Frodo
+- Add - Change MBID for Albums and Artists
 
 2.6.9
 - Fix - Properly handle VFS file paths for saving missing.txt

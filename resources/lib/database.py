@@ -82,7 +82,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
             percent = int((album_count/float(total)) * 100)
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), ( get_unicode( detail['title'] ).encode("utf-8") ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), ( get_unicode( detail['title'] ) ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
                 except:
                     pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), ( repr( detail['title'] ) ) ), "%s #:%6s      %s%6s" % ( __language__(32039), album_count, __language__(32045), total ) )
             try:
@@ -211,7 +211,7 @@ def store_alblist( local_album_list, background=False ):
         for album in local_album_list:
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf-8") ), "%s%6s" % ( __language__(32100), album_count ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ) ), "%s%6s" % ( __language__(32100), album_count ) )
                 except:
                     pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32138), repr( album["title"] ) ), "%s%6s" % ( __language__(32100), album_count ) )
             xbmc.log( "[script.cdartmanager] - Album Count: %s" % album_count, xbmc.LOGDEBUG )
@@ -333,7 +333,7 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
         for local in local_artist_list:
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( local["artist"] ).encode("utf-8") ) ) )
+                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( local["artist"] ) ) ) )
                 except:
                     pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( repr( local["artist"] ) ) ) )
                 if (pDialog.iscanceled()):
@@ -504,7 +504,7 @@ def build_local_artist_table( background=False ):
             percent = int( ( count/float( total ) ) * 100 )
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), get_unicode( local_artist["artist"] ).encode("utf-8") ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), get_unicode( local_artist["artist"] ) ) )
                 except:
                     pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), repr( local_artist["artist"] ) ) )
             count += 1
@@ -534,7 +534,7 @@ def build_local_artist_table( background=False ):
             percent = int( ( count/float( len(new_local_artist_list ) ) ) * 100 )
             if not background:
                 try:
-                    pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), get_unicode( artist["name"] ).encode("utf-8") ) )
+                    pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), get_unicode( artist["name"] ) ) )
                 except:
                     pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), repr( artist["name"] ) ) )
             try:
@@ -643,7 +643,7 @@ def check_album_mbid( albums, background=False ):
                 canceled = True
                 break
             try:
-                pDialog.update( percent, __language__( 32150 ), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ).encode("utf8") ), "%s: %s" % ( __language__(32137), get_unicode( album["artist"] ).encode("utf8") ) )
+                pDialog.update( percent, __language__( 32150 ), "%s: %s" % ( __language__(32138), get_unicode( album["title"] ) ), "%s: %s" % ( __language__(32137), get_unicode( album["artist"] ) ) )
             except:
                 pDialog.update( percent, __language__( 32150 ), "%s: %s" % ( __language__(32138), repr( album["title"] ) ), "%s: %s" % ( __language__(32137), repr( album["artist"] ) ) )
             if album["musicbrainz_albumid"]:
@@ -688,7 +688,7 @@ def check_artist_mbid( artists, background=False, mode = "all_artists" ):
         if update_artist["musicbrainz_artistid"]:
             if not background:
                 try:
-                    pDialog.update( percent, __language__( 32159 ), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ).encode("utf8") ) )
+                    pDialog.update( percent, __language__( 32159 ), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ) ) )
                 except:
                     pDialog.update( percent, __language__( 32149 ), "%s%s" % ( __language__(32125), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), repr( update_artist["name"] ) ) )
             mbid_match, current_mbid = check_mbid( update_artist["musicbrainz_artistid"], "artist" )
@@ -726,7 +726,7 @@ def update_missing_artist_mbid( artists, background=False, mode = "all_artists" 
                     canceled = True
                     break
                 try:
-                    pDialog.update( percent, __language__( 32132 ), "%s%s" % ( __language__( 32125 ), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ).encode("utf8") ) )
+                    pDialog.update( percent, __language__( 32132 ), "%s%s" % ( __language__( 32125 ), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ) ) )
                 except:
                     pDialog.update( percent, __language__( 32132 ), "%s%s" % ( __language__( 32125 ), update_artist["local_id"] ), "%s: %s" % ( __language__( 32137 ), repr( update_artist["name"] ) ) )
             try:
@@ -761,7 +761,7 @@ def update_missing_album_mbid( albums, background=False ):
                     canceled = True
                     break
                 try:
-                    pDialog.update( percent, __language__( 32133 ), "%s: %s" % ( __language__( 32138 ), get_unicode( album["title"] ).encode("utf8") ), "%s: %s" % ( __language__( 32137 ), get_unicode( album["artist"] ).encode("utf8") ) )
+                    pDialog.update( percent, __language__( 32133 ), "%s: %s" % ( __language__( 32138 ), get_unicode( album["title"] ) ), "%s: %s" % ( __language__( 32137 ), get_unicode( album["artist"] ) ) )
                 except:
                     pDialog.update( percent, __language__( 32133 ), "%s: %s" % ( __language__( 32138 ), repr( album["title"] ) ), "%s: %s" % ( __language__( 32137 ), repr( album["artist"] ) ) )
             musicbrainz_albuminfo, discard = get_musicbrainz_album( get_unicode( album["title"] ), get_unicode( album["artist"] ), 0, 1 )
@@ -896,7 +896,7 @@ def update_database( background=False ):
             percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
             if not background:
                 try:
-                    pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), ( get_unicode( artist["name"] ).encode("utf8") ) ) )
+                    pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), ( get_unicode( artist["name"] ) ) ) )
                 except:
                     pDialog.update( percent, __language__(32124), "%s%s" % ( __language__(32125), artist["local_id"] ), "%s%s" % ( __language__(32028), ( repr( artist["name"] ) ) ) )
             try:

@@ -1178,9 +1178,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.selected_item = self.getControl( 122 ).getSelectedPosition()
             if not url =="" : # If it is a recognized Album...
                 if self.menu_mode == 1:
-                    message, d_success = download_art( url, cdart_path, database_id, "cdart", "manual", 0 )
+                    message, d_success, is_canceled = download_art( url, cdart_path, database_id, "cdart", "manual", 0 )
                 elif self.menu_mode == 3:
-                    message, d_success = download_art( url, cdart_path, database_id, "cover", "manual", 0 )
+                    message, d_success, is_canceled = download_art( url, cdart_path, database_id, "cover", "manual", 0 )
                 try:
                     pDialog.close()
                 except:
@@ -1344,7 +1344,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.local_artists = self.album_artists
             else:
                 self.recognized_artists = self.all_artists_recognized
-                self.local_artists = self.all_artists
+                self.local_artists = self.all_artists_list
             self.populate_artist_list( self.recognized_artists )
         if controlId == 167:
             artist = {}
@@ -1354,7 +1354,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist["path"] = os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
                 selected_item = self.getControl( 167 ).getSelectedPosition()
                 if url:
-                    message, success = download_art( url, artist, self.artist_menu["local_id"], "clearlogo", "manual", 0 )
+                    message, success, is_canceled = download_art( url, artist, self.artist_menu["local_id"], "clearlogo", "manual", 0 )
                     try:
                         pDialog.close()
                     except:
@@ -1375,7 +1375,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist["path"] =  os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
                 selected_item = self.getControl( 160 ).getSelectedPosition()
                 if url:
-                    message, success = download_art( url, artist, self.artist_menu["local_id"], "fanart", "manual", 0 )
+                    message, success, is_canceled = download_art( url, artist, self.artist_menu["local_id"], "fanart", "manual", 0 )
                     try:
                         pDialog.close()
                     except:
@@ -1407,25 +1407,31 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.populate_artistthumbs( self.artist_menu, selected_item )
         if controlId in ( 182, 186, 187, 183, 106, 151, 195, 196 ): # Automatic Download
             self.artwork_type = ""
-            if controlId == 106: #cdARTs
-                self.menu_mode = 2
-                self.artwork_type = "cdart"
-            if controlId == 151: #cover arts
-                self.menu_mode = 4
-                self.artwork_type = "cover"
-            if controlId == 186:# ClearLOGOs
-                self.artwork_type = "clearlogo"
-            if controlId == 182:# Fanarts
-                self.artwork_type = "fanart"
-            if controlId == 187:# ClearLOGOs All Artists
-                self.artwork_type = "clearlogo_allartists"
-            if controlId == 183:# Fanarts All Artists
-                self.artwork_type = "fanart_allartists"
-            if controlId == 195:# Artist Thumbs
-                self.artwork_type = "artistthumb"
-            if controlId == 196:# Artist Thumbs All Artists
-                self.artwork_type = "artistthumb_allartists"            
-            download_count, successfully_downloaded = auto_download( self.artwork_type )
+            if controlId in ( 106, 151, 186, 182, 195 ):
+                self.recognized_artists = self.album_recognized_artists
+                self.local_artists = self.album_artists
+                if controlId == 106: #cdARTs
+                    self.menu_mode = 2
+                    self.artwork_type = "cdart"
+                elif controlId == 151: #cover arts
+                    self.menu_mode = 4
+                    self.artwork_type = "cover"
+                elif controlId == 186:# ClearLOGOs
+                    self.artwork_type = "clearlogo"
+                elif controlId == 182:# Fanarts
+                    self.artwork_type = "fanart"
+                elif controlId == 195:# Artist Thumbs
+                    self.artwork_type = "artistthumb"
+            if controlId in ( 183, 187, 196 ):
+                self.recognized_artists = self.all_artists_recognized
+                self.local_artists = self.all_artists_list
+                if controlId == 187:# ClearLOGOs All Artists
+                    self.artwork_type = "clearlogo_allartists"
+                if controlId == 183:# Fanarts All Artists
+                    self.artwork_type = "fanart_allartists"
+                if controlId == 196:# Artist Thumbs All Artists
+                    self.artwork_type = "artistthumb_allartists"            
+            download_count, successfully_downloaded = auto_download( self.artwork_type, self.recognized_artists, self.local_artists  )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
             if successfully_downloaded:
@@ -1523,7 +1529,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         break
                 if not canceled:
                     self.artists = get_musicbrainz_artists( artist, 10 )
-                    if artists:
+                    if self.artists:
                         self.populate_search_list_mbid( self.artists, "artists" )
             if self.menu_mode in ( 11, 12 ):
                 kb.setHeading( __language__( 32165 ) )

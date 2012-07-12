@@ -187,21 +187,23 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
             artist["name"] = ""
             artist["id"] = ""
             artist["sortname"] = ""
-            artist_match = re.search( '''score="(.*?)" type="(.*?)" id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)''', item )
-            try:
-                if artist_match:
-                    xbmc.log( "[script.cdartmanager] - Score     : %s" % artist_match.group(1), xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Type      : %s" % repr( artist_match.group(2) ), xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Id        : %s" % artist_match.group(3), xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( artist_match.group(4) ), xbmc.LOGDEBUG )
-                    xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( artist_match.group(5) ), xbmc.LOGDEBUG )
-                    artist["score"] = artist_match.group(1)
-                    artist["name"] = unescape( artist_match.group(4) )
-                    artist["id"] = artist_match.group(3)
-                    artist["sortname"] = artist_match.group(5)
-                    artists.append(artist)
-            except:
-                print_exc()
+            score_match = re.search( '''score="(.*?)"''', item )
+            name_match = re.search( '''<name>(.*?)</name>''', item )
+            id_match = re.search( '''id="(.*?)">''', item )
+            sort_name_match = re.search( '''<sort-name>(.*?)</sort-name>''', item )
+            if score_match:
+                artist["score"] = score_match.group(1)
+            if name_match:
+                artist["name"] = name_match.group(1)
+            if id_match:
+                artist["id"] = id_match.group(1)
+            if sort_name_match:
+                artist["sortname"] = sort_name_match.group(1)
+            xbmc.log( "[script.cdartmanager] - Score     : %s" % score, xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Id        : %s" % id, xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( name ), xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( sortname ), xbmc.LOGDEBUG )
+            artists.append(artist)
     else:
         xbmc.log( "[script.cdartmanager] - No Artist ID found for Artist: %s" % repr( artist_search ), xbmc.LOGDEBUG )
     return artists
@@ -215,16 +217,24 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
     else:
         url = alias_url % ( quote_plus( artist.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False)
-    match = re.search( '''<artist ext:score="(.*?)" type="(.*?)" id="(.*?)"><name>(.*?)</name><sort-name>(.*?)</sort-name>(?:.*?)</artist>''', htmlsource )
+    match = re.search( '''<artist(.*?)</artist>''', htmlsource )
     if match:
-        xbmc.log( "[script.cdartmanager] - Score     : %s" % match.group(1), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Type      : %s" % repr( match.group(2) ), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Id        : %s" % match.group(3), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( match.group(4) ), xbmc.LOGDEBUG )
-        xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( match.group(5) ), xbmc.LOGDEBUG )
-        name = match.group(4)
-        id = match.group(3)
-        sortname = match.group(5)
+        score_match = re.search( '''score="(.*?)"''', htmlsource )
+        name_match = re.search( '''<name>(.*?)</name>''', htmlsource )
+        id_match = re.search( '''id="(.*?)">''', htmlsource )
+        sort_name_match = re.search( '''<sort-name>(.*?)</sort-name>''', htmlsource )
+        if score_match:
+            score = score_match.group(1)
+        if name_match:
+            name = name_match.group(1)
+        if id_match:
+            id = id_match.group(1)
+        if sort_name_match:
+            sortname = sort_name_match.group(1)
+        xbmc.log( "[script.cdartmanager] - Score     : %s" % score, xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - Id        : %s" % id, xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( name ), xbmc.LOGDEBUG )
+        xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( sortname ), xbmc.LOGDEBUG )
     else:
         xbmc.sleep( 910 ) # sleep for allowing proper use of webserver
         if not alias:
