@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-06 03:00+0000 -->
-<!-- translator: pingo.mister -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
+<!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
   <string id="32001">Álbuns - cdARTs do Disco</string>
@@ -161,7 +161,7 @@
   <string id="32156">Select from search(manual entry)</string>
   <string id="32157">Select from search(automatic)</string>
   <string id="32158">Permitir gravação de ficheiro missing.txt</string>
-  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Please Enter 36 Characters including dashes</string>
   <string id="32161">Do you want to re-enter?</string>
   <string id="32162">Is this MBID Correct?</string>
@@ -169,4 +169,5 @@
   <string id="32164">Introduza o nome do artista para procurar</string>
   <string id="32165">Introduza o título do Álbum para procurar</string>
   <string id="32166">Seleccionar Álbum</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

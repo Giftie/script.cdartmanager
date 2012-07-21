@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-03 12:47+0000 -->
-<!-- translator: rasensi -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
+<!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconocidos</string>
   <string id="32001">Todos los Artistas</string>
@@ -161,7 +161,7 @@
   <string id="32156">Selección de búsqueda (entrada manual)</string>
   <string id="32157">Selección de búsqueda (entrada automática)</string>
   <string id="32158">Activar la creación de archivo missing.txt</string>
-  <string id="32159">Introduzca MBID - Incluidas almohadillas (36 carácteres)</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Por favor Introduzca 36 carácteres incluidas almohadillas</string>
   <string id="32161">¿Desea volver a introducirlo?</string>
   <string id="32162">¿Este MBID es correcto?</string>
@@ -169,4 +169,5 @@
   <string id="32164">Introduzca Artista a buscar</string>
   <string id="32165">Introduzca Álbum a buscar</string>
   <string id="32166">Seleccione Álbum</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

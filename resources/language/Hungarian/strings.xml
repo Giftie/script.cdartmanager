@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-03 05:43+0000 -->
-<!-- translator: giftie -->
+<!-- translation date: 2012-07-21 09:53+0000 -->
+<!-- translator: Attila Zsigus -->
 <strings>
   <string id="32000">Felismert előadók</string>
   <string id="32001">Minden előadó</string>
-  <string id="32002">Select Artist</string>
+  <string id="32002">Előadó Kiválasztása</string>
   <string id="32003">Albumok keresése</string>
   <string id="32004">Automata letöltés</string>
   <string id="32005">Helyi cd-kép lista mentése</string>
@@ -31,7 +31,7 @@
   <string id="32025">Elérési utak ahova cd-kép nem töltődött le</string>
   <string id="32026">Letöltési hiba!</string>
   <string id="32027">cd-kép nem töltődött le!</string>
-  <string id="32028">Download aborted!</string>
+  <string id="32028">Letöltés Megszakítva!</string>
   <string id="32029">cd-kép nem található?</string>
   <string id="32030">Kérlek járulj hozzá! Töltsd fel a cd-képeidet</string>
   <string id="32031">a www.xbmcstuff.com-on</string>
@@ -124,12 +124,12 @@
   <string id="32119">Az adatbázis felépítésének megállítása</string>
   <string id="32120">Összes előadó</string>
   <string id="32121">Album előadók</string>
-  <string id="32122">Edit Artist</string>
+  <string id="32122">Előadó Szerkesztése</string>
   <string id="32123">Biztonsági másolat az adatbázisról</string>
   <string id="32124">Minden helyi művész lekérdezése</string>
   <string id="32125">Előadó azonosító:</string>
   <string id="32126">Helyi adatbázis módosítása</string>
-  <string id="32127">Edit Album</string>
+  <string id="32127">Album Szerkesztése</string>
   <string id="32128">MusicBrainz Keresési Limit</string>
   <string id="32129">Adatbázis frissítése</string>
   <string id="32130">XBMC Zene adatbázis hiányzik...</string>
@@ -139,7 +139,7 @@
   <string id="32134">Kiegészítő adatbázis frissítése</string>
   <string id="32135">Kiegészítő adatbázis frissítése - Helyi előadók</string>
   <string id="32136">MusicBrainz ID kiegészítő adatbázis frissítés engedélyezése (a hiányzó azonosítókhoz)</string>
-  <string id="32137">Artist</string>
+  <string id="32137">Előadó</string>
   <string id="32138">Album</string>
   <string id="32139">Biztonsági mentés sikeres.</string>
   <string id="32140">Korábbi adatbázis verziót találtam...</string>
@@ -151,22 +151,23 @@
   <string id="32146">Beállítások</string>
   <string id="32147">Kilépés</string>
   <string id="32148">(this can take a long time to complete)</string>
-  <string id="32149">Checking Artist MBIDs</string>
-  <string id="32150">Checking Album MBIDs</string>
-  <string id="32151">Find Missing MBIDs</string>
-  <string id="32152">Refresh MBIDs</string>
-  <string id="32153">Change MBID</string>
-  <string id="32154">Check All MBIDs</string>
-  <string id="32155">Enter MBID</string>
-  <string id="32156">Select from search(manual entry)</string>
-  <string id="32157">Select from search(automatic)</string>
+  <string id="32149">Előadó MBID ellenőrzése</string>
+  <string id="32150">Album MBID ellenőrzése</string>
+  <string id="32151">Hiányzó MBID-k keresése</string>
+  <string id="32152">MBID Frissítése</string>
+  <string id="32153">MBID Váltása</string>
+  <string id="32154">Összes MBID ellenőrzése</string>
+  <string id="32155">MBID Bevitele</string>
+  <string id="32156">Kiválasztás kereséshez (manuális bevitel)</string>
+  <string id="32157">Kiválasztás kereséshez (automatikus)</string>
   <string id="32158">Enable saving of missing.txt file</string>
-  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Please Enter 36 Characters including dashes</string>
   <string id="32161">Do you want to re-enter?</string>
   <string id="32162">Is this MBID Correct?</string>
   <string id="32163">Are you sure you want to delete MBID?</string>
-  <string id="32164">Enter Artist name to search</string>
-  <string id="32165">Enter Album title to search</string>
-  <string id="32166">Select Album</string>
+  <string id="32164">Előadó nevének megadása kereséshez</string>
+  <string id="32165">Album címének megadása kereséshez</string>
+  <string id="32166">Album Kiválasztása</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-03 05:43+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artisti riconosciuti</string>
   <string id="32001">cdART degli album</string>
-  <string id="32002">Select Artist</string>
+  <string id="32002">Seleziona Artista</string>
   <string id="32003">Cover art degli album</string>
   <string id="32004">Download automatico</string>
   <string id="32005">Salva in locale la lista cdART</string>
@@ -31,7 +31,7 @@
   <string id="32025">Controlla i percorsi - cdART non scaricata</string>
   <string id="32026">Errore in fase di download!</string>
   <string id="32027">cdART non scaricata!</string>
-  <string id="32028">Download aborted!</string>
+  <string id="32028">Download interrotto!</string>
   <string id="32029">Nessuna cdART trovata?</string>
   <string id="32030">Contribuisci! Carica le tue cdART</string>
   <string id="32031">Su www.fanart.tv</string>
@@ -65,7 +65,7 @@
   <string id="32059"> cdART copiate</string>
   <string id="32060">Copia delle cdART in corso...</string>
   <string id="32061">Backup delle cdART</string>
-  <string id="32062">Path for missing.txt file</string>
+  <string id="32062">Percorso per il missing.txt file</string>
   <string id="32063">Copia cdART locali uniche</string>
   <string id="32064">Percorso cartella cdART uniche: %s</string>
   <string id="32065">Confronto tra cdART locali e remote...</string>
@@ -115,7 +115,7 @@
   <string id="32110">Errore nell'accesso alla cartella, script interrotto</string>
   <string id="32111">Artwork scaricati</string>
   <string id="32112">Updating Thumbnails and Fanarts</string>
-  <string id="32113">Finished updating Thumbnails and Fanarts</string>
+  <string id="32113">Update finito di Thumbnails e Fanart</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
   <string id="32115">Notifica durante la costruzione in background del database</string>
   <string id="32116">Notifica alla fine della costruzione in background del database (permanenza: 2 secondi)</string>
@@ -124,12 +124,12 @@
   <string id="32119">Sto fermando la costruzione del database in background</string>
   <string id="32120">Tutti gli artisti</string>
   <string id="32121">Artisti album</string>
-  <string id="32122">Edit Artist</string>
+  <string id="32122">Edita Artista</string>
   <string id="32123">Fai un backup del database</string>
   <string id="32124">Recupero degli artisti locali</string>
   <string id="32125">ID artista: </string>
   <string id="32126">Modifica database locale</string>
-  <string id="32127">Edit Album</string>
+  <string id="32127">Edita Album</string>
   <string id="32128">Limite ricerca di MusicBrainz</string>
   <string id="32129">Aggiorna database</string>
   <string id="32130">Manca il database musicale di XBMC...</string>
@@ -139,7 +139,7 @@
   <string id="32134">Aggiornamento database locale</string>
   <string id="32135">Aggiornamento database locale - artisti locali</string>
   <string id="32136">Abilita l'aggiornamento degli ID di MusicBrainz durante l'aggiornamento del database (per ID mancanti)</string>
-  <string id="32137">Artist</string>
+  <string id="32137">Artista</string>
   <string id="32138">Album</string>
   <string id="32139">Backup del database eseguito correttamente</string>
   <string id="32140">E' stata trovata una vecchia versione del database...</string>
@@ -150,23 +150,24 @@
   <string id="32145">Aggiorna le icone e fanart di XBMC</string>
   <string id="32146">Impostazioni</string>
   <string id="32147">Esci</string>
-  <string id="32148">(this can take a long time to complete)</string>
+  <string id="32148">(Questo puo impiegare molto tempo per finire)</string>
   <string id="32149">Checking Artist MBIDs</string>
   <string id="32150">Checking Album MBIDs</string>
-  <string id="32151">Find Missing MBIDs</string>
+  <string id="32151">Trova MBIDs Mancante</string>
   <string id="32152">Refresh MBIDs</string>
-  <string id="32153">Change MBID</string>
-  <string id="32154">Check All MBIDs</string>
-  <string id="32155">Enter MBID</string>
+  <string id="32153">Cambia MBID</string>
+  <string id="32154">Controlla Tutti MBIDs</string>
+  <string id="32155">Inserisci MBID</string>
   <string id="32156">Select from search(manual entry)</string>
   <string id="32157">Select from search(automatic)</string>
   <string id="32158">Enable saving of missing.txt file</string>
-  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Please Enter 36 Characters including dashes</string>
   <string id="32161">Do you want to re-enter?</string>
-  <string id="32162">Is this MBID Correct?</string>
-  <string id="32163">Are you sure you want to delete MBID?</string>
-  <string id="32164">Enter Artist name to search</string>
-  <string id="32165">Enter Album title to search</string>
-  <string id="32166">Select Album</string>
+  <string id="32162">Questo MBID è corretto?</string>
+  <string id="32163">Sei sicuro di voler cancellare MBID?</string>
+  <string id="32164">Inserisci il nome dell'Artista da cercare</string>
+  <string id="32165">Inserisci il nome dell'Album da cercare</string>
+  <string id="32166">Seleziona Album</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

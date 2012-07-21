@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-03 05:43+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">인식된 아티스트</string>
   <string id="32001">앨범 cdART</string>
-  <string id="32002">Select Artist</string>
+  <string id="32002">아티스트 선택</string>
   <string id="32003">앨범 커버 아트</string>
   <string id="32004">자동 다운로드</string>
   <string id="32005">로컬 cdART 목록 저장</string>
@@ -31,7 +31,7 @@
   <string id="32025">파일 경로를 확인하세요 - 아트워크가 다운로드되지 않았습니다</string>
   <string id="32026">다운로드 오류 발생!</string>
   <string id="32027">아트워크 다운로드 안 됨!</string>
-  <string id="32028">Download aborted!</string>
+  <string id="32028">다운로드 중지됨!</string>
   <string id="32029">아트워크 찾을 수 없음?</string>
   <string id="32030">참여를 부탁합니다. 여러분의 아트워크를 업로드 해 주세요.</string>
   <string id="32031">fanart.tv 에서</string>
@@ -124,12 +124,12 @@
   <string id="32119">백그라운드 데이터베이스 작성 중지</string>
   <string id="32120">모든 아티스트</string>
   <string id="32121">앨범 아티스트</string>
-  <string id="32122">Edit Artist</string>
+  <string id="32122">아티스트 수정</string>
   <string id="32123">데이터베이스 백업</string>
   <string id="32124">모든 로컬 아티스트 검색 중</string>
   <string id="32125">아티스트 ID: </string>
   <string id="32126">로컬 데이터베이스 수정</string>
-  <string id="32127">Edit Album</string>
+  <string id="32127">앨범 수정</string>
   <string id="32128">MusicBrainz 검색 제한</string>
   <string id="32129">데이터베이스 업데이트</string>
   <string id="32130">XBMC 음악 라이브러리 없음...</string>
@@ -139,8 +139,8 @@
   <string id="32134">추가기능 데이터베이스 업데이트</string>
   <string id="32135">추가기능 데이터베이스 업데이트 - 로컬 아티스트</string>
   <string id="32136">데이터베이스를 업데이트할 때 MusicBrainz ID 업데이트 (누락된 ID)</string>
-  <string id="32137">Artist</string>
-  <string id="32138">Album</string>
+  <string id="32137">아티스트</string>
+  <string id="32138">앨범</string>
   <string id="32139">추가기능 데이터베이스 백업 성공</string>
   <string id="32140">구버전 데이터베이스 발견...</string>
   <string id="32141">로컬 아티스트를 추가기능 데이터베이스에 추가하겠습니까?</string>
@@ -154,19 +154,20 @@
   <string id="32149">Checking Artist MBIDs</string>
   <string id="32150">Checking Album MBIDs</string>
   <string id="32151">Find Missing MBIDs</string>
-  <string id="32152">Refresh MBIDs</string>
-  <string id="32153">Change MBID</string>
-  <string id="32154">Check All MBIDs</string>
-  <string id="32155">Enter MBID</string>
+  <string id="32152">MBID 새로고침</string>
+  <string id="32153">MBID 변경</string>
+  <string id="32154">모든 MBID 확인</string>
+  <string id="32155">MBID 입력</string>
   <string id="32156">Select from search(manual entry)</string>
   <string id="32157">Select from search(automatic)</string>
   <string id="32158">Enable saving of missing.txt file</string>
-  <string id="32159">Enter MBID - Including dashes(36 Characters)</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Please Enter 36 Characters including dashes</string>
-  <string id="32161">Do you want to re-enter?</string>
-  <string id="32162">Is this MBID Correct?</string>
-  <string id="32163">Are you sure you want to delete MBID?</string>
-  <string id="32164">Enter Artist name to search</string>
-  <string id="32165">Enter Album title to search</string>
-  <string id="32166">Select Album</string>
+  <string id="32161">다시 입력 하시겠습니까?</string>
+  <string id="32162">이 MBID 가 정확합니까?</string>
+  <string id="32163">정말 MBID 를 삭제하기 원하십니까?</string>
+  <string id="32164">검색할 아티스트 이름 입력</string>
+  <string id="32165">검색할 앨범 제목 입력</string>
+  <string id="32166">앨범 선택</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

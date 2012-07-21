@@ -1,3 +1,7 @@
+2.7.1
+- Fix - JSONRPC erros
+- Fix - Manual MBID entry did not work as intended
+
 2.7.0
 - Add - 'Edit by Artist' and 'Edit by Album' functions on Modify Database tab
 - Add - Change MBIDs for both Artists and albums.  3 methods available - Manually Change the MBID, Manual Search MusicBrainz, Automatic Search using XBMC supplied info(the search provides upto 10 matches)

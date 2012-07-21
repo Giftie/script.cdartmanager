@@ -162,8 +162,8 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                             xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr( album_artist["artist"] ), xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr( album_artist["path"] ), xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - cdART Exists?: %s" % album_artist["cdart"], xbmc.LOGDEBUG )
-                            xbmc.log( "[script.cdartmanager] - Cover Art Exists?: %s" % album_artist["cover"], xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - cdART Exists?: %s" % ( "False", "True" )[album_artist["cdart"]], xbmc.LOGDEBUG )
+                            xbmc.log( "[script.cdartmanager] - Cover Art Exists?: %s" % ( "False", "True" )[album_artist["cover"]], xbmc.LOGDEBUG )
                             xbmc.log( "[script.cdartmanager] - Disc #: %s" % album_artist["disc"], xbmc.LOGDEBUG )
                             album_detail_list.append(album_artist)
                             if not simple:
@@ -219,8 +219,8 @@ def store_alblist( local_album_list, background=False ):
             xbmc.log( "[script.cdartmanager] - Album Title: %s" % repr(album["title"]), xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album Artist: %s" % repr(album["artist"]), xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Album Path: %s" % repr(album["path"]).replace("\\\\" , "\\"), xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - cdART Exist?: %s" % album["cdart"], xbmc.LOGDEBUG )
-            xbmc.log( "[script.cdartmanager] - Cover Art Exist?: %s" % album["cover"], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - cdART Exist?: %s" % ( "False", "True" )[album["cdart"]], xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Cover Art Exist?: %s" % ( "False", "True" )[album["cover"]], xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - Disc #: %s" % album["disc"], xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album["musicbrainz_albumid"], xbmc.LOGDEBUG )
             xbmc.log( "[script.cdartmanager] - MusicBrainz ArtistId: %s" % album["musicbrainz_artistid"], xbmc.LOGDEBUG )
@@ -650,12 +650,12 @@ def check_album_mbid( albums, background=False ):
                 mbid_match, current_mbid = check_mbid( album["musicbrainz_albumid"], "release-group" )
             if not mbid_match:
                 update_album["musicbrainz_albumid"] = current_mbid
-            xbmc.sleep(910)
+            xbmc.sleep( 900 )
         if album["musicbrainz_artistid"]:
             mbid_match, current_mbid = check_mbid( album["musicbrainz_artistid"], "artist" )
             if not mbid_match:
                 update_album["musicbrainz_artistid"] = current_mbid
-            xbmc.sleep(910)
+            xbmc.sleep( 900 )
         updated_albums.append( update_album )
     pDialog.close()
     return updated_albums, canceled
@@ -694,7 +694,7 @@ def check_artist_mbid( artists, background=False, mode = "all_artists" ):
             mbid_match, current_mbid = check_mbid( update_artist["musicbrainz_artistid"], "artist" )
             if not mbid_match:
                 update_artist["musicbrainz_artistid"] = current_mbid
-            xbmc.sleep(910)
+            xbmc.sleep( 900 )
         updated_artists.append( update_artist )
     pDialog.close()
     return updated_artists, canceled
@@ -904,7 +904,7 @@ def update_database( background=False ):
                 count += 1
             except:
                 print_exc()
-                continue            
+                continue
     conn.commit()
     c.close()
     if not background:

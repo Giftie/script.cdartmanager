@@ -76,22 +76,22 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     album_title = album_title.replace('"','?')
     if limit == 1:
         if not with_singles and not by_release and not use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Artist - Not including Singles", xbmc.LOGDEBUG )
             url = release_group_url_nosingles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and not by_release and use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Not including Singles", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Alias - Not including Singles", xbmc.LOGDEBUG )
             url = release_group_url_nosingles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         elif not by_release and not use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Artist - Including Singles", xbmc.LOGDEBUG )
             url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         elif not by_release and use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Including Singles", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Alias - Including Singles", xbmc.LOGDEBUG )
             url = release_group_url_singles_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and not use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Artist - Using Release Name", xbmc.LOGDEBUG )
             url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and use_alias:
-            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Using Release Name", xbmc.LOGDEBUG )
+            xbmc.log( "[script.cdartmanager] - Retieving MusicBrainz Info - Checking by Alias - Using Release Name", xbmc.LOGDEBUG )
             url = release_group_url_using_release_name_alias % ( quote_plus( album_title.encode("utf-8") ), quote_plus( artist.encode("utf-8") ), limit )
         htmlsource = get_html_source( url, "", False )
         match = re.search( '''<release-group ext:score="(.*?)"(?:.*?)</release-group>''', htmlsource )
@@ -111,25 +111,26 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
         if not album["id"]:
             if not with_singles and not by_release and not use_alias:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz, Checking by Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 500 ) # sleep for allowing proper use of webserver
+                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, False, True ) # try again by using artist alias
             elif use_alias and not with_singles and not by_release:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz, Checking by Release name", xbmc.LOGDEBUG )
-                xbmc.sleep( 500 ) # sleep for allowing proper use of webserver
+                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, True, False ) # try again by using release name
             elif by_release and not with_singles and not use_alias:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz, Checking by Release name and Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 500 ) # sleep for allowing proper use of webserver
+                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, True, True ) # try again by using release name and artist alias
             elif by_release and not with_singles and use_alias:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz, checking singles", xbmc.LOGDEBUG )
-                xbmc.sleep( 500 ) # sleep for allowing proper use of webserver
+                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, True, False, False ) # try again with singles
             elif with_singles and not use_alias and not by_release:
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz, checking singles and Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 500 ) # sleep for allowing proper use of webserver
+                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, True, False, True ) # try again with singles and artist alias
             else:
+                xbmc.sleep( 900 )
                 xbmc.log( "[script.cdartmanager] - No releases found on MusicBrainz.", xbmc.LOGDEBUG )
                 album["artist"], album["artist_id"], sort_name = get_musicbrainz_artist_id( artist )
             
@@ -235,6 +236,7 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
         xbmc.log( "[script.cdartmanager] - Id        : %s" % id, xbmc.LOGDEBUG )
         xbmc.log( "[script.cdartmanager] - Name      : %s" % repr( name ), xbmc.LOGDEBUG )
         xbmc.log( "[script.cdartmanager] - Sort Name : %s" % repr( sortname ), xbmc.LOGDEBUG )
+        xbmc.sleep( 900 )
     else:
         xbmc.sleep( 910 ) # sleep for allowing proper use of webserver
         if not alias:
