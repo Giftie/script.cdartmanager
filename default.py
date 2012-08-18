@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import os, traceback
+import os, traceback, socket
 import xbmcaddon, xbmc, xbmcgui
 
 try:
@@ -29,7 +29,7 @@ __dbversionancient__ = "1.1.8"
 __addon_path__       = __addon__.getAddonInfo('path')
 __useragent__        = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
 __XBMCisFrodo__      = False
-if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0-ALPHA4" ): # required GIT version
+if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0-ALPHA" ): # required GIT version
     __XBMCisFrodo__  = True
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
 api_key              = "e308cc6c6f76e502f98526f1694c62ac"
@@ -48,6 +48,8 @@ rebuild              = False
 soft_exit            = False
 background_db        = False
 pDialog              = xbmcgui.DialogProgress()
+#time socket out at 30 seconds
+socket.setdefaulttimeout(30)
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
@@ -57,6 +59,8 @@ from file_item import Thumbnails
 from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db
 from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
+from fanarttv_scraper import get_distant_artists, get_recognized
+from download import auto_download
 try:
     from xbmcvfs import mkdirs as _makedirs
 except:
@@ -169,6 +173,7 @@ def update_xbmc_thumbnails():
     
 if ( __name__ == "__main__" ):
     xbmc.executebuiltin('Dialog.Close(all, true)')
+    xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "True" )
     xbmc.log( "[script.cdartmanager] - ############################################################", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #    %-50s    #" % __scriptname__, xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] - #        default.py module                                 #", xbmc.LOGNOTICE )
@@ -187,33 +192,64 @@ if ( __name__ == "__main__" ):
         __addon__.openSettings()
         soft_exit = True
     settings_to_log( addon_work_folder, "[script.cdartmanager]" )
-    empty_tempxml_folder()
+    #empty_tempxml_folder()
     try:
         if sys.argv[ 1 ] and not soft_exit:
             xbmc.executebuiltin('Dialog.Close(all, true)') 
             if sys.argv[ 1 ] == "database":
                 xbmc.log( "[script.cdartmanager] - Start method - Build Database in background", xbmc.LOGNOTICE )
-                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "True") 
+                xbmcgui.Window( 10000 ).setProperty( "cdartmanager_db", "True" ) 
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
                 if notifyatfinish=="true":
                     xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32117), 2000, image) )
-                xbmcgui.Window( 10000 ).setProperty("cdartmanager_db", "False")
+                xbmcgui.Window( 10000 ).setProperty( "cdartmanager_db", "False" )
+            elif sys.argv[ 1 ] in ( "autocdart", "autocover", "autofanart", "autologo", "autothumb", "autoall" ):
+                distant_artist = get_distant_artists()
+                local_artists = get_local_artists_db( mode="album_artists", background=True )
+                if __addon__.getSetting("enable_all_artists") == "true":
+                    all_artists = get_local_artists_db( mode="all_artists", background=True )
+                else:
+                    all_artists = []
+                if distant_artist:
+                    recognized_artists, all_artists_recognized, all_artists_list, album_artists = get_recognized( distant_artist, all_artists, local_artists, background=True )
+            if sys.argv[ 1 ] in ( "autocdart", "autocover", "autofanart", "autologo", "autothumb" ):
+                if sys.argv[ 1 ] == "autocdart":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Album cdARTs in background", xbmc.LOGNOTICE )
+                    artwork_type = "cdart"
+                elif sys.argv[ 1 ] == "autocover":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Album Cover art in background", xbmc.LOGNOTICE )
+                    artwork_type = "cover"
+                elif sys.argv[ 1 ] == "autofanart":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Artist Fanarts in background", xbmc.LOGNOTICE )
+                    artwork_type = "fanart"
+                elif sys.argv[ 1 ] == "autologo":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Artist Logos in background", xbmc.LOGNOTICE )
+                    artwork_type = "clearlogo"
+                elif sys.argv[ 1 ] == "autothumb":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Artist Thumbnails in background", xbmc.LOGNOTICE )
+                    artwork_type = "artistthumb"
+                if artwork_type in ( "fanart", "clearlogo", "artistthumb" ) and __addon__.getSetting("enable_all_artists") == "true":
+                    download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
+                else:
+                    download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
+                xbmc.log( "[script.cdartmanager] - Autodownload of %s artwork completed\nTotal artwork downloaded: %d" % ( artwork_type, total_artwork ), xbmc.LOGNOTICE )
+            elif sys.argv[ 1 ] == "autoall":
+                xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
+                total_artwork = 0
+                for artwork_type in ( "cdart", "cover", "fanart", "clearlogo", "artistthumb" ):
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload %s in background" % artwork_type, xbmc.LOGNOTICE )
+                    if artwork_type in ( "fanart", "clearlogo", "artistthumb" ) and __addon__.getSetting("enable_all_artists") == "true":
+                        download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
+                    elif artwork_type:
+                        download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
+                    total_artwork += download_count
+                xbmc.log( "[script.cdartmanager] - Autodownload all artwork completed\nTotal artwork downloaded: %d" % total_artwork, xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "update_thumbs":
                 xbmc.log( "[script.cdartmanager] - Start method - Update Thumbnails in background", xbmc.LOGNOTICE )
                 update_xbmc_thumbnails()
             elif sys.argv[ 1 ] == "update":
                 xbmc.log( "[script.cdartmanager] - Start method - Update Database in background", xbmc.LOGNOTICE )
-            elif sys.argv[ 1 ] == "autocdart":
-                xbmc.log( "[script.cdartmanager] - Start method - Autodownload cdARTs in background", xbmc.LOGNOTICE )
-            elif sys.argv[ 1 ] == "autocover":
-                xbmc.log( "[script.cdartmanager] - Start method - Autodownload cover art in background", xbmc.LOGNOTICE )
-            elif sys.argv[ 1 ] == "autofanart":
-                xbmc.log( "[script.cdartmanager] - Start method - Autodownload fanarts in background", xbmc.LOGNOTICE )
-            elif sys.argv[ 1 ] == "autologo":
-                xbmc.log( "[script.cdartmanager] - Start method - Autodownload logos in background", xbmc.LOGNOTICE )
-            elif sys.argv[ 1 ] == "autoall":
-                xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "oneshot":
                 xbmc.log( "[script.cdartmanager] - Start method - One Shot Download method", xbmc.LOGNOTICE )
                 # sys.argv[ 2 ] = artwork type ( clearlogo, fanart, artistthumb, cdart, cover )
@@ -230,7 +266,7 @@ if ( __name__ == "__main__" ):
                                 xbmc.log( "[script.cdartmanager] - No MBID found", xbmc.LOGNOTICE )
                             else:
                                 xbmc.log( "[script.cdartmanager] - Artist: %s" % artist, xbmc.LOGDEBUG )
-                                xbmc.log( "[script.cdartmanager] - MBID: %s" % mbid, xbmc.LOGDEBUG )                        
+                                xbmc.log( "[script.cdartmanager] - MBID: %s" % mbid, xbmc.LOGDEBUG )
                         elif sys.argv[ 2 ] in ( "cdart", "cover" ):
                             album_details = retrieve_album_details( provided_id )
                             album = album_musicbrainz_id( album_details )
@@ -247,6 +283,7 @@ if ( __name__ == "__main__" ):
                     xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv: %s" % sys.argv, xbmc.LOGNOTICE )
             else:
                 xbmc.log( "[script.cdartmanager] - Error: Improper sys.argv[ 1 ]: %s" % sys.argv[ 1 ], xbmc.LOGNOTICE )
+        xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
     except IndexError:
         xbmc.log( "[script.cdartmanager] - Addon Work Folder: %s" % addon_work_folder, xbmc.LOGNOTICE )
         xbmc.log( "[script.cdartmanager] - Addon Database: %s" % addon_db, xbmc.LOGNOTICE )
@@ -351,6 +388,8 @@ if ( __name__ == "__main__" ):
         elif not background_db and not soft_exit:
             xbmc.log( "[script.cdartmanager] - Problem accessing folder, exiting script", xbmc.LOGNOTICE )
             xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )
+        xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
     except:
         print "Unexpected error:", sys.exc_info()[0]
         raise
+        xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )

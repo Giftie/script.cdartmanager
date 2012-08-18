@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import xbmc, xbmcgui
+import xbmc, xbmcgui, xbmcvfs
 import sys, os, re, datetime
-from traceback import print_exc
-
+import traceback
 try:
     from sqlite3 import dbapi2 as sqlite3
 except:
@@ -21,25 +20,34 @@ addon_db          = sys.modules[ "__main__" ].addon_db
 addon_db_backup   = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+__dbversion__     = sys.modules[ "__main__" ].__dbversion__
+__XBMCisFrodo__   = sys.modules[ "__main__" ].__XBMCisFrodo__
 notify = __addon__.getSetting("notifybackground")
 image = xbmc.translatePath( os.path.join( __addon__.getAddonInfo("path"), "icon.png") )
 
-safe_db_version = "1.5.3"
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 pDialog = xbmcgui.DialogProgress()
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, check_mbid
 from fanarttv_scraper import retrieve_fanarttv_xml, remote_cdart_list
 from utils import get_unicode
-
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
-from xbmcvfs import delete as delete_file
-from xbmcvfs import exists as exists
-from xbmcvfs import copy as file_copy
+
 try:
     from xbmcvfs import mkdirs as _makedirs
 except:
     from utils import _makedirs
 
+def artist_list_to_string( artist ):
+    artist_string = ""
+    if not ( type( artist ) is list ):
+        artist_string = artist
+    else:
+        if len( artist ) > 1:
+            artist_string = " / ".join( artist )
+        else:
+            artist_string = "".join( artist )
+    return artist_string
+    
 def artwork_search( cdart_url, id, disc, type ):
     xbmc.log( "[script.cdartmanager] - Finding Artwork", xbmc.LOGDEBUG )
     art = {}
@@ -113,17 +121,17 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                     if path == previous_path:
                         continue
                     else:
-                        if exists(path):
+                        if xbmcvfs.exists(path):
                             xbmc.log( "[script.cdartmanager] - Path Exists", xbmc.LOGDEBUG )
                             try:
                                 album_artist["local_id"] = detail['local_id']  # for database update
                             except:
                                 album_artist["local_id"] = detail['albumid']
                             title = detail['title']
-                            album_artist["artist"] = get_unicode( albums['artist'].split(" / ")[0] )
+                            album_artist["artist"] = get_unicode( artist_list_to_string( albums['artist'] ).split(" / ")[0] )
                             album_artist["path"] = path
-                            album_artist["cdart"] = exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
-                            album_artist["cover"] = exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
+                            album_artist["cdart"] = xbmcvfs.exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
+                            album_artist["cover"] = xbmcvfs.exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
                             previous_path = path
                             path_match = re.search( "(?:disc|cd)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
                             if path_match:
@@ -171,7 +179,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                     album_artist["title"] = get_unicode( album_artist["title"] )
                                     musicbrainz_albuminfo, discard = get_musicbrainz_album( album_artist["title"], album_artist["artist"], 0, 1 )
                                 except:
-                                    print_exc()
+                                    traceback.print_exc()
                                 album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                                 album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
                                 xbmc.log( "[script.cdartmanager] - MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
@@ -181,21 +189,21 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                             break
     except:
         xbmc.log( "[script.cdartmanager] - Error Occured", xbmc.LOGDEBUG )
-        print_exc()
+        traceback.print_exc()
         if not background:
             pDialog.close()
     return album_detail_list
     
 def get_album_cdart( album_path ):
     xbmc.log( "[script.cdartmanager] - Retrieving cdART status", xbmc.LOGDEBUG )
-    if exists( os.path.join( album_path , "cdart.png").replace("\\\\" , "\\") ):
+    if xbmcvfs.exists( os.path.join( album_path , "cdart.png").replace("\\\\" , "\\") ):
         return True
     else:
         return False
         
 def get_album_coverart( album_path ):
     xbmc.log( "[script.cdartmanager] - Retrieving cover art status", xbmc.LOGDEBUG )
-    if exists( os.path.join( album_path , "folder.jpg").replace("\\\\" , "\\") ):
+    if xbmcvfs.exists( os.path.join( album_path , "folder.jpg").replace("\\\\" , "\\") ):
         return True
     else:
         return False
@@ -231,13 +239,13 @@ def store_alblist( local_album_list, background=False ):
                 c.execute("insert into alblist(album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], get_unicode( album["title"] ), get_unicode( album["artist"] ), get_unicode( album["path"].replace("\\\\" , "\\") ), ("False","True")[album["cdart"]], ("False","True")[album["cover"]], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
             except:
                 xbmc.log( "[script.cdartmanager] - Error Saving to Database", xbmc.LOGDEBUG )
-                print_exc()
+                traceback.print_exc()
             if not background:
                 if (pDialog.iscanceled()):
                     break
     except:
         xbmc.log( "[script.cdartmanager] - Error Saving to Database", xbmc.LOGDEBUG )
-        print_exc()
+        traceback.print_exc()
     conn.commit()
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Storing ablist", xbmc.LOGDEBUG )
@@ -273,7 +281,7 @@ def store_lalist( local_artist_list, count_artist_local, background=False ):
                 if (pDialog.iscanceled()):
                     break
         except:
-            print_exc()
+            traceback.print_exc()
     conn.commit()
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Storing lalist", xbmc.LOGDEBUG )
@@ -295,7 +303,7 @@ def retrieve_distinct_album_artists():
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Retrieving Distinct Album Artists", xbmc.LOGDEBUG )
     return album_artists
-        
+
 def store_counts( local_artists_count, artist_count, album_count, cdart_existing ):
     xbmc.log( "[script.cdartmanager] - Storing Counts", xbmc.LOGNOTICE )
     xbmc.log( "[script.cdartmanager] -     Album Count: %s" % album_count, xbmc.LOGNOTICE )
@@ -308,12 +316,12 @@ def store_counts( local_artists_count, artist_count, album_count, cdart_existing
         c.execute('''DROP table IF EXISTS counts''')
     except:
         # table missing
-        print_exc()
+        traceback.print_exc()
     try:
         c.execute('''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''')
     except:
-        print_exc()
-    c.execute("insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, safe_db_version))
+        traceback.print_exc()
+    c.execute("insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__ ))
     conn.commit()
     c.close()
     xbmc.log( "[script.cdartmanager] - Finished Storing Counts", xbmc.LOGDEBUG )
@@ -328,17 +336,17 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
         #xbmc.log( artist, xbmc.LOGDEBUG )
         album_artist_1 = {}
         name = ""
-        name = get_unicode( artist["name"] )
+        name = get_unicode( artist_list_to_string( artist["name"] ) )
         artist_count += 1
         for local in local_artist_list:
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( local["artist"] ) ) ) )
+                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( get_unicode( artist_list_to_string( local["artist"] ) ) ) ) )
                 except:
-                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( repr( local["artist"] ) ) ) )
+                    pDialog.update( percent, __language__(20186), "%s"  % __language__(32101) , "%s:%s" % ( __language__(32038), ( repr( artist_list_to_string( local["artist"] ) ) ) ) )
                 if (pDialog.iscanceled()):
                     break
-            if name == get_unicode( local["artist"] ):
+            if name == get_unicode( artist_list_to_string( local["artist"] ) ):
                 id = local["artistid"]
                 found = True
                 break
@@ -349,9 +357,9 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
             local_album_artist_list.append(album_artist_1)
         else:
             try:
-                print repr( artist["name"] )
+                print repr( artist_list_to_string( artist["name"] ) )
             except:
-                print_exc()
+                traceback.print_exc()
     return local_album_artist_list, artist_count
     
 def new_database_setup( background=False ):
@@ -368,7 +376,7 @@ def new_database_setup( background=False ):
     xbmc.log( "[script.cdartmanager] - Setting Up Database", xbmc.LOGDEBUG )
     xbmc.log( "[script.cdartmanager] -     addon_work_path: %s" % addon_work_folder, xbmc.LOGDEBUG )
     if not background:
-        if not exists( os.path.join( addon_work_folder, "settings.xml") ):
+        if not xbmcvfs.exists( os.path.join( addon_work_folder, "settings.xml") ):
             xbmcgui.Dialog().ok( __language__(32071), __language__(32072), __language__(32073) )
             xbmc.log( "[script.cdartmanager] - Settings not set, aborting database creation", xbmc.LOGDEBUG )
             return album_count, artist_count, cdart_existing
@@ -428,7 +436,7 @@ def get_local_albums_db( artist_name, background=False ):
                 query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist='%s'" % artist_name
                 c.execute(query)
             except:
-                print_exc()
+                traceback.print_exc()
         db=c.fetchall()
         c.close
         for item in db:
@@ -445,7 +453,7 @@ def get_local_albums_db( artist_name, background=False ):
             #print album
             local_album_list.append(album)
     except:
-        print_exc()
+        traceback.print_exc()
         if not background:
             pDialog.close()
     #xbmc.log( local_album_list, xbmc.LOGDEBUG )
@@ -455,7 +463,7 @@ def get_local_albums_db( artist_name, background=False ):
     xbmc.log( "[script.cdartmanager] - Finished Retrieving Local Albums from Database", xbmc.LOGDEBUG )
     return local_album_list
         
-def get_local_artists_db( mode="album_artists" ):
+def get_local_artists_db( mode="album_artists", background=False ):
     local_artist_list = []    
     if mode == "album_artists":
         xbmc.log( "[script.cdartmanager] - Retrieving Local Album Artists from Database", xbmc.LOGDEBUG )
@@ -479,7 +487,7 @@ def get_local_artists_db( mode="album_artists" ):
             #xbmc.log( (artists), xbmc.LOGDEBUG )
             local_artist_list.append(artists)
     except:
-        print_exc()
+        traceback.print_exc()
     #xbmc.log( local_artist_list, xbmc.LOGDEBUG )
     return local_artist_list
     
@@ -504,16 +512,16 @@ def build_local_artist_table( background=False ):
             percent = int( ( count/float( total ) ) * 100 )
             if not background:
                 try:
-                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), get_unicode( local_artist["artist"] ) ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), get_unicode( artist_list_to_string( local_artist["artist"] ) ) ) )
                 except:
-                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), repr( local_artist["artist"] ) ) )
+                    pDialog.update( percent, __language__(20186), "%s: %s" % ( __language__(32125), local_artist["artistid"] ), "%s: %s" % ( __language__(32137), repr( artist_list_to_string( local_artist["artist"] ) ) ) )
             count += 1
             for album_artist in local_album_artist_list:
                 if not background:
                     if (pDialog.iscanceled()):
                         break
                 if local_artist["artistid"] == album_artist["local_id"]:
-                    artist["name"] = get_unicode( local_artist["artist"] )
+                    artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
                     artist["local_id"] = local_artist["artistid"]
                     artist["musicbrainz_artistid"] = album_artist["musicbrainz_artistid"]
                     break
@@ -521,12 +529,12 @@ def build_local_artist_table( background=False ):
                     continue
             if not artist:
                 try:
-                    artist["name"] = get_unicode( local_artist["artist"] )
-                    name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( local_artist["artist"] ) )
+                    artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
+                    name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( get_unicode( artist_list_to_string( local_artist["artist"] ) ) )
                 except:
-                    artist["name"] = get_unicode( local_artist["artist"] )
-                    name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( local_artist["artist"] )
-                artist["local_id"] = local_artist["artistid"]
+                    artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
+                    name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( artist_list_to_string( local_artist["artist"] ) )
+                artist["local_id"] = artist_list_to_string( local_artist["artistid"] )
             new_local_artist_list.append( artist )
         count = 0
         percent = 0
@@ -541,13 +549,13 @@ def build_local_artist_table( background=False ):
                 c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
                 count += 1
             except:
-                print_exc()
+                traceback.print_exc()
         conn.commit()
         if not background:
             pDialog.close()
     except:
         xbmc.log( "[script.cdartmanager] - Problem with making all artists table", xbmc.LOGDEBUG )
-        print_exc()
+        traceback.print_exc()
         if not background:
             pDialog.close()
     c.close
@@ -584,22 +592,22 @@ def refresh_db( background=False ):
     local_album_count = 0
     local_artist_count = 0
     local_cdart_count = 0
-    if exists( addon_db ):
+    if xbmcvfs.exists( addon_db ):
         #File exists needs to be deleted
         if not background:
             db_delete = xbmcgui.Dialog().yesno( __language__(32042) , __language__(32015) )
         else:
             db_delete = True
         if db_delete:
-            if exists( addon_db ):
+            if xbmcvfs.exists( addon_db ):
                 # backup database
                 backup_database()
                 try:
                     # try to delete exsisting database
-                    delete_file( addon_db )
+                    xbmcvfs.delete( addon_db )
                 except:
                     xbmc.log( "[script.cdartmanager] - Unable to delete Database", xbmc.LOGDEBUG )
-            if exists( addon_db ):
+            if xbmcvfs.exists( addon_db ):
                 # if database file still exists even after trying to delete it. Wipe out its contents
                 conn = sqlite3.connect(addon_db)
                 c = conn.cursor()
@@ -819,7 +827,7 @@ def update_database( background=False ):
         xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Checking Artists", xbmc.LOGNOTICE )
         for artist in local_artists:
             new_artist = {}
-            new_artist["name"] = get_unicode( artist["artist"] )
+            new_artist["name"] = get_unicode( artist_list_to_string( artist["artist"] ) )
             new_artist["local_id"] = artist["artistid"]
             new_artist["musicbrainz_artistid"] = ""
             temp_local_artists.append( new_artist )
@@ -844,16 +852,14 @@ def update_database( background=False ):
             combined_artists = temp_local_artists
         if local_artists_unmatched:
             updated_artists, canceled = update_missing_artist_mbid( local_artists_unmatched, background, mode = "all_artists" )
-            combined_artists.extend( updated_artists )    
+            combined_artists.extend( updated_artists )
     percent = 0
     count = 0
     xbmc.log( "[script.cdartmanager] - Updating Addon's DB - Getting MusicBrainz ID's for Artist and Albums", xbmc.LOGNOTICE )
     if __addon__.getSetting("update_musicbrainz") == "true" and not canceled:  # update missing MusicBrainz ID's
         if not canceled:
             updated_albums, canceled = update_missing_album_mbid( combined, background )  
-        combined_artists = updated_artists
-        combined = updated_albums    
-    combined_artists.extend( local_artists_unmatched_detail )
+        combined = updated_albums
     if __addon__.getSetting( "check_mbid" ) == "true" and not canceled:
         updated_albums, canceled = check_album_mbid( combined, background )
         combined = updated_albums
@@ -867,7 +873,7 @@ def update_database( background=False ):
         return
     conn = sqlite3.connect( addon_db )
     c = conn.cursor()
-    if exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
+    if xbmcvfs.exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
         c.execute('''DROP table IF EXISTS counts''') 
         c.execute('''DROP table IF EXISTS lalist''')   # drop local album artists database
         c.execute('''DROP table IF EXISTS alblist''')  # drop local album database
@@ -903,7 +909,7 @@ def update_database( background=False ):
                 c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
                 count += 1
             except:
-                print_exc()
+                traceback.print_exc()
                 continue
     conn.commit()
     c.close()
@@ -914,14 +920,14 @@ def backup_database():
     todays_date = today = datetime.datetime.today().strftime("%m-%d-%Y")
     db_backup_file = "l_cdart-%s.bak" % todays_date
     addon_backup_path = os.path.join( addon_work_folder, db_backup_file ).replace("\\\\","\\")
-    file_copy( addon_db, addon_backup_path )
-    if exists( addon_backup_path ):
+    xbmcvfs.copy( addon_db, addon_backup_path )
+    if xbmcvfs.exists( addon_backup_path ):
         try:
-            delete_file( addon_backup_path )
+            xbmcvfs.delete( addon_backup_path )
         except:
             xbmc.log( "[script.cdartmanager] - Unable to delete Database Backup", xbmc.LOGDEBUG )
     try:
-        file_copy( addon_db, addon_backup_path )
+        xbmcvfs.copy( addon_db, addon_backup_path )
         xbmc.log( "[script.cdartmanager] - Backing up old Local Database", xbmc.LOGDEBUG )
     except:
         xbmc.log( "[script.cdartmanager] - Unable to make Database Backup", xbmc.LOGDEBUG )

@@ -1778,7 +1778,7 @@ id      | description
                     <onleft>9005</onleft>
                     <onright>113</onright>
                     <onclick>113</onclick>
-                    <onup>190</onup>
+                    <onup>192</onup>
                     <ondown>189</ondown>
                 </control>
                 <control type="radiobutton" id="189"> <!-- Edit By Album -->

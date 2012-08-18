@@ -3,8 +3,10 @@
 # jsonrpc_calls
 
 import xbmc, xbmcaddon, xbmcvfs
-import os
+import os, sys
 from json_utils import retrieve_json_dict
+
+__XBMCisFrodo__   = sys.modules[ "__main__" ].__XBMCisFrodo__
 
 empty = []
 
@@ -43,9 +45,9 @@ def get_fanart_path( database_id, type ):
 def get_all_local_artists( all_artists = True ):
     xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving all local artists", xbmc.LOGDEBUG )
     if all_artists:
-        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": false }, "id": 1}'
+        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": false }, "id": 1}'''
     else:
-        json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": true }, "id": 1}'
+        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": true }, "id": 1}'''
     json_artists = retrieve_json_dict(json_query, items='artists', force_log=False )
     if json_artists:
         return json_artists
@@ -54,7 +56,7 @@ def get_all_local_artists( all_artists = True ):
 
 def retrieve_artist_details( artist_id ):
     xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Path", xbmc.LOGDEBUG )
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["musicbrainzartistid"], "artistid": %d}, "id": 1}' % artist_id
+    json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["musicbrainzartistid"], "artistid": %d}, "id": 1}''' % artist_id
     json_artist_details = retrieve_json_dict(json_query, items='artistdetails', force_log=False )
     if json_artist_details:
         return json_artist_details
@@ -63,7 +65,7 @@ def retrieve_artist_details( artist_id ):
         
 def retrieve_album_list():
     xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album List"        , xbmc.LOGDEBUG )
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist", "musicbrainzalbumid", "musicbrainzalbumartistid"], "sort": {"order":"ascending"}}, "id": 1}'
+    json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist", "musicbrainzalbumid", "musicbrainzalbumartistid"], "sort": {"order":"ascending"}}, "id": 1}'''
     json_albums = retrieve_json_dict(json_query, items='albums', force_log=False )
     if json_albums:
         return json_albums, len(json_albums)
@@ -71,9 +73,9 @@ def retrieve_album_list():
         return empty, 0
     
 def retrieve_album_details( album_id ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Path", xbmc.LOGDEBUG )
+    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Details", xbmc.LOGDEBUG )
     album_details = []
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["artist", "title", "musicbrainzalbumid", "musicbrainzalbumartistid"], "albumid": %d}, "id": 1}' % album_id
+    json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["artist", "title", "musicbrainzalbumid", "musicbrainzalbumartistid"], "albumid": %d}, "id": 1}''' % album_id
     json_album_details = retrieve_json_dict(json_query, items='albumdetails', force_log=False )
     if json_album_details:
         album_details.append( json_album_details )
@@ -84,7 +86,10 @@ def retrieve_album_details( album_id ):
 def get_album_path( album_id ):
     xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Path", xbmc.LOGDEBUG )
     paths = []
-    json_query = '{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "properties": ["file", "musicbrainzalbumartistid"], "sort": {"method":"fullpath","order":"ascending"}}, "id": 1}' % album_id
+    if not __XBMCisFrodo__:
+        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "properties": ["file", "musicbrainzalbumartistid"], "sort": {"method":"fullpath","order":"ascending"}}, "id": 1}''' % album_id
+    else:
+        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": { "properties": ["file", "musicbrainzalbumartistid"], "filter": { "albumid": %d }, "sort": {"method":"fullpath","order":"ascending"} }, "id": 1}''' % album_id
     json_songs_detail = retrieve_json_dict(json_query, items='songs', force_log=False )
     if json_songs_detail:
         for song in json_songs_detail:

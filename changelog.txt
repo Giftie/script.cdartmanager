@@ -1,6 +1,17 @@
+2.7.3
+- Fix - Change LF to CRLF in missing.txt file
+- Fix - keep script functioning with XBMC Development Master
+- Add - script can be started in artwork auto download modes, modes - autocdart, autocover, autofanart, autologo, autothumb, autoall
+
+2.7.2
+- Change - code cleanup
+- Fix - Update Database was not properly updating All Artist Id
+- Fix - Modify Database menu movement was not proper
+
 2.7.1
 - Fix - JSONRPC erros
 - Fix - Manual MBID entry did not work as intended
+- Fix - Corrected MusicBrainz access
 
 2.7.0
 - Add - 'Edit by Artist' and 'Edit by Album' functions on Modify Database tab

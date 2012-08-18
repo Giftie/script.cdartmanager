@@ -221,7 +221,7 @@ def cdart_search( cdart_url, id, disc ):
     return cdart
     
 #Automatic download of non existing cdarts and refreshes addon's db
-def auto_download( type, recognized_artists, artist_list, background = False ):
+def auto_download( type, recognized_artists, artist_list, background=False ):
     is_canceled = False
     xbmc.log( "[script.cdartmanager] - Autodownload", xbmc.LOGDEBUG )
     try:
@@ -243,6 +243,7 @@ def auto_download( type, recognized_artists, artist_list, background = False ):
         if not background:
             pDialog.create( _(32046) )
         #Onscreen Dialog - Automatic Downloading of Artwork
+        key_label = type
         for artist in recognized_artists:
             if not background:
                 if ( pDialog.iscanceled() ) or is_canceled:
@@ -314,7 +315,9 @@ def auto_download( type, recognized_artists, artist_list, background = False ):
                     else:
                         artwork = art[0]
                         if type == "artistthumb":
-                            if exists( os.path.join( auto_art["path"], "folder.jpg" ) ):
+                            if resizeondownload == "true":
+                                low_res = check_size( auto_art["path"], key_label, 1000 )
+                            if exists( os.path.join( auto_art["path"], "folder.jpg" ) ) and not low_res:
                                 xbmc.log( "[script.cdartmanager] - Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
@@ -336,17 +339,16 @@ def auto_download( type, recognized_artists, artist_list, background = False ):
                 else :
                         xbmc.log( "[script.cdartmanager] - Artist Match not found", xbmc.LOGDEBUG )
             elif type in ( "cdart", "cover" ):
-                local_album_list = get_local_albums_db( artist["name"], False )
+                local_album_list = get_local_albums_db( artist["name"], background )
                 if type == "cdart":
-                    key_label = "cdart"
                     remote_art_url = remote_cdart_list( artist )
                 else:
-                    key_label = "cover"
                     remote_art_url = remote_coverart_list( artist )
                 for album in local_album_list:
                     low_res = True
-                    if ( pDialog.iscanceled() ):
-                        break
+                    if not background:
+                        if ( pDialog.iscanceled() ):
+                            break
                     if not remote_art_url:
                         xbmc.log( "[script.cdartmanager] - No artwork found", xbmc.LOGDEBUG )
                         break
@@ -389,9 +391,8 @@ def auto_download( type, recognized_artists, artist_list, background = False ):
                             xbmc.log( "[script.cdartmanager] - ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
                     else:
                         xbmc.log( "[script.cdartmanager] - %s artwork file already exists, skipping..." % key_label, xbmc.LOGDEBUG )
-
-        pDialog.close()
         if not background:
+            pDialog.close()
             if d_error:
                 xbmcgui.Dialog().ok( _(32026), "%s: %s" % ( _(32041), download_count ) )
             else:
@@ -399,4 +400,5 @@ def auto_download( type, recognized_artists, artist_list, background = False ):
         return download_count, successfully_downloaded
     except:
         print_exc()
-        pDialog.close()
+        if not background:
+            pDialog.close()
