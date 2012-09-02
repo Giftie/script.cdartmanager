@@ -340,7 +340,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                         elif type == "clearlogo":
                             if enable_hdlogos == "true" and resizeondownload == "true":
                                 low_res = check_size( auto_art["path"], key_label, 800, 310 )
-                            if exists( os.path.join( auto_art["path"], "logo.png" ) ) and not low_res and not arthd[0]:
+                            if exists( os.path.join( auto_art["path"], "logo.png" ) ) and not low_res and not arthd:
                                 xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:

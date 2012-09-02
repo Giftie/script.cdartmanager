@@ -259,9 +259,9 @@ if ( __name__ == "__main__" ):
                 xbmc.log( "[script.cdartmanager] - Start method - Update Database in background", xbmc.LOGNOTICE )
             elif sys.argv[ 1 ] == "oneshot":
                 xbmc.log( "[script.cdartmanager] - Start method - One Shot Download method", xbmc.LOGNOTICE )
-                # sys.argv[ 2 ] = artwork type ( clearlogo, fanart, artistthumb, cdart, cover )
+                # sys.argv[ 2 ] = artwork type ( clearlogo, fanart, artistthumb, musicbanner, cdart, cover )
                 # sys.argv[ 3 ] = XBMC DB ID
-                # sys.argv[ 4 ] = artwork path( clearlogo, fanart, artistthumb)
+                # sys.argv[ 4 ] = artwork path( clearlogo, fanart, artistthumb, musicbanner)
                 try:
                     if len(sys.argv) > 2:
                         xbmc.log( "[script.cdartmanager] - Artwork: %s" % sys.argv[ 2 ], xbmc.LOGNOTICE )

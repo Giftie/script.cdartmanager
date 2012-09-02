@@ -1,10 +1,18 @@
 2.7.4
 - Add - Add support for the new Artwork available from fanart.tv(HD Music Logos, Music Banners)
+- Add - Add setting to enable/disable the New HD Music logos, enabled will overwrite older clearLOGO during an auto download
+- Add - Add autobanner to the auto download start mode
+- Update - Updated French strings - Thanks Hellnino18
+- Update - Updated German strings - Thanks solidsatras
 
 2.7.3
 - Fix - Change LF to CRLF in missing.txt file
 - Fix - keep script functioning with XBMC Development Master
-- Add - script can be started in artwork auto download modes, modes - autocdart, autocover, autofanart, autologo, autothumb, autoall
+- Add - script can be started in artwork auto download modes, modes - autocdart, autocover, autofanart, autologo, autothumb, autoall. All these are done in the background
+        To use:
+                RunScript(script.cdartmanager,mode)
+                
+                Eg: RunScript(script.cdartmanager,autoall) <- starts the script downloading everything in the background
 
 2.7.2
 - Change - code cleanup
