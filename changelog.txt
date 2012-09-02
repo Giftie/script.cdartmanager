@@ -1,3 +1,6 @@
+2.7.4
+- Add - Add support for the new Artwork available from fanart.tv(HD Music Logos, Music Banners)
+
 2.7.3
 - Fix - Change LF to CRLF in missing.txt file
 - Fix - keep script functioning with XBMC Development Master

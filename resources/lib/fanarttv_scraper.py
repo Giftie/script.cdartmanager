@@ -86,7 +86,7 @@ def remote_fanart_list( artist_menu ):
     try:
         art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
-            backgrounds = art[0]["backgrounds"]
+            backgrounds = art[ 0 ]["backgrounds"]
     except:
         print_exc()
     return backgrounds
@@ -101,6 +101,28 @@ def remote_clearlogo_list( artist_menu ):
     except:
         print_exc()
     return clearlogo
+    
+def remote_hdlogo_list( artist_menu ):
+    xbmc.log( "[script.cdartmanager] - Finding remote hdlogo", xbmc.LOGDEBUG )
+    hdlogo = ""
+    try:
+        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        if not len(art) < 3:
+            hdlogo = art[ 5 ]["hdlogo"]
+    except:
+        print_exc()
+    return hdlogo
+
+def remote_banner_list( artist_menu ):
+    xbmc.log( "[script.cdartmanager] - Finding remote music banners", xbmc.LOGDEBUG )
+    banner = ""
+    try:
+        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        if not len(art) < 3:
+            banner = art[ 4 ]["banner"]
+    except:
+        print_exc()
+    return banner
 
 def remote_artistthumb_list( artist_menu ):
     xbmc.log( "[script.cdartmanager] - Finding remote artistthumb", xbmc.LOGDEBUG )
@@ -126,6 +148,8 @@ def retrieve_fanarttv_xml( id ):
     clearlogo = {}
     artistthumb = {}
     album_art = {}
+    hdlogo = {}
+    banner = {}
     try:
         if match:
             backgrounds = re.search( '<artistbackgrounds>(.*?)</artistbackgrounds>', htmlsource )
@@ -190,6 +214,26 @@ def retrieve_fanarttv_xml( id ):
                 xbmc.log( "[script.cdartmanager] - No artwork found for artist_id: %s" % id, xbmc.LOGDEBUG )
                 album_art["artwork"] = blank
                 artist_artwork.append( album_art )
+            banners = re.search( '<musicbanners>(.*?)</musicbanners>', htmlsource )
+            if banners:
+                xbmc.log( "[script.cdartmanager] - Found Music Banner", xbmc.LOGDEBUG )
+                _banner = re.findall('<musicbanner id="(?:.*?)" url="(.*?)" likes="(?:.*?)/>' , htmlsource )
+                banner["banner"] = _banner
+                artist_artwork.append( banner )
+            else:
+                xbmc.log( "[script.cdartmanager] - No Music Banner found", xbmc.LOGDEBUG )
+                banner["banner"] = ""
+                artist_artwork.append( banner )
+            hdlogos = re.search( '<hdmusiclogos>(.*?)</hdmusiclogos>', htmlsource )
+            if hdlogos:
+                xbmc.log( "[script.cdartmanager] - Found HD LOGOs", xbmc.LOGDEBUG )
+                _hdlogos = re.findall('<hdmusiclogo id="(?:.*?)" url="(.*?)" likes="(?:.*?)/>' , htmlsource )
+                hdlogo["hdlogo"] = _hdlogos
+                artist_artwork.append( hdlogo )
+            else:
+                hdlogo["hdlogo"] = ""
+                artist_artwork.append( hdlogo )
+                xbmc.log( "[script.cdartmanager] - No Artist HDLOGO found", xbmc.LOGDEBUG )
     except:
         print_exc()
     return artist_artwork

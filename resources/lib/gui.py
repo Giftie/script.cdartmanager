@@ -24,6 +24,8 @@ addon_work_folder    = sys.modules[ "__main__" ].addon_work_folder
 __useragent__        = sys.modules[ "__main__" ].__useragent__
 image                = sys.modules[ "__main__" ].image
 BASE_RESOURCE_PATH   = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+enable_hdlogos       = sys.modules[ "__main__" ].enable_hdlogos
+
 #variables
 download_temp_folder = os.path.join( addon_work_folder, "temp" )
 addon_image_path     = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "media")
@@ -35,7 +37,7 @@ skin_art_path        = os.path.join( BASE_RESOURCE_PATH, "skins", "Default", "me
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
 # script imports
-from fanarttv_scraper import get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
+from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode
 from download import download_art, auto_download
 from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
@@ -373,23 +375,68 @@ class GUI( xbmcgui.WindowXMLDialog ):
         except:
             traceback.print_exc()
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        
+    
+    def populate_musicbanners( self, artist_menu, focus_item ):
+        xbmc.log( "[script.cdartmanager] - Populating Music Banner List", xbmc.LOGNOTICE )
+        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
+        self.getControl( 202 ).reset()
+        try:
+            banner = remote_banner_list( artist_menu )
+            if banner:
+                for artwork in banner:
+                    clear_image_cache( artwork )
+                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
+                    #listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork )
+                    self.getControl( 202 ).addItem( listitem )
+                    listitem.setLabel( os.path.basename( artwork ) )
+                    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                    self.setFocus( self.getControl( 202 ) )
+                    self.getControl( 202 ).selectItem( focus_item )
+            else:
+                xbmc.log( "[script.cdartmanager - No Music Banners for this artist", xbmc.LOGNOTICE )
+                xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                xbmcgui.Window(10001).clearProperty( "artwork" )
+                xbmcgui.Dialog().ok( __language__(32033), __language__(32030), __language__(32031) )
+                #Onscreen Dialog - Not Found on Fanart.tv, Please contribute! Upload your cdARTs, On fanart.tv
+                return
+        except:
+            traceback.print_exc()
+            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+    
     def populate_clearlogos( self, artist_menu, focus_item ):
         xbmc.log( "[script.cdartmanager] - Populating ClearLOGO List", xbmc.LOGNOTICE )
         xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         self.getControl( 167 ).reset()
+        hdlogo = ""
+        not_found = False
         try:
             clearlogo = remote_clearlogo_list( artist_menu )
+            if enable_hdlogos == "true":
+                hdlogo = remote_hdlogo_list( artist_menu )
             if clearlogo:
                 for artwork in clearlogo:
                     clear_image_cache( artwork )
-                    listitem = xbmcgui.ListItem( label = os.path.basename( artwork ), label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
+                    listitem = xbmcgui.ListItem( label = "Standard", label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
                     self.getControl( 167 ).addItem( listitem )
-                    listitem.setLabel( os.path.basename( artwork ) )
+                    listitem.setLabel( __language__(32169) )
                     xbmc.executebuiltin( "Dialog.Close(busydialog)" )
                     self.setFocus( self.getControl( 167 ) )
                     self.getControl( 167 ).selectItem( focus_item )
             else:
+                not_found = True
+            if hdlogo:
+                for artwork in hdlogo:
+                    clear_image_cache( artwork )
+                    listitem = xbmcgui.listitem = xbmcgui.ListItem( label = "HD", label2 = artist_menu["name"] + "&&&&" + artwork, thumbnailImage = artwork + "/preview" )
+                    self.getControl( 167 ).addItem( listitem )
+                    listitem.setLabel( __language__(32170) )
+                    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+                    self.setFocus( self.getControl( 167 ) )
+                    self.getControl( 167 ).selectItem( focus_item )
+            else:
+                if not_found:
+                    not_found = True
+            if not_found:
                 xbmc.log( "[script.cdartmanager - No ClearLOGO for this artist", xbmc.LOGNOTICE )
                 xbmc.executebuiltin( "Dialog.Close(busydialog)" )
                 xbmcgui.Window(10001).clearProperty( "artwork" )
@@ -844,8 +891,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             missing.write("Artists Missing Artwork\r\n")
             missing.write("\r\n")
             music_path = xbmc.translatePath( __addon__.getSetting( "music_path" ) )
-            missing.write("|  %-45s| %-70s|  Fanart  |  clearLogo  |  Artist Thumb |\r\n" % ( "MusicBrainz ID", "Artist Name" ) )
-            missing.write("-" * 162)
+            missing.write("|  %-45s| %-70s| Fanart | clearLogo | Artist Thumb | Music Banner |\r\n" % ( "MusicBrainz ID", "Artist Name" ) )
+            missing.write("-" * 172)
             missing.write("\r\n")
             count = 0
             percent =1
@@ -865,24 +912,28 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 fanart = " "
                 clearlogo = " "
                 artistthumb = " "
+                musicbanner = " "
                 line = ""
                 fanart_path = os.path.join( music_path, artist["name"], "fanart.jpg" ).replace( "\\\\", "\\" )
                 clearlogo_path = os.path.join( music_path, artist["name"], "logo.png" ).replace( "\\\\", "\\" )
                 artistthumb_path = os.path.join( music_path, artist["name"], "folder.jpg" ).replace( "\\\\", "\\" )
+                musicbanner_path = os.path.join( music_path, artist["name"], "banner.jpg" ).replace( "\\\\", "\\" )
                 if xbmcvfs.exists( fanart_path ):
                     fanart = "X"
                 if xbmcvfs.exists( clearlogo_path ):
                     clearlogo = "X"
                 if xbmcvfs.exists( artistthumb_path ):
                     artistthumb = "X"
+                if xbmcvfs.exists( musicbanner_path ):
+                    musicbanner = "X"
                 if not xbmcvfs.exists( fanart_path ) or not xbmcvfs.exists( clearlogo_path ) or not xbmcvfs.exists( artistthumb_path ):
-                    line = "|  %-45s| %-70s|     %s    |     %s       |       %s       |\r\n" % ( artist["musicbrainz_artistid"], artist["name"], fanart, clearlogo, artistthumb )
+                    line = "|  %-45s| %-70s|    %s   |    %s      |      %s       |      %s       |\r\n" % ( artist["musicbrainz_artistid"], artist["name"], fanart, clearlogo, artistthumb, musicbanner )
                 if line:
                     try:
                         missing.write( line.encode("utf8") )
                     except:
                         missing.write( repr( line ) )
-                    missing.write("-" * 162)
+                    missing.write("-" * 172)
                     missing.write("\r\n")
             missing.close()
         except:
@@ -1103,6 +1154,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.local_albums = get_local_albums_db( self.artist_menu["name"] )
                 self.getControl( 145 ).reset()
                 self.populate_album_list_mbid( self.local_albums )
+            elif self.menu_mode == 13:
+                xbmcgui.Window(10001).setProperty( "artwork", "musicbanner" )
+                self.populate_musicbanners( self.artist_menu, 0 )
         if controlId == 145:
             self.selected_item = self.getControl( 145 ).getSelectedPosition()
             if self.menu_mode == 10: # Artist
@@ -1112,7 +1166,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.artist_menu["musicbrainz_artistid"] = get_unicode( self.local_artists[self.getControl( 145 ).getSelectedPosition()]["musicbrainz_artistid"] )
                 self.setFocusId( 157 )
                 try:
-                    self.getControl( 156 ).setLabel( __language__(32038) + "[CR]%s" % self.artist_menu["name"].encode("utf-8") )
+                    self.getControl( 156 ).setLabel( __language__(32038) + "[CR]%s" % get_unicode( self.artist_menu["name"] ) )
                 except:
                     self.getControl( 156 ).setLabel( __language__(32038) + "[CR]%s" % repr( self.artist_menu["name"] ) )
             if self.menu_mode in ( 11, 12 ): # Album
@@ -1125,7 +1179,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.album_menu["musicbrainz_artistid"] = get_unicode( self.local_albums[self.getControl( 145 ).getSelectedPosition()]["musicbrainz_artistid"] )
                 self.setFocusId( 157 )
                 try:
-                    self.getControl( 156 ).setLabel( __language__(32039) + "[CR]%s" % self.album_menu["title"].encode("utf-8") )
+                    self.getControl( 156 ).setLabel( __language__(32039) + "[CR]%s" % get_unicode( self.album_menu["title"] ) )
                 except:
                     self.getControl( 156 ).setLabel( __language__(32039) + "[CR]%s" % repr( self.album_menu["title"] ) )
         if controlId == 157: #Manual Edit
@@ -1211,9 +1265,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
             url = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[0]
             cdart_path["path"] = ((self.getControl( 122 ).getSelectedItem().getLabel2()).split("&&&&")[0]).split("&&")[1]
             try:
-                cdart_path["artist"] = ( self.getControl( 204 ).getLabel().encode('utf-8') ).replace( __language__(32038) + "[CR]","")
+                cdart_path["artist"] = get_unicode( self.getControl( 204 ).getLabel() ).replace( __language__(32038) + "[CR]","")
             except:
-                cdart_path["artist"] = ( self.getControl( 204 ).getLabel().decode('utf-8') ).replace( __language__(32038) + "[CR]","")
+                cdart_path["artist"] = repr( self.getControl( 204 ).getLabel() ).replace( __language__(32038) + "[CR]","")
             cdart_path["title"] = self.getControl( 122 ).getSelectedItem().getLabel()
             cdart_path["title"] = self.remove_color(cdart_path["title"])
             self.selected_item = self.getControl( 122 ).getSelectedPosition()
@@ -1234,7 +1288,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmc.log( "[script.cdartmanager] - Oops --  Some how I got here... - ControlID(122)", xbmc.LOGDEBUG )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
-            artist_name = self.artist_menu["name"].decode("utf-8")
+            artist_name = get_unicode( self.artist_menu["name"] )
             self.getControl( 204 ).setLabel( __language__(32038) + "[CR]%s" % artist_name )
             if self.menu_mode == 1:
                 self.remote_cdart_url = remote_cdart_list( self.artist_menu )
@@ -1341,6 +1395,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 101 : #Cover Arts
             self.artwork_type = "cover"
             self.setFocusId( 150 )
+        if controlId == 154 : #Cover Arts
+            self.artwork_type = "musicbanner"
+            self.setFocusId( 200 )
         if controlId == 103 : #Advanced
             self.setFocusId( 130 )
         if controlId == 104 : #Settings
@@ -1359,6 +1416,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.menu_mode = 7
         if controlId in ( 197, 198 ): # Artist Thumb Search Artists
             self.menu_mode = 9
+        if controlId in ( 205, 207 ): # Artist Music Banner Select Artists
+            self.menu_mode = 13
         if controlId == 102:
             self.artwork_type = "fanart"
             self.setFocusId( 170 )
@@ -1374,6 +1433,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setFocusId( 197 )
         if controlId == 194:
             self.setFocusId( 195 )
+        if controlId == 200:
+            self.setFocusId( 205 )
+        if controlId == 201:
+            self.setFocusId( 207 )
         if controlId == 152:
             self.artwork_type = "clearlogo"
             xbmcgui.Window(10001).setProperty( "artwork", "clearlogo" )
@@ -1384,15 +1447,15 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmcgui.Window(10001).setProperty( "artwork", "artistthumb" )
             self.menu_mode = 9
             self.setFocusId( 193 )
-        if controlId in ( 180, 181, 184, 185, 197, 198 ):
-            distant_artist = get_distant_artists()
-            if controlId in ( 180, 184, 197 ):
+        if controlId in ( 180, 181, 184, 185, 197, 198, 205, 206 ):
+            #distant_artist = get_distant_artists()
+            if controlId in ( 180, 184, 197, 205 ):
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 120 ).reset()
                 self.recognized_artists = self.album_recognized_artists
                 self.local_artists = self.album_artists
                 self.populate_artist_list( self.recognized_artists )
-            elif controlId in ( 181, 185, 198 ) and __addon__.getSetting("enable_all_artists") == "true":
+            elif controlId in ( 181, 185, 198, 206 ) and __addon__.getSetting("enable_all_artists") == "true":
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 120 ).reset()
                 self.recognized_artists = self.all_artists_recognized
@@ -1419,6 +1482,27 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "clearlogo" )
                 self.populate_clearlogos( self.artist_menu, selected_item )
+        if controlId == 202:
+            artist = {}
+            if self.menu_mode == 13:
+                url = ( self.getControl( 202 ).getSelectedItem().getLabel2() ).split("&&&&")[ 1 ]
+                artist["artist"] = ( self.getControl( 202 ).getSelectedItem().getLabel2() ).split("&&&&")[ 0 ]
+                artist["path"] = os.path.join( __addon__.getSetting("music_path"), artist["artist"] )
+                selected_item = self.getControl( 202 ).getSelectedPosition()
+                if url:
+                    message, success, is_canceled = download_art( url, artist, self.artist_menu["local_id"], "musicbanner", "manual", 0 )
+                    try:
+                        pDialog.close()
+                    except:
+                        pass
+                    try:
+                        xbmcgui.Dialog().ok( message[0], message[1], message[2], message[3] )
+                    except:
+                        xbmcgui.Dialog().ok( message[0], message[1], repr( message[2] ), repr( message[3] ) )
+                else:
+                    xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
+                xbmcgui.Window(10001).setProperty( "artwork", "musicbanner" )
+                self.populate_musicbanners( self.artist_menu, selected_item )
         if controlId == 160:
             artist = {}
             if self.menu_mode == 6:
@@ -1457,9 +1541,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     xbmc.log( "[script.cdartmanager] - Nothing to download", xbmc.LOGDEBUG )
                 xbmcgui.Window(10001).setProperty( "artwork", "artistthumb" )
                 self.populate_artistthumbs( self.artist_menu, selected_item )
-        if controlId in ( 182, 186, 187, 183, 106, 151, 195, 196 ): # Automatic Download
+        if controlId in ( 182, 186, 187, 183, 106, 151, 195, 196, 207, 208 ): # Automatic Download
             self.artwork_type = ""
-            if controlId in ( 106, 151, 186, 182, 195 ):
+            if controlId in ( 106, 151, 186, 182, 195, 207 ):
                 self.recognized_artists = self.album_recognized_artists
                 self.local_artists = self.album_artists
                 if controlId == 106: #cdARTs
@@ -1474,20 +1558,24 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     self.artwork_type = "fanart"
                 elif controlId == 195:# Artist Thumbs
                     self.artwork_type = "artistthumb"
+                elif controlId == 207:# Artist banner
+                    self.artwork_type = "musicbanner"
                 download_count, successfully_downloaded = auto_download( self.artwork_type, self.recognized_artists, self.local_artists  )
                 local_album_count, local_artist_count, local_cdart_count = new_local_count()
                 self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
                 if successfully_downloaded:
                     self.populate_downloaded( successfully_downloaded, self.artwork_type )
-            if controlId in ( 183, 187, 196 ) and __addon__.getSetting("enable_all_artists") == "true":
+            if controlId in ( 183, 187, 196, 208 ) and __addon__.getSetting("enable_all_artists") == "true":
                 self.recognized_artists = self.all_artists_recognized
                 self.local_artists = self.all_artists_list
                 if controlId == 187:# ClearLOGOs All Artists
                     self.artwork_type = "clearlogo_allartists"
-                if controlId == 183:# Fanarts All Artists
+                elif controlId == 183:# Fanarts All Artists
                     self.artwork_type = "fanart_allartists"
-                if controlId == 196:# Artist Thumbs All Artists
-                    self.artwork_type = "artistthumb_allartists"            
+                elif controlId == 196:# Artist Thumbs All Artists
+                    self.artwork_type = "artistthumb_allartists"
+                elif controlId == 208:# Artist Banners All Artists
+                    self.artwork_type = "musicbanner_allartists"
                 download_count, successfully_downloaded = auto_download( self.artwork_type, self.recognized_artists, self.local_artists  )
                 local_album_count, local_artist_count, local_cdart_count = new_local_count()
                 self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )

@@ -24,9 +24,10 @@ __useragent__     = sys.modules[ "__main__" ].__useragent__
 resizeondownload  = __addon__.getSetting( "resizeondownload" )
 music_path        = sys.modules[ "__main__" ].music_path
 __XBMCisFrodo__   = sys.modules[ "__main__" ].__XBMCisFrodo__
+enable_hdlogos    = sys.modules[ "__main__" ].enable_hdlogos
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-from fanarttv_scraper import get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
+from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 from utils import clear_image_cache, get_unicode
 from file_item import Thumbnails
@@ -43,7 +44,7 @@ except:
 
 pDialog = xbmcgui.DialogProgress()
  
-def check_size( path, type, size ):
+def check_size( path, type, size_h, size_w ):
     # first copy from source to work directory since Python does not support SMB://
     file_name = get_filename( type, path, "auto" )
     destination = os.path.join( addon_work_folder, "temp", file_name )
@@ -55,7 +56,7 @@ def check_size( path, type, size ):
         return True
     try:
         artwork = Image.open( destination )
-        if artwork.size[0] < 1000 and artwork.size[1] < 1000 and size == 1000:  # if image is smaller than 1000 x 1000 and the image on fanart.tv = 1000
+        if artwork.size[0] < size_w and artwork.size[1] < size_h:  # if image is smaller than 1000 x 1000 and the image on fanart.tv = 1000
             delete_file( destination )
             return True
         else:
@@ -82,6 +83,8 @@ def get_filename( type, url, mode ):
         file_name = "logo.png"
     elif type == "artistthumb":
         file_name = "folder.jpg"
+    elif type == "musicbanner":
+        file_name = "banner.jpg"
     else:
         file_name = "unknown"
     return file_name
@@ -150,7 +153,7 @@ def download_art( url_cdart, album, database_id, type, mode, size, background = 
             if percent > 100:
                 percent = 100
             if not background:
-                if type in ( "fanart", "clearlogo", "artistthumb" ):
+                if type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ):
                     try:
                         pDialog.update( percent, "%s%s" % ( _(32038) , get_unicode( album["artist"] ) ) )
                     except:
@@ -232,11 +235,13 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
         d_error=False
         percent = 1
         successfully_downloaded = []
-        if type in ( "clearlogo_allartists", "artistthumb_allartists", "fanart_allartists" ):
+        if type in ( "clearlogo_allartists", "artistthumb_allartists", "fanart_allartists", "musicbanner_allartists" ):
             if type == "clearlogo_allartists":
                 type = "clearlogo"
             elif type == "artistthumb_allartists":
                 type = "artistthumb"
+            elif type == "musicbanner_allartists":
+                type = "musicbanner"
             else:
                 type = "fanart"
         count_artist_local = len( recognized_artists )
@@ -245,6 +250,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
         #Onscreen Dialog - Automatic Downloading of Artwork
         key_label = type
         for artist in recognized_artists:
+            low_res = True
             if not background:
                 if ( pDialog.iscanceled() ) or is_canceled:
                     is_canceled = True
@@ -256,7 +262,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
             if percent > 100:
                 percent = 100
             xbmc.log( "[script.cdartmanager] - Artist: %-40s Local ID: %-10s   Distant ID: %s" % ( repr( artist["name"] ), artist["local_id"], artist["distant_id"] ), xbmc.LOGNOTICE )
-            if type in ( "fanart", "clearlogo", "artistthumb" ):
+            if type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ):
                 if not background:
                     try:
                         pDialog.update( percent, "%s%s" % ( _(32038), get_unicode( artist["name"] ) ) )
@@ -275,6 +281,9 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                     art = remote_fanart_list( auto_art )
                 elif type == "clearlogo":
                     art = remote_clearlogo_list( auto_art )
+                    arthd = remote_hdlogo_list( auto_art )
+                elif type == "musicbanner":
+                    art = remote_banner_list( auto_art )
                 else:
                     art = remote_artistthumb_list( auto_art )
                 if art:
@@ -313,21 +322,35 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                                 xbmc.log( "[script.cdartmanager] -     Path: %s" % repr( auto_art["path"] ) , xbmc.LOGDEBUG )
                                 d_error = True
                     else:
-                        artwork = art[0]
+                        if type == "clearlogo":
+                            if arthd and enable_hdlogos == "true":
+                                artwork = arthd[0]
+                            else:
+                                artwork = art[0]
+                        else:
+                            artwork = art[0]
                         if type == "artistthumb":
                             if resizeondownload == "true":
-                                low_res = check_size( auto_art["path"], key_label, 1000 )
+                                low_res = check_size( auto_art["path"], key_label, 1000, 1000 )
                             if exists( os.path.join( auto_art["path"], "folder.jpg" ) ) and not low_res:
                                 xbmc.log( "[script.cdartmanager] - Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork , auto_art, artist["local_id"], "artistthumb", "auto", 0, background )
-                        else:    
-                            if exists( os.path.join( auto_art["path"], "logo.png" ) ):
+                        elif type == "clearlogo":
+                            if enable_hdlogos == "true" and resizeondownload == "true":
+                                low_res = check_size( auto_art["path"], key_label, 800, 310 )
+                            if exists( os.path.join( auto_art["path"], "logo.png" ) ) and not low_res and not arthd[0]:
                                 xbmc.log( "[script.cdartmanager] - ClearLOGO already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork , auto_art, artist["local_id"], "clearlogo", "auto", 0, background )
+                        elif type == "musicbanner":
+                            if exists( os.path.join( auto_art["path"], "banner.jpg" ) ):
+                                xbmc.log( "[script.cdartmanager] - Music Banner already exists, skipping", xbmc.LOGDEBUG )
+                                continue
+                            else:
+                                message, d_success, final_destination, is_canceled = download_art( artwork , auto_art, artist["local_id"], "musicbanner", "auto", 0, background )
                         if d_success == 1:
                             download_count += 1
                             auto_art["path"] = final_destination
@@ -368,7 +391,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                         art = artwork_search( remote_art_url, musicbrainz_albumid, album["disc"], key_label )
                         if art:
                             if resizeondownload == "true":
-                                low_res = check_size( album["path"].replace( "\\\\", "\\" ), key_label, art["size"] )
+                                low_res = check_size( album["path"].replace( "\\\\", "\\" ), key_label, art["size"], art["size"] )
                             if art["picture"]: 
                                 xbmc.log( "[script.cdartmanager] - ALBUM MATCH FOUND", xbmc.LOGDEBUG )
                                 #xbmc.log( "[script.cdartmanager] - test_album[0]: %s" % test_album[0], xbmc.LOGDEBUG )

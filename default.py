@@ -21,8 +21,8 @@ __scriptID__         = __addon__.getAddonInfo('id')
 __author__           = __addon__.getAddonInfo('author')
 __version__          = __addon__.getAddonInfo('version')
 __credits__          = "Ppic, Reaven, Imaginos, redje, Jair, "
-__credits2__         = "Chaos_666, Magnatism, Kode"
-__date__             = "7-21-12"
+__credits2__         = "Chaos_666, Magnatism, Kode, Martijn"
+__date__             = "9-1-12"
 __dbversion__        = "1.5.3"
 __dbversionold__     = "1.3.2"
 __dbversionancient__ = "1.1.8"
@@ -32,6 +32,7 @@ __XBMCisFrodo__      = False
 if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0-ALPHA" ): # required GIT version
     __XBMCisFrodo__  = True
 notifyatfinish       = __addon__.getSetting("notifyatfinish")
+enable_hdlogos       = __addon__.getSetting("enable_hdlogos")
 api_key              = "e308cc6c6f76e502f98526f1694c62ac"
 BASE_RESOURCE_PATH   = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) ).decode('utf-8')
 music_path           = xbmc.translatePath( __addon__.getSetting( "music_path" ) ).decode('utf-8')
@@ -91,7 +92,7 @@ def thumbnail_copy( art_path, thumb_path, type="artwork" ):
     elif thumb_path.startswith("http://") or thumb_path.startswith("image://"):
         xbmc.log( "[script.cdartmanager] - Destination Path is not able to be copied to: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
         
-def update_xbmc_thumbnails():
+def update_xbmc_thumbnails( background=False ):
     xbmc.log( "[script.cdartmanager] - Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
     fanart = "fanart.jpg"
     artistthumb_temp = "artist.jpg"
@@ -99,7 +100,8 @@ def update_xbmc_thumbnails():
     albumthumb = "folder.jpg"
     #xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32112), 2000, image) )
     xbmc.sleep( 1000 )
-    pDialog.create( __language__( 32042 ) )
+    if not background:
+        pDialog.create( __language__( 32042 ) )
     # Artists
     artists = get_local_artists_db( mode="local_artists" )
     if not artists:
@@ -115,12 +117,14 @@ def update_xbmc_thumbnails():
             percent = 1
         if percent > 100:
             percent = 100
-        if ( pDialog.iscanceled() ):
-            break
-        try:
-            pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
-        except:
-            pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
+        if not background:
+            if ( pDialog.iscanceled() ):
+                break
+        if not background:
+            try:
+                pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), artist["name"].encode("utf-8") ) )
+            except:
+                pDialog.update( percent, __language__( 32112 ), " %s %s" % ( __language__( 32038 ), repr( artist["name"] ) ) )
         xbmc_thumbnail_path = ""
         xbmc_fanart_path = ""
         fanart_path = os.path.join( music_path, artist["name"], fanart ).replace( "\\\\","\\" )
@@ -229,7 +233,10 @@ if ( __name__ == "__main__" ):
                 elif sys.argv[ 1 ] == "autothumb":
                     xbmc.log( "[script.cdartmanager] - Start method - Autodownload Artist Thumbnails in background", xbmc.LOGNOTICE )
                     artwork_type = "artistthumb"
-                if artwork_type in ( "fanart", "clearlogo", "artistthumb" ) and __addon__.getSetting("enable_all_artists") == "true":
+                elif sys.argv[ 1 ] == "autobanner":
+                    xbmc.log( "[script.cdartmanager] - Start method - Autodownload Artist Music Banners in background", xbmc.LOGNOTICE )
+                    artwork_type = "musicbanner"
+                if artwork_type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ) and __addon__.getSetting("enable_all_artists") == "true":
                     download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
                 else:
                     download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
@@ -237,9 +244,9 @@ if ( __name__ == "__main__" ):
             elif sys.argv[ 1 ] == "autoall":
                 xbmc.log( "[script.cdartmanager] - Start method - Autodownload all artwork in background", xbmc.LOGNOTICE )
                 total_artwork = 0
-                for artwork_type in ( "cdart", "cover", "fanart", "clearlogo", "artistthumb" ):
+                for artwork_type in ( "cdart", "cover", "fanart", "clearlogo", "artistthumb", "musicbanner" ):
                     xbmc.log( "[script.cdartmanager] - Start method - Autodownload %s in background" % artwork_type, xbmc.LOGNOTICE )
-                    if artwork_type in ( "fanart", "clearlogo", "artistthumb" ) and __addon__.getSetting("enable_all_artists") == "true":
+                    if artwork_type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ) and __addon__.getSetting("enable_all_artists") == "true":
                         download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
                     elif artwork_type:
                         download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
@@ -260,7 +267,7 @@ if ( __name__ == "__main__" ):
                         xbmc.log( "[script.cdartmanager] - Artwork: %s" % sys.argv[ 2 ], xbmc.LOGNOTICE )
                         xbmc.log( "[script.cdartmanager] - ID: %s" % sys.argv[ 3 ], xbmc.LOGNOTICE )
                         provided_id = int( sys.argv[ 3 ] )
-                        if sys.argv[ 2 ] in ( "clearlogo", "fanart", "artistthumb" ):
+                        if sys.argv[ 2 ] in ( "clearlogo", "fanart", "artistthumb", "musicbanner" ):
                             artist, mbid = artist_musicbrainz_id( provided_id )
                             if not artist:
                                 xbmc.log( "[script.cdartmanager] - No MBID found", xbmc.LOGNOTICE )

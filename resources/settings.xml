@@ -34,6 +34,7 @@
         <setting type="sep" />
         <setting label="" type="lsep" />
         <setting label="32106" type="bool" id="resizeondownload" default="false" />
+        <setting label="32171" type="bool" id="enable_hdlogos" default="true" />
         <setting type="sep" />
         <setting label="32115" type="bool" id="notifybackground" default="false" />
         <setting label="32116" type="bool" id="notifyatfinish" default="true" />
