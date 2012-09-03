@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-19 02:10+0000 -->
+<!-- translation date: 2012-09-02 03:13+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
@@ -170,4 +170,8 @@
   <string id="32165">Introduza o título do Álbum para procurar</string>
   <string id="32166">Seleccionar Álbum</string>
   <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
+  <string id="32168">Artist Banners</string>
+  <string id="32169">400px X 155px</string>
+  <string id="32170">800px X 310px</string>
+  <string id="32171">Enable HD Music LOGOs</string>
 </strings>

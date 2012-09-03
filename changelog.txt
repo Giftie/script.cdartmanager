@@ -4,6 +4,7 @@
 - Add - Add autobanner to the auto download start mode
 - Update - Updated French strings - Thanks Hellnino18
 - Update - Updated German strings - Thanks solidsatras
+- Update - Updated Portuguese (Brazil) - Thanks Wanilton
 
 2.7.3
 - Fix - Change LF to CRLF in missing.txt file

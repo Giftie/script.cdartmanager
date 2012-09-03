@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-19 02:10+0000 -->
+<!-- translation date: 2012-09-02 03:13+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconocidos</string>
@@ -161,13 +161,17 @@
   <string id="32156">Selección de búsqueda (entrada manual)</string>
   <string id="32157">Selección de búsqueda (entrada automática)</string>
   <string id="32158">Activar la creación de archivo missing.txt</string>
-  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
-  <string id="32160">Por favor Introduzca 36 carácteres incluidas almohadillas</string>
+  <string id="32159">Introducir MBID del intérprete - Incluyendo los guiones (36 carácteres)</string>
+  <string id="32160">Por favor introduzca 36 carácteres incluidos los guiones</string>
   <string id="32161">¿Desea volver a introducirlo?</string>
   <string id="32162">¿Este MBID es correcto?</string>
   <string id="32163">¿Seguro que desea borrar este MBID?</string>
   <string id="32164">Introduzca Artista a buscar</string>
   <string id="32165">Introduzca Álbum a buscar</string>
   <string id="32166">Seleccione Álbum</string>
-  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
+  <string id="32167">Introducir MBID del álbum - Incluyendo los guiones (36 carácteres)</string>
+  <string id="32168">Artist Banners</string>
+  <string id="32169">400px X 155px</string>
+  <string id="32170">800px X 310px</string>
+  <string id="32171">Enable HD Music LOGOs</string>
 </strings>
