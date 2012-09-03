@@ -42,7 +42,6 @@
         <setting label="32145" type="action" action="RunScript($CWD/default.py,update_thumbs)" />
         <setting label="32142" type="bool" id="enable_all_artists" default="false" />
         <setting label="32136" type="bool" id="update_musicbrainz" default="true" />
-        <setting label="download all artwork" type="action" action="RunScript($CWD/default.py,autoall)" />
         <setting label="32114" type="bool" id="check_mbid" default="false" />
         <setting label="32148" type="lsep" />
     </category>

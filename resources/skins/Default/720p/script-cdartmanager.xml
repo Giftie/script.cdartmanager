@@ -381,7 +381,7 @@ id      | description
                 <animation effect="fade" start="0" end="100" delay="300" time="200" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
                 <animation effect="fade" start="100" end="0" time="0" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">WindowClose</animation>
                 <animation effect="slide" end="300,0" time="600" tween="quadratic" easing="out" condition="Control.HasFocus(120) | ControlGroup(9003).HasFocus">conditional</animation>
-                <visible>Control.HasFocus(120) | Control.HasFocus(121) | ControlGroup(9004).HasFocus | ControlGroup(9010).HasFocus | ControlGroup(9023).HasFocus | ControlGroup(9024).HasFocus</visible>
+                <visible>Control.HasFocus(120) | Control.HasFocus(121) | ControlGroup(9037).HasFocus | ControlGroup(9004).HasFocus | ControlGroup(9010).HasFocus | ControlGroup(9023).HasFocus | ControlGroup(9024).HasFocus</visible>
                 <control type="image" id ="220">
                     <!--
                     <posx>0</posx>
