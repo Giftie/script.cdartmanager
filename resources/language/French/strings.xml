@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-02 04:01+0000 -->
+<!-- translation date: 2012-09-27 03:22+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistes Reconnus</string>
@@ -117,7 +117,7 @@
   <string id="32112">MAJ des Fanarts et des Miniatures</string>
   <string id="32113">MAJ terminee des Fanarts et Miniatures</string>
   <string id="32114">Verifie que les MBIDs de la BDD sont identiques aux derniers de Musicbrainz</string>
-  <string id="32115">Notifier durant la construction de la BDD en arriere-plan</string>
+  <string id="32115">Notify while in Background mode</string>
   <string id="32116">Notifier a la fin de la construction de la BDD (affichee pendant 2 secondes)</string>
   <string id="32117">Construction de la BDD terminee</string>
   <string id="32118">Construction de la BDD en arriere-plan en cours... Sortie du script...</string>
@@ -174,4 +174,12 @@
   <string id="32169">400px X 155px</string>
   <string id="32170">800px X 310px</string>
   <string id="32171">Enable HD Music LOGOs</string>
+  <string id="32172">Backup addon database during update</string>
+  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
+  <string id="32174">Number of possible MBID matches:</string>
+  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
+  <string id="32176">   illegal characters to replace</string>
+  <string id="32177">   replacement character</string>
+  <string id="32178">Yes</string>
+  <string id="32179">No</string>
 </strings>

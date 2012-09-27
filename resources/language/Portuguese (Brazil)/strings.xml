@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-02 03:13+0000 -->
+<!-- translation date: 2012-09-27 03:22+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
@@ -117,7 +117,7 @@
   <string id="32112">Atualizando miniaturas e fanarts</string>
   <string id="32113">Terminou de atualizar Miniaturas e fanarts</string>
   <string id="32114">Verificar se o Banco de Dados MBID´s é o atual durante atualização </string>
-  <string id="32115">Notificar Durante a construção do Database</string>
+  <string id="32115">Notify while in Background mode</string>
   <string id="32116">Notificar ao final da construção do Database em Background(2 segundos)</string>
   <string id="32117">Construção do Banco de Dados completado</string>
   <string id="32118">Construindo o Banco de Dados - em progresso...  Saíndo do Script...</string>
@@ -170,8 +170,16 @@
   <string id="32165">Entre nome do Álbum para procurar</string>
   <string id="32166">Selecione Álbum</string>
   <string id="32167">Digite Álbum MBID - Incluindo traços (36 caracteres)</string>
-  <string id="32168">Artist Banners</string>
+  <string id="32168">Banners de Artistas</string>
   <string id="32169">400px X 155px</string>
   <string id="32170">800px X 310px</string>
-  <string id="32171">Enable HD Music LOGOs</string>
+  <string id="32171">Ativar Logos de Músicas em formato HD</string>
+  <string id="32172">Backup da base de dados do addon durante atualização</string>
+  <string id="32173">Número de dias para cache dados fanart.tv(Agendar)[CR]Cache será limpado com uso manual do cdART Manager.</string>
+  <string id="32174">Number of possible MBID matches:</string>
+  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
+  <string id="32176">   illegal characters to replace</string>
+  <string id="32177">   replacement character</string>
+  <string id="32178">Yes</string>
+  <string id="32179">No</string>
 </strings>

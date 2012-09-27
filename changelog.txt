@@ -1,10 +1,19 @@
+2.7.5
+- Add - skin property for scheduler service script
+- Add - ability to update database from outside of script
+- Fix - errors when update runs in background
+- Add - cache fanart.tv data for when The Scheduler is used(adjustable, preset to 3 days, but adjustable from 1 to 7)
+- Fix - MusicBrainz xml changes
+- Add - illegal character replacement in artist name for saving
+- Fix - script was downloading the same artwork(clearLOGOs)
+- Change - change method to create dialogs and logging
+
 2.7.4
 - Add - Add support for the new Artwork available from fanart.tv(HD Music Logos, Music Banners)
 - Add - Add setting to enable/disable the New HD Music logos, enabled will overwrite older clearLOGO during an auto download
 - Add - Add autobanner to the auto download start mode
 - Update - Updated French strings - Thanks Hellnino18
 - Update - Updated German strings - Thanks solidsatras
-- Update - Updated Portuguese (Brazil) - Thanks Wanilton
 
 2.7.3
 - Fix - Change LF to CRLF in missing.txt file

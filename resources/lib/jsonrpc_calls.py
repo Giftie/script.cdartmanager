@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-# script.cdart.manager 
-# jsonrpc_calls
+# script.cdartmanager 
+# jsonrpc_calls.py
 
 import xbmc, xbmcaddon, xbmcvfs
 import os, sys
 from json_utils import retrieve_json_dict
+import utils
 
 __XBMCisFrodo__   = sys.modules[ "__main__" ].__XBMCisFrodo__
-
 empty = []
 
 def get_thumbnail_path( database_id, type ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Thumbnail Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Thumbnail Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
     if type in ( "cover", "cdart", "album" ) and database_id:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["thumbnail"], "albumid": %d}, "id": 1}''' % database_id
         json_thumb = retrieve_json_dict( json_query, items='albumdetails', force_log=False )
@@ -19,7 +19,7 @@ def get_thumbnail_path( database_id, type ):
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["thumbnail"], "artistid": %d}, "id": 1}''' % database_id
         json_thumb = retrieve_json_dict( json_query, items='artistdetails', force_log=False )
     else:
-        xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Improper type or database_id", xbmc.LOGDEBUG )
+        utils.log( "jsonrpc_calls.py - Improper type or database_id", xbmc.LOGDEBUG )
         return empty
     if json_thumb:
         return json_thumb["thumbnail"]
@@ -27,7 +27,7 @@ def get_thumbnail_path( database_id, type ):
         return empty
         
 def get_fanart_path( database_id, type ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Fanart Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Fanart Path for %s id: %s" % ( type, database_id ), xbmc.LOGDEBUG )
     if type in ( "cover", "cdart", "album" ) and database_id:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["fanart"], "albumid": %d}, "id": 1}''' % database_id
         json_fanart = retrieve_json_dict( json_query, items='albumdetails', force_log=False )
@@ -35,7 +35,7 @@ def get_fanart_path( database_id, type ):
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["fanart"], "artistid": %d}, "id": 1}''' % database_id
         json_fanart = retrieve_json_dict( json_query, items='artistdetails', force_log=False )
     else:
-        xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Improper type or database_id", xbmc.LOGDEBUG )
+        utils.log( "jsonrpc_calls.py - Improper type or database_id", xbmc.LOGDEBUG )
         return empty
     if json_fanart:
         return json_fanart["fanart"]
@@ -43,7 +43,7 @@ def get_fanart_path( database_id, type ):
         return empty
         
 def get_all_local_artists( all_artists = True ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving all local artists", xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving all local artists", xbmc.LOGDEBUG )
     if all_artists:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtists", "params": { "albumartistsonly": false }, "id": 1}'''
     else:
@@ -55,7 +55,7 @@ def get_all_local_artists( all_artists = True ):
         return empty
 
 def retrieve_artist_details( artist_id ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Path", xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Album Path", xbmc.LOGDEBUG )
     json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["musicbrainzartistid"], "artistid": %d}, "id": 1}''' % artist_id
     json_artist_details = retrieve_json_dict(json_query, items='artistdetails', force_log=False )
     if json_artist_details:
@@ -64,7 +64,7 @@ def retrieve_artist_details( artist_id ):
         return empty
         
 def retrieve_album_list():
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album List"        , xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Album List"        , xbmc.LOGDEBUG )
     json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist", "musicbrainzalbumid", "musicbrainzalbumartistid"], "sort": {"order":"ascending"}}, "id": 1}'''
     json_albums = retrieve_json_dict(json_query, items='albums', force_log=False )
     if json_albums:
@@ -73,7 +73,7 @@ def retrieve_album_list():
         return empty, 0
     
 def retrieve_album_details( album_id ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Details", xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Album Details", xbmc.LOGDEBUG )
     album_details = []
     json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["artist", "title", "musicbrainzalbumid", "musicbrainzalbumartistid"], "albumid": %d}, "id": 1}''' % album_id
     json_album_details = retrieve_json_dict(json_query, items='albumdetails', force_log=False )
@@ -84,7 +84,7 @@ def retrieve_album_details( album_id ):
         return empty
 
 def get_album_path( album_id ):
-    xbmc.log( "[script.cdartmanager] - jsonrpc_calls - Retrieving Album Path", xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Album Path", xbmc.LOGDEBUG )
     paths = []
     if not __XBMCisFrodo__:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "properties": ["file", "musicbrainzalbumartistid"], "sort": {"method":"fullpath","order":"ascending"}}, "id": 1}''' % album_id

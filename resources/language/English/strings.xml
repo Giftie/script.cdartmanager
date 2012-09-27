@@ -117,7 +117,7 @@
   <string id="32112">Updating Thumbnails and Fanarts</string>
   <string id="32113">Finished updating Thumbnails and Fanarts</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">Notify During Background Database Build</string>
+  <string id="32115">Notify while in Background mode</string>
   <string id="32116">Notify At End of Background Database Build(displayed for 2 seconds)</string>
   <string id="32117">Database Building completed</string>
   <string id="32118">Background Database building in progress...  Exiting Script...</string>
@@ -174,4 +174,12 @@
   <string id="32169">400px X 155px</string>
   <string id="32170">800px X 310px</string>
   <string id="32171">Enable HD Music LOGOs</string>
+  <string id="32172">Backup addon database during update</string>
+  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets cleared with manual use of cdART Manager</string>
+  <string id="32174">Number of possible MBID matches:</string>
+  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
+  <string id="32176">   illegal characters to replace</string>
+  <string id="32177">   replacement character</string>
+  <string id="32178">Yes</string>
+  <string id="32179">No</string>
 </strings>

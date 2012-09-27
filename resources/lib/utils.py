@@ -8,21 +8,26 @@ try:
     from sqlite3 import dbapi2 as sqlite3
 except:
     from pysqlite2 import dbapi2 as sqlite3
-__language__      = sys.modules[ "__main__" ].__language__
-__scriptname__    = sys.modules[ "__main__" ].__scriptname__
-__scriptID__      = sys.modules[ "__main__" ].__scriptID__
-__author__        = sys.modules[ "__main__" ].__author__
-__credits__       = sys.modules[ "__main__" ].__credits__
-__credits2__      = sys.modules[ "__main__" ].__credits2__
-__version__       = sys.modules[ "__main__" ].__version__
-__addon__         = sys.modules[ "__main__" ].__addon__
-addon_db          = sys.modules[ "__main__" ].addon_db
-addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
-tempxml_folder    = os.path.join( addon_work_folder, "tempxml" )
-__useragent__     = sys.modules[ "__main__" ].__useragent__
-BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+__language__           = sys.modules[ "__main__" ].__language__
+__scriptname__         = sys.modules[ "__main__" ].__scriptname__
+__scriptID__           = sys.modules[ "__main__" ].__scriptID__
+__author__             = sys.modules[ "__main__" ].__author__
+__credits__            = sys.modules[ "__main__" ].__credits__
+__credits2__           = sys.modules[ "__main__" ].__credits2__
+__version__            = sys.modules[ "__main__" ].__version__
+__addon__              = sys.modules[ "__main__" ].__addon__
+addon_db               = sys.modules[ "__main__" ].addon_db
+addon_work_folder      = sys.modules[ "__main__" ].addon_work_folder
+tempxml_folder         = os.path.join( addon_work_folder, "tempxml" )
+__useragent__          = sys.modules[ "__main__" ].__useragent__
+BASE_RESOURCE_PATH     = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+illegal_characters     = sys.modules[ "__main__" ].illegal_characters
+replace_character      = sys.modules[ "__main__" ].replace_character
+enable_replace_illegal = sys.modules[ "__main__" ].enable_replace_illegal
+notify_in_background   = sys.modules[ "__main__" ].notify_in_background
+image                  = sys.modules[ "__main__" ].image
 
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+#sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from file_item import Thumbnails
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 from xbmcvfs import delete as delete_file
@@ -30,7 +35,23 @@ from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
 from xbmcvfs import mkdir
 
-pDialog = xbmcgui.DialogProgress()
+dialog = xbmcgui.DialogProgress()
+
+def change_characters( text ):
+    original = list( text )
+    final = []
+    if enable_replace_illegal:
+        for i in original:
+            if i in illegal_characters:
+                final.append( replace_character )
+            else:
+                final.append( i )
+        temp = "".join(final)
+        if temp.endswith("."):
+            text = temp[:len(temp)-1] + replace_character
+        else:
+            text = temp
+    return text
 
 def get_unicode( to_decode ):
     final = []
@@ -53,7 +74,7 @@ def get_unicode( to_decode ):
             
 def settings_to_log( settings_path, script_heading="[utils.py]" ):
     try:
-        xbmc.log( "%s - Settings\n" % script_heading, level=xbmc.LOGDEBUG)
+        log( "Settings\n", xbmc.LOGDEBUG)
         # set base watched file path
         base_path = os.path.join( settings_path, "settings.xml" )
         # open path
@@ -64,13 +85,15 @@ def settings_to_log( settings_path, script_heading="[utils.py]" ):
         usock.close()
         for set in settings_list:
             match = re.search('    <setting id="(.*?)" value="(.*?)"', set)
+            if not match:
+                match = re.search("""    <setting id="(.*?)" value='(.*?)'""", set)
             if match:
-                xbmc.log( "%s - %30s: %s" % ( script_heading, match.group(1), match.group(2) ), level=xbmc.LOGDEBUG)
+                log( "%30s: %s" % ( match.group(1), str( unescape( match.group(2) ) ) ), xbmc.LOGDEBUG )
     except:
         traceback.print_exc()
                 
 def _makedirs( _path ):
-    xbmc.log( "[script.cdartmanager] - Building Directory", xbmc.LOGDEBUG )
+    log( "Building Directory", xbmc.LOGDEBUG )
     success = False
     canceled = False
     if ( exists( _path ) ): return True
@@ -116,7 +139,7 @@ def empty_tempxml_folder():
         
 def get_html_source( url, path, save_file = True ):
     """ fetch the html source """
-    xbmc.log( "[script.cdartmanager] - Retrieving HTML Source", xbmc.LOGDEBUG )
+    log( "Retrieving HTML Source", xbmc.LOGDEBUG )
     error = False
     htmlsource = ""
     file_name = ""
@@ -148,12 +171,12 @@ def get_html_source( url, path, save_file = True ):
             break
         except:
             print_exc()
-            xbmc.log( "[script.cdartmanager] - !!Unable to open page %s" % url, xbmc.LOGDEBUG )
+            log( "!!Unable to open page %s" % url, xbmc.LOGDEBUG )
             error = True
     if error:
         return htmlsource
     else:
-        xbmc.log( "[script.cdartmanager] - HTML Source:\n%s" % htmlsource, xbmc.LOGDEBUG )
+        log( "HTML Source:\n%s" % htmlsource, xbmc.LOGDEBUG )
         return htmlsource
 
 def unescape(text):
@@ -176,4 +199,58 @@ def unescape(text):
                 pass
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
- 
+
+# centralized Dialog function from Artwork Downloader
+# Define dialogs
+def dialog_msg(action,
+               percent = 0,
+               heading = '',
+               line1 = '',
+               line2 = '',
+               line3 = '',
+               background = False,
+               nolabel = __language__(32178),
+               yeslabel = __language__(32179)):
+    # Fix possible unicode errors 
+    heading = heading.encode( 'utf-8', 'ignore' )
+    line1 = line1.encode( 'utf-8', 'ignore' )
+    line2 = line2.encode( 'utf-8', 'ignore' )
+    line3 = line3.encode( 'utf-8', 'ignore' )
+
+    # Dialog logic
+    if not heading == '':
+        heading = __scriptname__ + " - " + heading
+    else:
+        heading = __scriptname__
+    if not background:
+        if action == 'create':
+            dialog.create( heading, line1, line2, line3 )
+        if action == 'update':
+            dialog.update( percent, line1, line2, line3 )
+        if action == 'close':
+            dialog.close()
+        if action == 'iscanceled':
+            if dialog.iscanceled():
+                return True
+            else:
+                return False
+        if action == 'okdialog':
+            xbmcgui.Dialog().ok(heading, line1, line2, line3)
+        if action == 'yesno':
+            return xbmcgui.Dialog().yesno(heading, line1, line2, line3, nolabel, yeslabel)
+    if background:
+        if (action == 'create' or action == 'okdialog'):
+            if line2 == '':
+                msg = line1
+            else:
+                msg = line1 + ': ' + line2
+            if notify_in_background:
+                xbmc.executebuiltin("XBMC.Notification(%s, %s, 7500, %s)" % ( heading , msg, image ))
+
+def log( text, severity=xbmc.LOGDEBUG ):
+    try:
+        message = ('[%s] - %s' % ( __scriptname__ ,text) )
+        xbmc.log( msg=message, level=severity)
+    except:
+        message = repr('[%s] - %s' % ( __scriptname__ ,text) )
+        xbmc.log( msg=message, level=severity )

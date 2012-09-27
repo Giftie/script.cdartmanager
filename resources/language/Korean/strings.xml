@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-02 03:13+0000 -->
+<!-- translation date: 2012-09-27 03:22+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">인식된 아티스트</string>
@@ -117,7 +117,7 @@
   <string id="32112">미리보기와 팬아트 업데이트 중</string>
   <string id="32113">미리보기와 팬아트 업데이트 완료</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">백그라운드 데이터베이스 작성 중 알림</string>
+  <string id="32115">Notify while in Background mode</string>
   <string id="32116">백그라운드 데이터베이스 작성이 끝나면 알림 (2초간 표시)</string>
   <string id="32117">데이터베이스 작성 완료</string>
   <string id="32118">백그라운드 데이터베이스 작성 진행 중...  스크립트 종료...</string>
@@ -174,4 +174,12 @@
   <string id="32169">400px X 155px</string>
   <string id="32170">800px X 310px</string>
   <string id="32171">Enable HD Music LOGOs</string>
+  <string id="32172">Backup addon database during update</string>
+  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
+  <string id="32174">Number of possible MBID matches:</string>
+  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
+  <string id="32176">   illegal characters to replace</string>
+  <string id="32177">   replacement character</string>
+  <string id="32178">Yes</string>
+  <string id="32179">No</string>
 </strings>
