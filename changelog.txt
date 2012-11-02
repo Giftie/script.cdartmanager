@@ -1,3 +1,11 @@
+2.7.6
+- Fix - Single artwork download
+- Fix - clean up recognized artist code
+- Change - skip artist if Distant MBID is missing, no point bugging fanart.tv for something it already reported that it does not have.
+- Add - Use internal XBMC Library MBID's if available
+- Fix - Frodo changes
+- Add - option to enable/disable replacing trailing period with illegal character replacement character
+
 2.7.5
 - Add - skin property for scheduler service script
 - Add - ability to update database from outside of script
