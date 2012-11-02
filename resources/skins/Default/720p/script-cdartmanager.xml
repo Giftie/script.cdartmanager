@@ -159,9 +159,9 @@ id      | description
 -->
 
 <window>
-    <defaultcontrol>1001</defaultcontrol>
+    <!--<defaultcontrol>1001</defaultcontrol>
     <animation effect="fade" time="250">WindowOpen</animation>
-    <animation effect="fade" time="250">WindowClose</animation>
+    <animation effect="fade" time="250">WindowClose</animation>-->
     <controls>
         <control type="group">
             <posx>0</posx>

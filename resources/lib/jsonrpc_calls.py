@@ -86,15 +86,22 @@ def retrieve_album_details( album_id ):
 def get_album_path( album_id ):
     utils.log( "jsonrpc_calls.py - Retrieving Album Path", xbmc.LOGDEBUG )
     paths = []
+    albumartistmbids = []
+    albumreleasembids = []
     if not __XBMCisFrodo__:
         json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": {"albumid": %d, "properties": ["file", "musicbrainzalbumartistid"], "sort": {"method":"fullpath","order":"ascending"}}, "id": 1}''' % album_id
     else:
-        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": { "properties": ["file", "musicbrainzalbumartistid"], "filter": { "albumid": %d }, "sort": {"method":"fullpath","order":"ascending"} }, "id": 1}''' % album_id
+        json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetSongs", "params": { "properties": ["file", "musicbrainzalbumartistid", "musicbrainzalbumid"], "filter": { "albumid": %d }, "sort": {"method":"path","order":"ascending"} }, "id": 1}''' % album_id
     json_songs_detail = retrieve_json_dict(json_query, items='songs', force_log=False )
     if json_songs_detail:
         for song in json_songs_detail:
             path = os.path.dirname( song['file'] )
             paths.append( path )
-        return paths
+            if __XBMCisFrodo__:
+                albumartistmbid = song['musicbrainzalbumartistid']
+                albumartistmbids.append( albumartistmbid )
+                albumreleasembid = song['musicbrainzalbumid']
+                albumreleasembids.append( albumreleasembid )
+        return paths, albumartistmbids, albumreleasembids
     else:
         return empty

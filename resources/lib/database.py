@@ -25,9 +25,10 @@ music_path            = sys.modules[ "__main__" ].music_path
 check_mbid            = sys.modules[ "__main__" ].check_mbid
 update_musicbraniz_id = sys.modules[ "__main__" ].update_musicbraniz_id
 enable_all_artists    = sys.modules[ "__main__" ].enable_all_artists
+backup_during_update  = sys.modules[ "__main__" ].backup_during_update
 image                 = sys.modules[ "__main__" ].image
 
-from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, check_mbid
+from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, mbid_check, get_musicbrainz_release_group
 from fanarttv_scraper import retrieve_fanarttv_xml, remote_cdart_list
 from utils import get_unicode, log, dialog_msg
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
@@ -78,6 +79,8 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
     percent = 1
     try:
         for detail in album_list:
+            if not detail["title"] and detail["label"]:  # check to see if title is empty and label contains something
+                detail["title"] = detail["label"]
             if dialog_msg( "iscanceled", background = background):
                 break
             album_count += 1
@@ -90,92 +93,141 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
             albumdetails = retrieve_album_details( album_id )
             if not albumdetails:
                 continue
-            for albums in albumdetails:
+            for album in albumdetails:
                 if dialog_msg( "iscanceled", background = background):
                     break
                 album_artist = {}
                 previous_path = ""
+                mbid_match = False
+                albumrelease_mbid = ""
+                albumartist_mbid = ""
                 if not update:
-                    paths = get_album_path( album_id )
+                    paths, albumartistmbids, albumreleasembids = get_album_path( album_id )
+                    if albumartistmbids:
+                        albumartist_mbid = albumartistmbids[0]
+                        for albumartistmbid in albumartistmbids:
+                            if albumartist_mbid == albumartistmbid:
+                                mbid_match = True
+                                log( "Found an Artist MBID in the Database: %s" % albumartist_mbid, xbmc.LOGDEBUG )
+                                continue
+                            else:
+                                mbid_match = False
+                        if not mbid_match:
+                            albumartist_mbid = ""
+                    if albumreleasembids:
+                        albumrelease_mbid = albumreleasembids[0]
+                        log( "Found an Album Release MBID in the Database: %s" % albumrelease_mbid, xbmc.LOGDEBUG )
                     if not paths:
                         continue
                 else:
                     paths = []
                     paths.append( detail['path'] )                    
                 for path in paths:
-                    if not background:
-                        if dialog_msg( "iscanceled", background = background):
-                            break
-                    album_artist = {}
-                    if path == previous_path:
-                        continue
-                    else:
-                        if xbmcvfs.exists(path):
-                            log( "Path Exists", xbmc.LOGDEBUG )
-                            try:
-                                album_artist["local_id"] = detail['local_id']  # for database update
-                            except:
-                                album_artist["local_id"] = detail['albumid']
-                            title = detail['title']
-                            album_artist["artist"] = get_unicode( artist_list_to_string( albums['artist'] ).split(" / ")[0] )
-                            album_artist["path"] = path
-                            album_artist["cdart"] = xbmcvfs.exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
-                            album_artist["cover"] = xbmcvfs.exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
-                            previous_path = path
-                            path_match = re.search( "(?:disc|cd)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
-                            if path_match:
-                                if not path_match.group(1):
-                                    path_match = re.search( "(?:disc|cd)(?: |_|-)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
-                            title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
-                            if title_match:
-                                if title_match.group(2):
-                                    log( "Title has CD count", xbmc.LOGDEBUG )
-                                    log( "    Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
-                                    album_artist["disc"] = int( title_match.group(2) )
-                                    album_artist["title"] = ( title_match.group( 1 ).replace(" -", "") ).rstrip()
+                    try:
+                        if not background:
+                            if dialog_msg( "iscanceled", background = background):
+                                break
+                        album_artist = {}
+                        if path == previous_path:
+                            continue
+                        else:
+                            if xbmcvfs.exists(path):
+                                log( "Path Exists", xbmc.LOGDEBUG )
+                                try:
+                                    album_artist["local_id"] = detail['local_id']  # for database update
+                                except:
+                                    album_artist["local_id"] = detail['albumid']
+                                title = detail['title']
+                                album_artist["artist"] = get_unicode( artist_list_to_string( album['artist'] ).split(" / ")[0] )
+                                album_artist["path"] = path
+                                album_artist["cdart"] = xbmcvfs.exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
+                                album_artist["cover"] = xbmcvfs.exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
+                                previous_path = path
+                                path_match = re.search( "(?:\\\\|/| - )(?:disc|cd)(?:\s|-|_|)([0-9]{0,3})" , path.replace("\\\\","\\"), re.I)
+                                title_match = re.search( "(.*?)(?:[\s]|[\(]|[\s][\(])(?:disc|cd)(?:[\s]|)([0-9]{0,3})(?:[\)]?.*?)" , title, re.I)
+                                if title_match:
+                                    if len( title_match.groups() ) > 1:
+                                        if title_match.group( 2 ):
+                                            log( "Title has CD count", xbmc.LOGDEBUG )
+                                            log( "    Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
+                                            album_artist["disc"] = int( title_match.group( 2 ) )
+                                            album_artist["title"] = ( title_match.group( 1 ).replace(" -", "") ).rstrip()
+                                        else:
+                                            if path_match:
+                                                if len( path_match.groups() ) > 0:
+                                                    if path_match.group( 1 ):
+                                                        log( "Path has CD count", xbmc.LOGDEBUG )
+                                                        log( "    Disc %s" % repr( path_match.group( 1 ) ), xbmc.LOGDEBUG )
+                                                        album_artist["disc"] = int( path_match.group( 1 ) )
+                                                    else:
+                                                        album_artist["disc"] = 1
+                                                else:
+                                                    album_artist["disc"] = 1
+                                            else:
+                                                album_artist["disc"] = 1
+                                            album_artist["title"] = ( title.replace(" -", "") ).rstrip()
+                                    else:
+                                        if path_match:
+                                            if len( path_match.groups() ) > 0:
+                                                if path_match.group( 1 ):
+                                                    log( "Path has CD count", xbmc.LOGDEBUG )
+                                                    log( "    Disc %s" % repr( path_match.group( 1 ) ), xbmc.LOGDEBUG )
+                                                    album_artist["disc"] = int( path_match.group( 1 ) )
+                                                else:
+                                                    album_artist["disc"] = 1
+                                            else:
+                                                album_artist["disc"] = 1
+                                        else:
+                                            album_artist["disc"] = 1
+                                        album_artist["title"] = ( title.replace(" -", "") ).rstrip()
                                 else:
                                     if path_match:
-                                        if path_match.group(1):
-                                            log( "Path has CD count", xbmc.LOGDEBUG )
-                                            log( "    Disc %s" % repr( path_match.group( 1 ) ), xbmc.LOGDEBUG )
-                                            album_artist["disc"] = int( path_match.group(1) )
+                                        if len( path_match.groups() ) > 0:
+                                            if path_match.group( 1 ):
+                                                log( "Path has CD count", xbmc.LOGDEBUG )
+                                                log( "    Disc %s" % repr( path_match.group( 1 ) ), xbmc.LOGDEBUG )
+                                                album_artist["disc"] = int( path_match.group( 1 ) )
+                                            else:
+                                                album_artist["disc"] = 1
                                         else:
                                             album_artist["disc"] = 1
                                     else:
                                         album_artist["disc"] = 1
                                     album_artist["title"] = ( title.replace(" -", "") ).rstrip()
+                                log( "Album Title: %s" % album_artist["title"], xbmc.LOGDEBUG )
+                                log( "Album Artist: %s" % album_artist["artist"], xbmc.LOGDEBUG )
+                                log( "Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
+                                log( "Album Path: %s" % album_artist["path"], xbmc.LOGDEBUG )
+                                log( "cdART Exists?: %s" % ( "False", "True" )[album_artist["cdart"]], xbmc.LOGDEBUG )
+                                log( "Cover Art Exists?: %s" % ( "False", "True" )[album_artist["cover"]], xbmc.LOGDEBUG )
+                                log( "Disc #: %s" % album_artist["disc"], xbmc.LOGDEBUG )
+                                if not simple:
+                                    album_artist["musicbrainz_artistid"] = ""
+                                    album_artist["musicbrainz_albumid"] = ""
+                                    if albumartist_mbid:
+                                        album_artist["musicbrainz_artistid"] = albumartist_mbid
+                                    if albumrelease_mbid:
+                                        album_artist["musicbrainz_albumid"] = get_musicbrainz_release_group( albumrelease_mbid )
+                                    if not album_artist["musicbrainz_albumid"]:
+                                        try:
+                                            album_artist["title"] = get_unicode( album_artist["title"] )
+                                            musicbrainz_albuminfo, discard = get_musicbrainz_album( album_artist["title"], album_artist["artist"], 0, 1 )
+                                            album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
+                                            album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
+                                        except:
+                                            traceback.print_exc()
+                                    log( "MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
+                                    log( "MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
+                                album_detail_list.append(album_artist)
+                                
                             else:
-                                if path_match:
-                                    if path_match.group(1):
-                                        log( "Path has CD count", xbmc.LOGDEBUG )
-                                        log( "    Disc %s" % repr( path_match.group( 1 ) ), xbmc.LOGDEBUG )
-                                        album_artist["disc"] = int( path_match.group(1) )
-                                    else:
-                                        album_artist["disc"] = 1
-                                else:
-                                    album_artist["disc"] = 1
-                                album_artist["title"] = ( title.replace(" -", "") ).rstrip()
-                            log( "Album Title: %s" % album_artist["title"], xbmc.LOGDEBUG )
-                            log( "Album Artist: %s" % album_artist["artist"], xbmc.LOGDEBUG )
-                            log( "Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
-                            log( "Album Path: %s" % album_artist["path"], xbmc.LOGDEBUG )
-                            log( "cdART Exists?: %s" % ( "False", "True" )[album_artist["cdart"]], xbmc.LOGDEBUG )
-                            log( "Cover Art Exists?: %s" % ( "False", "True" )[album_artist["cover"]], xbmc.LOGDEBUG )
-                            log( "Disc #: %s" % album_artist["disc"], xbmc.LOGDEBUG )
-                            album_detail_list.append(album_artist)
-                            if not simple:
-                                try:
-                                    album_artist["title"] = get_unicode( album_artist["title"] )
-                                    musicbrainz_albuminfo, discard = get_musicbrainz_album( album_artist["title"], album_artist["artist"], 0, 1 )
-                                except:
-                                    traceback.print_exc()
-                                album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
-                                album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
-                                log( "MusicBrainz AlbumId: %s" % album_artist["musicbrainz_albumid"], xbmc.LOGDEBUG )
-                                log( "MusicBrainz ArtistId: %s" % album_artist["musicbrainz_artistid"], xbmc.LOGDEBUG )
-                        else:
-                            log( "Path does not exist: %s" % repr( path ), xbmc.LOGDEBUG )
-                            break
+                                log( "Path does not exist: %s" % repr( path ), xbmc.LOGDEBUG )
+                                continue
+                    except:
+                        log( "Error Occured", xbmc.LOGDEBUG )
+                        log( "Title: %s" % detail['title'], xbmc.LOGDEBUG )
+                        log( "Path: %s" % path, xbmc.LOGDEBUG )
+                        traceback.print_exc()
     except:
         log( "Error Occured", xbmc.LOGDEBUG )
         traceback.print_exc()
@@ -382,7 +434,7 @@ def new_database_setup( background=False ):
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
     local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background )
     count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
-    if __addon__.getSetting("enable_all_artists") == "true":
+    if enable_all_artists:
         local_artist_count = build_local_artist_table( background )
     store_counts( local_artist_count, artist_count, album_count, cdart_existing )
     if dialog_msg( "iscanceled", background = background):
@@ -616,10 +668,10 @@ def check_album_mbid( albums, background=False ):
             canceled = True
             break
         dialog_msg( "update", percent = percent, line1 = __language__( 32150 ), line2 = "%s: %s" % ( __language__(32138), get_unicode( album["title"] ) ), line3 = "%s: %s" % ( __language__(32137), get_unicode( album["artist"] ) ), background = background )
-        if album["musicbrainz_artistid"]:
-            mbid_match, current_mbid = check_mbid( album["musicbrainz_artistid"], "artist" )
+        if album["musicbrainz_albumid"]:
+            mbid_match, current_mbid = mbid_check( album["musicbrainz_albumid"], "release-group" )
             if not mbid_match:
-                update_album["musicbrainz_artistid"] = current_mbid
+                update_album["musicbrainz_albumid"] = current_mbid
             xbmc.sleep( 900 )
         updated_albums.append( update_album )
     if not background:
@@ -652,7 +704,7 @@ def check_artist_mbid( artists, background=False, mode = "all_artists" ):
             break
         if update_artist["musicbrainz_artistid"]:
             dialog_msg( "update", percent = percent, line1 = __language__( 32149 ), line2 = "%s%s" % ( __language__(32125), update_artist["local_id"] ), line3 = "%s: %s" % ( __language__( 32137 ), get_unicode( update_artist["name"] ) ), background = background )
-            mbid_match, current_mbid = check_mbid( update_artist["musicbrainz_artistid"], "artist" )
+            mbid_match, current_mbid = mbid_check( update_artist["musicbrainz_artistid"], "artist" )
             if not mbid_match:
                 update_artist["musicbrainz_artistid"] = current_mbid
             xbmc.sleep( 900 )
@@ -727,7 +779,7 @@ def update_missing_album_mbid( albums, background=False ):
     
 def update_database( background=False ):
     log( "Updating Addon's DB", xbmc.LOGNOTICE )
-    if __addon__.getSetting( "backup_during_update" ) == "true":
+    if backup_during_update:
         backup_database()
     update_list = []
     new_list = []

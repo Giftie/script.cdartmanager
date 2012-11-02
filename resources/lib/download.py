@@ -8,6 +8,10 @@ try:
     from sqlite3 import dbapi2 as sqlite3
 except:
     from pysqlite2 import dbapi2 as sqlite3
+
+true = True
+false = False
+null = None
     
 __language__       = sys.modules[ "__main__" ].__language__
 __scriptname__     = sys.modules[ "__main__" ].__scriptname__
@@ -21,7 +25,7 @@ addon_db           = sys.modules[ "__main__" ].addon_db
 addon_work_folder  = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 __useragent__      = sys.modules[ "__main__" ].__useragent__
-resizeondownload   = __addon__.getSetting( "resizeondownload" )
+resizeondownload   = eval( __addon__.getSetting( "resizeondownload" ) )
 music_path         = sys.modules[ "__main__" ].music_path
 __XBMCisFrodo__    = sys.modules[ "__main__" ].__XBMCisFrodo__
 enable_hdlogos     = sys.modules[ "__main__" ].enable_hdlogos
@@ -144,17 +148,20 @@ def download_art( url_cdart, album, database_id, type, mode, size, background = 
         #this give the ability to use the progress bar by retrieving the downloading information
         #and calculating the percentage
         def _report_hook( count, blocksize, totalsize ):
-            percent = int( float( count * blocksize * 100 ) / totalsize )
-            if percent == 0:
+            try:
+                percent = int( float( count * blocksize * 100 ) / totalsize )
+                if percent < 1:
+                    percent = 1
+                if percent > 100:
+                    percent = 100
+            except:
                 percent = 1
-            if percent > 100:
-                percent = 100
             if type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ):
                 dialog_msg( "update", percent = percent, line1 = "%s%s" % ( __language__(32038) , get_unicode( album["artist"] ) ), background = background )
             else:
                 dialog_msg( "update", percent = percent, line1 = "%s%s" % ( __language__(32038) , get_unicode( album["artist"] ) ), line2 = "%s%s" % ( __language__(32039) , get_unicode( album["title"] ) ), background = background )
             if mode == "auto":
-                if dialog_msg( "iscanceled" ):
+                if dialog_msg( "iscanceled", background = background ):
                     is_canceled = True  
         if exists( path ):
             fp, h = urllib.urlretrieve(url_cdart, destination, _report_hook)
@@ -202,7 +209,7 @@ def download_art( url_cdart, album, database_id, type, mode, size, background = 
     if mode == "auto" or mode == "single":
         return message, download_success, final_destination, is_canceled  # returns one of the messages built based on success or lack of
     else:
-        pDialog.close()
+        dialog_msg( "close", background = background )
         return message, download_success, is_canceled
 
 def cdart_search( cdart_url, id, disc ):
@@ -244,8 +251,11 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                 is_canceled = True
                 break
             artist_count += 1
+            if not artist["distant_id"] or not artist["musicbrainz_artistid"]:
+            # If fanart.tv does not report that it has an artist match skip it.
+                continue
             percent = int( (artist_count / float(count_artist_local) ) * 100)
-            if percent == 0:
+            if percent < 1:
                 percent = 1
             if percent > 100:
                 percent = 100
@@ -256,8 +266,6 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                 temp_art = {}
                 temp_art["musicbrainz_artistid"] = artist["distant_id"]
                 auto_art["musicbrainz_artistid"] = artist["distant_id"]
-                if not auto_art["musicbrainz_artistid"]:
-                    continue
                 temp_art["artist"] = artist["name"]
                 auto_art["artist"] = artist["name"]
                 path = os.path.join( music_path, change_characters( artist["name"] ) )
@@ -307,14 +315,14 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                                 d_error = True
                     else:
                         if type == "clearlogo":
-                            if arthd and enable_hdlogos == "true":
+                            if arthd and enable_hdlogos:
                                 artwork = arthd[0]
                             else:
                                 artwork = art[0]
                         else:
                             artwork = art[0]
                         if type == "artistthumb":
-                            if resizeondownload == "true":
+                            if resizeondownload:
                                 low_res = check_size( auto_art["path"], key_label, 1000, 1000 )
                             if exists( os.path.join( auto_art["path"], "folder.jpg" ) ) and not low_res:
                                 log( "Artist Thumb already exists, skipping", xbmc.LOGDEBUG )
@@ -322,7 +330,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork , auto_art, artist["local_id"], "artistthumb", "auto", 0, background )
                         elif type == "clearlogo":
-                            if enable_hdlogos == "true" and resizeondownload == "true" and arthd:
+                            if enable_hdlogos and resizeondownload and arthd:
                                 low_res = check_size( auto_art["path"], key_label, 800, 310 )
                             else:
                                 low_res = False
@@ -361,20 +369,20 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                         log( "No artwork found", xbmc.LOGDEBUG )
                         break
                     album_count += 1
+                    if not album["musicbrainz_albumid"]:
+                        continue
                     dialog_msg( "update", percent = percent, line1 = "%s%s" % ( __language__(32038) , get_unicode( artist["name"] ) ), line2 = "%s%s" % (__language__(32039) , get_unicode( album["title"] ) ), background = background )
                     name = artist["name"]
                     title = album["title"]
                     log( "Album: %s" % album["title"], xbmc.LOGDEBUG )
-                    if not album[key_label] or resizeondownload == "true":
+                    if not album[key_label] or resizeondownload:
                         musicbrainz_albumid = album["musicbrainz_albumid"]
-                        if not musicbrainz_albumid:
-                            continue
                         art = artwork_search( remote_art_url, musicbrainz_albumid, album["disc"], key_label )
                         if art:
-                            if resizeondownload == "true":
+                            if resizeondownload:
                                 low_res = check_size( album["path"].replace( "\\\\", "\\" ), key_label, art["size"], art["size"] )
                             if art["picture"]: 
-                                log( "ALBUM MATCH FOUND", xbmc.LOGDEBUG )
+                                log( "ALBUM MATCH ON FANART.TV FOUND", xbmc.LOGDEBUG )
                                 #log( "test_album[0]: %s" % test_album[0], xbmc.LOGDEBUG )
                                 if low_res:
                                     message, d_success, final_destination, is_canceled = download_art( art["picture"], album, album["local_id"], key_label, "auto", 0, background )
@@ -390,9 +398,9 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                                 else:
                                     pass
                             else:
-                                log( "ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                                log( "ALBUM NOT MATCHED ON FANART.TV", xbmc.LOGDEBUG )
                         else:
-                            log( "ALBUM MATCH NOT FOUND", xbmc.LOGDEBUG )
+                            log( "ALBUM NOT MATCHED ON FANART.TV", xbmc.LOGDEBUG )
                     else:
                         log( "%s artwork file already exists, skipping..." % key_label, xbmc.LOGDEBUG )
         dialog_msg( "close", background = background )

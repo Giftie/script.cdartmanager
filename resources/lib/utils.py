@@ -25,6 +25,7 @@ illegal_characters     = sys.modules[ "__main__" ].illegal_characters
 replace_character      = sys.modules[ "__main__" ].replace_character
 enable_replace_illegal = sys.modules[ "__main__" ].enable_replace_illegal
 notify_in_background   = sys.modules[ "__main__" ].notify_in_background
+change_period_atend    = sys.modules[ "__main__" ].change_period_atend
 image                  = sys.modules[ "__main__" ].image
 
 #sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
@@ -47,7 +48,7 @@ def change_characters( text ):
             else:
                 final.append( i )
         temp = "".join(final)
-        if temp.endswith("."):
+        if temp.endswith(".") and change_period_atend:
             text = temp[:len(temp)-1] + replace_character
         else:
             text = temp
@@ -78,20 +79,20 @@ def settings_to_log( settings_path, script_heading="[utils.py]" ):
         # set base watched file path
         base_path = os.path.join( settings_path, "settings.xml" )
         # open path
-        usock = open( base_path, "r" )
-        u_read = usock.read()
-        settings_list = u_read.replace("<settings>\n","").replace("</settings>\n","").split("/>\n")
+        settings_file = open( base_path, "r" )
+        settings_file_read = settings_file.read()
+        settings_list = settings_file_read.replace("<settings>\n","").replace("</settings>\n","").split("/>\n")
         # close socket
-        usock.close()
-        for set in settings_list:
-            match = re.search('    <setting id="(.*?)" value="(.*?)"', set)
+        settings_file.close()
+        for setting in settings_list:
+            match = re.search('    <setting id="(.*?)" value="(.*?)"', setting)
             if not match:
-                match = re.search("""    <setting id="(.*?)" value='(.*?)'""", set)
+                match = re.search("""    <setting id="(.*?)" value='(.*?)'""", setting)
             if match:
                 log( "%30s: %s" % ( match.group(1), str( unescape( match.group(2) ) ) ), xbmc.LOGDEBUG )
     except:
         traceback.print_exc()
-                
+
 def _makedirs( _path ):
     log( "Building Directory", xbmc.LOGDEBUG )
     success = False
@@ -209,19 +210,24 @@ def dialog_msg(action,
                line2 = '',
                line3 = '',
                background = False,
-               nolabel = __language__(32178),
-               yeslabel = __language__(32179)):
+               nolabel = __language__(32179),
+               yeslabel = __language__(32178)):
     # Fix possible unicode errors 
     heading = heading.encode( 'utf-8', 'ignore' )
     line1 = line1.encode( 'utf-8', 'ignore' )
     line2 = line2.encode( 'utf-8', 'ignore' )
     line3 = line3.encode( 'utf-8', 'ignore' )
-
     # Dialog logic
     if not heading == '':
         heading = __scriptname__ + " - " + heading
     else:
         heading = __scriptname__
+    if not line1:
+        line1 = ""
+    if not line2:
+        line2 = ""
+    if not line3:
+        line3 = ""
     if not background:
         if action == 'create':
             dialog.create( heading, line1, line2, line3 )

@@ -40,6 +40,7 @@ safe_db_version      = sys.modules[ "__main__" ].__dbversion__
 skin_art_path        = sys.modules[ "__main__" ].skin_art_path
 safe_db_version      = __dbversion__
 enable_all_artists   = sys.modules[ "__main__" ].enable_all_artists
+enable_missing       = sys.modules[ "__main__" ].enable_missing
 
 # script imports
 from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
@@ -58,6 +59,7 @@ kb      = xbmc.Keyboard()
 
 KEY_BUTTON_BACK  = 275
 KEY_KEYBOARD_ESC = 61467
+colours = ( "green", "blue", "red", "yellow", "orange", "white", "cyan", "violet", "pink" )
 
 class GUI( xbmcgui.WindowXMLDialog ):
     def __init__( self, *args, **kwargs ):
@@ -65,24 +67,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
         
     def onInit( self ):
         self.setup_colors()
-        try:
-            self.setup_all()
-        except:
-            traceback.print_exc()
-            try:
-                pDialog.close()
-            except:
-                pass            
+        self.setup_all()
 
     def setup_colors( self ):
-        if __addon__.getSetting( "enablecustom" ) == "true":
-            self.recognized_color   = str.lower( __addon__.getSetting( "recognized" ) )
-            self.unrecognized_color = str.lower( __addon__.getSetting( "unrecognized" ) )
-            self.remote_color       = str.lower( __addon__.getSetting( "remote" ) )
-            self.local_color        = str.lower( __addon__.getSetting( "local" ) )
-            self.remotelocal_color  = str.lower( __addon__.getSetting( "remotelocal" ) )
-            self.unmatched_color    = str.lower( __addon__.getSetting( "unmatched" ) )
-            self.localcdart_color   = str.lower( __addon__.getSetting( "localcdart" ) )
+        if enablecustom:
+            self.recognized_color   = colours[ int( __addon__.getSetting( "recognized" ) ) ]
+            self.unrecognized_color = colours[ int( __addon__.getSetting( "unrecognized" ) ) ]
+            self.remote_color       = colours[ int( __addon__.getSetting( "remote" ) ) ]
+            self.local_color        = colours[ int( __addon__.getSetting( "local" ) ) ]
+            self.remotelocal_color  = colours[ int( __addon__.getSetting( "remotelocal" ) ) ]
+            self.unmatched_color    = colours[ int( __addon__.getSetting( "unmatched" ) ) ]
+            self.localcdart_color   = colours[ int( __addon__.getSetting( "localcdart" ) ) ]
         else:
             self.recognized_color   = "green"
             self.unrecognized_color = "white"
@@ -376,7 +371,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         not_found = False
         try:
             clearlogo = remote_clearlogo_list( artist_menu )
-            if enable_hdlogos == "true":
+            if enable_hdlogos:
                 hdlogo = remote_hdlogo_list( artist_menu )
             if clearlogo:
                 for artwork in clearlogo:
@@ -637,7 +632,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
 
     def restore_from_backup( self ):
         log( "Restoring cdARTs from backup folder", xbmc.LOGNOTICE )
-        pDialog.create( __language__(32069) )
+        dialog_msg( "create", heading = __language__(32069) )
         #Onscreen Dialog - Restoring cdARTs from backup...
         bkup_folder = __addon__.getSetting("backup_path")
         if not bkup_folder:
@@ -646,7 +641,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         else:
             pass
         self.copy_cdarts(bkup_folder)
-        pDialog.close()
+        dialog_msg( "close" )
         
     def copy_cdarts( self, from_folder ): 
         log( "Copying cdARTs from: %s" % repr(from_folder), xbmc.LOGNOTICE )
@@ -669,7 +664,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         log( "total albums: %s" % total_albums, xbmc.LOGNOTICE )
         dialog_msg( "create", heading = __language__(32069) )
         for album in local_db:
-            if (pDialog.iscanceled()):
+            if dialog_msg( "iscanceled" ):
                 break
             log( "Artist: %-30s  ##  Album: %s" % (repr(album["artist"]), repr(album["title"])), xbmc.LOGNOTICE )
             log( "Album Path: %s" % repr(album["path"]), xbmc.LOGNOTICE )
@@ -742,7 +737,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         albums = get_local_albums_db( "all artists", self.background )
         dialog_msg( "create", heading = __language__(32060) )
         for album in albums:
-            if (pDialog.iscanceled()):
+            if dialog_msg( "iscanceled" ):
                 break
             if album["cdart"]:
                 source=os.path.join( album["path"].replace( "\\\\" , "\\" ), "cdart.png" )
@@ -885,7 +880,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     artistthumb = "X"
                 if xbmcvfs.exists( musicbanner_path ):
                     musicbanner = "X"
-                if not xbmcvfs.exists( fanart_path ) or not xbmcvfs.exists( clearlogo_path ) or not xbmcvfs.exists( artistthumb_path ):
+                if not xbmcvfs.exists( fanart_path ) or not xbmcvfs.exists( clearlogo_path ) or not xbmcvfs.exists( artistthumb_path ) or not xbmcvfs.exists( musicbanner_path ):
                     line = "|  %-45s| %-70s|    %s   |    %s      |      %s       |      %s       |\r\n" % ( artist["musicbrainz_artistid"], artist["name"], fanart, clearlogo, artistthumb, musicbanner )
                 if line:
                     try:
@@ -944,9 +939,9 @@ class GUI( xbmcgui.WindowXMLDialog ):
         #self.getControl( 402 ).setLabel( line2 )
         #self.getControl( 403 ).setLabel( line3 )
         #self.getControl( 9012 ).setVisible( True )
-        pDialog.create( header, line1, line2, line3 )
+        dialog_msg( "create", header = header, line1 = line1, line2 = line2, line3 = line3 )
         xbmc.sleep(2000)
-        pDialog.close()
+        dialog_msg( "close" )
         #self.getControl( 9012 ).setVisible( False ) 
 
     def get_mbid_keyboard( self, type = "artist" ):
@@ -1191,7 +1186,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 c.close()
             distant_artist = get_distant_artists()
             local_artists = get_local_artists_db( mode="album_artists" )
-            if __addon__.getSetting("enable_all_artists") == "true":
+            if enable_all_artists:
                 all_artists = get_local_artists_db( mode="all_artists" )
             else:
                 all_artists = []
@@ -1205,7 +1200,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             elif self.menu_mode == 10:
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 145 ).reset()
-                if __addon__.getSetting("enable_all_artists") == "true":
+                if enable_all_artists:
                     self.local_artists = all_artists
                 else:
                     self.local_artists = local_artists
@@ -1238,14 +1233,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     message, d_success, is_canceled = download_art( url, cdart_path, database_id, "cdart", "manual", 0 )
                 elif self.menu_mode == 3:
                     message, d_success, is_canceled = download_art( url, cdart_path, database_id, "cover", "manual", 0 )
-                try:
-                    pDialog.close()
-                except:
-                    pass # pDialog not open anyways
-                try:
-                    xbmcgui.Dialog().ok( message[0], message[1], message[2], message[3] )
-                except:
-                    xbmcgui.Dialog().ok( message[0], message[1], repr( message[2] ), repr( message[3] ) )
+                dialog_msg( "close" )
+                dialog_msg( "ok", heading = message[0], line1 = message[1], line2 = message[2], line3 = message[3] )
             else : # If it is not a recognized Album...
                 log( "Oops --  Some how I got here... - ControlID(122)", xbmc.LOGDEBUG )
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
@@ -1277,13 +1266,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32139), 2000, image) )
         if controlId == 191 : #Refresh Local database selected from Advanced Menu
             refresh_db( False )
-            try:
-                pDialog.close()
-            except:
-                pass
+            dialog_msg( "close" )
             distant_artist = get_distant_artists()
             local_artists = get_local_artists_db( mode="album_artists" )
-            if __addon__.getSetting("enable_all_artists") == "true":
+            if enable_all_artists:
                 all_artists = get_local_artists_db( mode="all_artists" )
             else:
                 all_artists = []
@@ -1293,13 +1279,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         if controlId == 192: #Update database
             update_database( False )
-            try:
-                pDialog.close()
-            except:
-                pass
+            dialog_msg( "close" )
             distant_artist = get_distant_artists()
             local_artists = get_local_artists_db( mode="album_artists" )
-            if __addon__.getSetting("enable_all_artists") == "true":
+            if enable_all_artists:
                 all_artists = get_local_artists_db( mode="all_artists" )
             else:
                 all_artists = []
@@ -1369,7 +1352,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 111 : #Exit
             self.menu_mode = 0
             empty_tempxml_folder()
-            if __addon__.getSetting("enable_missing") == "true":
+            if enable_missing:
                 self.missing_list()
             self.close()
         if controlId in ( 180, 181 ): # fanart Search Album Artists
@@ -1417,7 +1400,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.recognized_artists = self.album_recognized_artists
                 self.local_artists = self.album_artists
                 self.populate_artist_list( self.recognized_artists )
-            elif controlId in ( 181, 185, 198, 206 ) and __addon__.getSetting("enable_all_artists") == "true":
+            elif controlId in ( 181, 185, 198, 206 ) and enable_all_artists:
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 120 ).reset()
                 self.recognized_artists = self.all_artists_recognized
@@ -1507,7 +1490,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
                 if successfully_downloaded:
                     self.populate_downloaded( successfully_downloaded, self.artwork_type )
-            if controlId in ( 183, 187, 196, 208 ) and __addon__.getSetting("enable_all_artists") == "true":
+            if controlId in ( 183, 187, 196, 208 ) and enable_all_artists:
                 self.recognized_artists = self.all_artists_recognized
                 self.local_artists = self.all_artists_list
                 if controlId == 187:# ClearLOGOs All Artists
@@ -1530,7 +1513,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 189: # Edit By Album
             self.setFocusId( 123 )
         if controlId == 115: # Find Missing Artist MBIDs
-            if __addon__.getSetting("enable_all_artists") == "true":
+            if enable_all_artists:
                 updated_artists, canceled = update_missing_artist_mbid( empty, False, mode="all_artists" )
             else:
                 updated_artists, canceled = update_missing_artist_mbid( empty, False, mode="album_artists" )
@@ -1587,7 +1570,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             self.getControl( 145 ).reset()
             self.menu_mode = 10
-            if __addon__.getSetting("enable_all_artists") == "true":
+            if enable_all_artists:
                 self.local_artists = get_local_artists_db( "all_artists")
             else:
                 self.local_artists = get_local_artists_db( "album_artists")
@@ -1682,7 +1665,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 c.close()
                 self.getControl( 145 ).reset()
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
-                if __addon__.getSetting("enable_all_artists") == "true":
+                if enable_all_artists:
                     self.local_artists = get_local_artists_db( "all_artists")
                 else:
                     self.local_artists = get_local_artists_db( "album_artists")
@@ -1725,28 +1708,25 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
             empty_tempxml_folder()
-            if __addon__.getSetting("enable_missing") == "true":
+            if enable_missing:
                 self.missing_list()
         if actionID == 10:
             log( "Closing", xbmc.LOGNOTICE )
-            try:
-                pDialog.close()
-            except:
-                pass
+            dialog_msg( "close" )
             empty_tempxml_folder()
-            if __addon__.getSetting("enable_missing") == "true":
+            if enable_missing:
                 self.missing_list()
             self.close()
 
 def onAction( self, action ):
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             empty_tempxml_folder()
-            if __addon__.getSetting("enable_missing") == "true":
+            if enable_missing:
                 self.missing_list()
             self.close()
     if ( action.getButtonCode() in CANCEL_DIALOG ):
         log( "Closing", xbmc.LOGNOTICE )
         empty_tempxml_folder()
-        if __addon__.getSetting("enable_missing") == "true":
+        if enable_missing:
             self.missing_list()
         self.close()

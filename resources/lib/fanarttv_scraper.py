@@ -7,18 +7,19 @@ import urllib
 from traceback import print_exc
 from urllib import quote_plus, unquote_plus
 
-__language__      = sys.modules[ "__main__" ].__language__
-__scriptname__    = sys.modules[ "__main__" ].__scriptname__
-__scriptID__      = sys.modules[ "__main__" ].__scriptID__
-__author__        = sys.modules[ "__main__" ].__author__
-__credits__       = sys.modules[ "__main__" ].__credits__
-__credits2__      = sys.modules[ "__main__" ].__credits2__
-__version__       = sys.modules[ "__main__" ].__version__
-__addon__         = sys.modules[ "__main__" ].__addon__
-addon_db          = sys.modules[ "__main__" ].addon_db
-addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
-BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
-api_key           = sys.modules[ "__main__" ].api_key
+__language__        = sys.modules[ "__main__" ].__language__
+__scriptname__      = sys.modules[ "__main__" ].__scriptname__
+__scriptID__        = sys.modules[ "__main__" ].__scriptID__
+__author__          = sys.modules[ "__main__" ].__author__
+__credits__         = sys.modules[ "__main__" ].__credits__
+__credits2__        = sys.modules[ "__main__" ].__credits2__
+__version__         = sys.modules[ "__main__" ].__version__
+__addon__           = sys.modules[ "__main__" ].__addon__
+addon_db            = sys.modules[ "__main__" ].addon_db
+addon_work_folder   = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH  = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+api_key             = sys.modules[ "__main__" ].api_key
+enable_all_artists  = sys.modules[ "__main__" ].enable_all_artists
 
 #sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source, unescape, log, dialog_msg
@@ -41,8 +42,11 @@ def remote_cdart_list( artist_menu ):
                     for cdart in artwork["cdart"]:
                         album = {}
                         album["artistl_id"] = artist_menu["local_id"]
-                        album["artistd_id"] = artist_menu["distant_id"]
-                        album["local_name"] = album["artist"] = artist_menu["name"]
+                        album["artistd_id"] = artist_menu["musicbrainz_artistid"]
+                        try:
+                            album["local_name"] = album["artist"] = artist_menu["name"]
+                        except KeyError:
+                            album["local_name"] = album["artist"] = artist_menu["artist"]
                         album["musicbrainz_albumid"] = artwork["musicbrainz_albumid"]
                         album["disc"] = cdart["disc"]
                         album["size"] = cdart["size"]
@@ -241,11 +245,12 @@ def get_distant_artists():
     log( "Retrieving Distant Artists", xbmc.LOGDEBUG )
     distant_artists = []
     htmlsource = get_html_source( artist_url % api_key, "distant" )
-    match = re.compile( '<artist id="(.*?)" name="(.*?)"/>', re.DOTALL )
+    match = re.compile( '<artist id="(.*?)" name="(.*?)" newimages="(?:.*?)" totalimages="(?:.*?)"/>', re.DOTALL )
     for item in match.finditer( htmlsource ):
         distant = {}
         distant["name"] = unescape( ( item.group(2).replace("&amp;", "&") ) )
         distant["id"] = ( item.group(1) )
+        #print distant
         distant_artists.append(distant)
     return distant_artists
 
@@ -270,10 +275,17 @@ def match_artists( distant, artists, background=False ):
                 matched_count += 1
                 matched = True
                 artist["distant_id"] = d_artist["id"]
-                break                
+                break
+            elif artist["musicbrainz_artistid"] == d_artist["id"]:
+                #print "name missing, adding anyways"
+                matched_count += 1
+                matched = True
+                artist["distant_id"] = d_artist["id"]
+                break
             else:
                 artist["distant_id"] = ""
                 matched = False
+        #print artist
         recognized.append(artist)
         artist_list.append(artist)
         dialog_msg( "update", percent = percent, line1 =  __language__(32049) % matched_count, background = background )
@@ -294,7 +306,7 @@ def get_recognized( distant, all_artists, album_artists, background=False ):
     dialog_msg( "create", heading = __language__(32048), background = background )
     #Onscreen dialog - Retrieving Recognized Artist List....
     recognized, artist_list, matched, canceled = match_artists( distant, album_artists, background )
-    if __addon__.getSetting("enable_all_artists") == "true" and all_artists:
+    if enable_all_artists and all_artists:
         recognized_album, all_artist_list, matched, canceled = match_artists( distant, all_artists, background )
     if not matched and not canceled:
         log( "No Matches found.  Compare Artist and Album names with fanart.tv", xbmc.LOGNOTICE )

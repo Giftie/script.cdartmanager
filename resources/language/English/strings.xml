@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-02 03:13+0000 -->
+<!-- translation date: 2012-10-21 17:52+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Recognized Artists</string>
@@ -16,8 +16,8 @@
   <string id="32010">Local Discs: %s</string>
   <string id="32011">Advanced</string>
   <string id="32012">Refresh Addon Database</string>
-  <string id="32013">Clean XBMC's Music Database</string>
-  <string id="32014">Update XBMC's Music Database</string>
+  <string id="32013">Clean XBMC's Music Library</string>
+  <string id="32014">Update XBMC's Music Library</string>
   <string id="32015">Delete Addon's Database?</string>
   <string id="32016">Disc:</string>
   <string id="32017">Local cdART List saving folder</string>
@@ -102,7 +102,7 @@
   <string id="32096">Duplicates Found</string>
   <string id="32097">    Resize Unique cdARTs?</string>
   <string id="32098">Local cdART List</string>
-  <string id="32099">Build Database in background</string>
+  <string id="32099">Build Addon Database in background</string>
   <string id="32100">Local Album Count</string>
   <string id="32101">Sorting Album Artists</string>
   <string id="32102">Retrieving Local Database</string>
@@ -128,7 +128,7 @@
   <string id="32123">Backup Database</string>
   <string id="32124">Retrieving All Local Artists</string>
   <string id="32125">Artist ID: </string>
-  <string id="32126">Modify Local Database</string>
+  <string id="32126">Modify Addon Database</string>
   <string id="32127">Edit Album</string>
   <string id="32128">MusicBrainz Search Limit</string>
   <string id="32129">Update Database</string>
@@ -182,4 +182,7 @@
   <string id="32177">   replacement character</string>
   <string id="32178">Yes</string>
   <string id="32179">No</string>
+  <string id="32180">    change trailing periods to replacement character</string>
+  <string id="32181">There is an error in Settings.</string>
+  <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
 </strings>
