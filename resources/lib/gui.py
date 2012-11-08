@@ -68,6 +68,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
     def onInit( self ):
         self.setup_colors()
         self.setup_all()
+        empty_tempxml_folder()
 
     def setup_colors( self ):
         if enablecustom:
@@ -1707,26 +1708,26 @@ class GUI( xbmcgui.WindowXMLDialog ):
         actionID   =  action.getId()
         if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
             self.close()
-            empty_tempxml_folder()
+            #empty_tempxml_folder()
             if enable_missing:
                 self.missing_list()
         if actionID == 10:
             log( "Closing", xbmc.LOGNOTICE )
             dialog_msg( "close" )
-            empty_tempxml_folder()
+            #empty_tempxml_folder()
             if enable_missing:
                 self.missing_list()
             self.close()
 
 def onAction( self, action ):
     if (buttonCode == KEY_BUTTON_BACK or buttonCode == KEY_KEYBOARD_ESC):
-            empty_tempxml_folder()
+            #empty_tempxml_folder()
             if enable_missing:
                 self.missing_list()
             self.close()
     if ( action.getButtonCode() in CANCEL_DIALOG ):
         log( "Closing", xbmc.LOGNOTICE )
-        empty_tempxml_folder()
+        #empty_tempxml_folder()
         if enable_missing:
             self.missing_list()
         self.close()
