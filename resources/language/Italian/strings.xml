@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-27 03:22+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artisti riconosciuti</string>
@@ -106,7 +106,7 @@
   <string id="32100">Numero album locali</string>
   <string id="32101">Ordinamento degli artisti album</string>
   <string id="32102">Recupero database locale</string>
-  <string id="32103">Salvando la lista degli artwork non trovati</string>
+  <string id="32103">Saving Missing Artwork List</string>
   <string id="32104">Caricamento sul sito della lista cdART mancanti</string>
   <string id="32105">Recupero dettagli album</string>
   <string id="32106">Sovrascrivi le cdART a bassa risoluzione già esistenti</string>
@@ -114,10 +114,10 @@
   <string id="32109">Vuoi ricostruire?</string>
   <string id="32110">Errore nell'accesso alla cartella, script interrotto</string>
   <string id="32111">Artwork scaricati</string>
-  <string id="32112">Aggiornando anteprime e fanart</string>
+  <string id="32112">Updating Thumbnails and Fanarts</string>
   <string id="32113">Update finito di Thumbnails e Fanart</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">Notify while in Background mode</string>
+  <string id="32115">Notifica durante la costruzione in background del database</string>
   <string id="32116">Notifica alla fine della costruzione in background del database (permanenza: 2 secondi)</string>
   <string id="32117">Costruzione database completata</string>
   <string id="32118">Costruzione in corso del database in background...  Chiusura script...</string>
@@ -151,35 +151,23 @@
   <string id="32146">Impostazioni</string>
   <string id="32147">Esci</string>
   <string id="32148">(Questo puo impiegare molto tempo per finire)</string>
-  <string id="32149">Controllando l'MBID degli artisti</string>
-  <string id="32150">Controllando l'MBID degli album</string>
+  <string id="32149">Checking Artist MBIDs</string>
+  <string id="32150">Checking Album MBIDs</string>
   <string id="32151">Trova MBIDs Mancante</string>
-  <string id="32152">Ricaricando gli MBID</string>
+  <string id="32152">Refresh MBIDs</string>
   <string id="32153">Cambia MBID</string>
   <string id="32154">Controlla Tutti MBIDs</string>
   <string id="32155">Inserisci MBID</string>
-  <string id="32156">Seleziona da ricerca (inserimento manuale)</string>
-  <string id="32157">Seleziona da ricerca (automaticamente)</string>
-  <string id="32158">Abilita salvataggio del file missing.txt</string>
-  <string id="32159">Inserisci MBID Artista - Inclusi trattini (36 caratteri)</string>
-  <string id="32160">Inserisci 36 caratteri inclusi compresi trattini</string>
-  <string id="32161">Vuoi reinserire?</string>
+  <string id="32156">Select from search(manual entry)</string>
+  <string id="32157">Select from search(automatic)</string>
+  <string id="32158">Enable saving of missing.txt file</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
+  <string id="32160">Please Enter 36 Characters including dashes</string>
+  <string id="32161">Do you want to re-enter?</string>
   <string id="32162">Questo MBID è corretto?</string>
   <string id="32163">Sei sicuro di voler cancellare MBID?</string>
   <string id="32164">Inserisci il nome dell'Artista da cercare</string>
   <string id="32165">Inserisci il nome dell'Album da cercare</string>
   <string id="32166">Seleziona Album</string>
-  <string id="32167">Inserisci MBID Album - Inclusi trattini (36 caratteri)</string>
-  <string id="32168">Banner Artista</string>
-  <string id="32169">400px X 155px</string>
-  <string id="32170">800px X 310px</string>
-  <string id="32171">Abilita LOGHI HD Musica</string>
-  <string id="32172">Backup database addon durante l'aggiornamento</string>
-  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
-  <string id="32174">Number of possible MBID matches:</string>
-  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
-  <string id="32176">   illegal characters to replace</string>
-  <string id="32177">   replacement character</string>
-  <string id="32178">Yes</string>
-  <string id="32179">No</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

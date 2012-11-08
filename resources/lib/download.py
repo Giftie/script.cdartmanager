@@ -29,8 +29,9 @@ resizeondownload   = eval( __addon__.getSetting( "resizeondownload" ) )
 music_path         = sys.modules[ "__main__" ].music_path
 __XBMCisFrodo__    = sys.modules[ "__main__" ].__XBMCisFrodo__
 enable_hdlogos     = sys.modules[ "__main__" ].enable_hdlogos
+fanart_limit       = sys.modules[ "__main__" ].fanart_limit
+enable_fanart_limit= sys.modules[ "__main__" ].enable_fanart_limit
 
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 from utils import clear_image_cache, get_unicode, change_characters, log, dialog_msg
@@ -40,10 +41,10 @@ from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
 
-try:
-    #frodo code
+if __XBMCisFrodo__:
     from xbmcvfs import mkdirs as _makedirs
-except:
+    from xbmcvfs import listdir
+else:
     from utils import _makedirs
 
 def check_size( path, type, size_w, size_h ):
@@ -110,7 +111,7 @@ def make_music_path( artist ):
             else:
                 log( "unable to make path to music artist", xbmc.LOGDEBUG )
                 return False
-                
+
 def download_art( url_cdart, album, database_id, type, mode, size, background = False ):
     log( "Downloading artwork... ", xbmc.LOGDEBUG )
     download_success = False 
@@ -295,16 +296,24 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                     else:
                         auto_art["path"] = path
                     if type == "fanart":
+                        fanart_dir, fanart_files = listdir( auto_art["path"] )
+                        fanart_number = len( fanart_files )
+                        if enable_fanart_limit and fanart_number == fanart_limit:
+                            continue
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
                             message, d_success, final_destination, is_canceled = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0, background )
                         for artwork in art:
                             fanart = {}
+                            if enable_fanart_limit and fanart_number == fanart_limit:
+                                log( "Fanart Limit Reached", xbmc.LOGNOTICE )
+                                continue
                             if exists( os.path.join( auto_art["path"], os.path.basename( artwork ) ) ):
                                 log( "Fanart already exists, skipping", xbmc.LOGDEBUG )
                                 continue
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork, auto_art, artist["local_id"], "fanart", "auto", 0, background )
                             if d_success == 1:
+                                fanart_number += 1
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]
                                 fanart["path"] = final_destination

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-27 03:22+0000 -->
-<!-- translator: giftie -->
+<!-- translation date: 2012-07-21 09:53+0000 -->
+<!-- translator: Attila Zsigus -->
 <strings>
   <string id="32000">Felismert előadók</string>
   <string id="32001">Minden előadó</string>
@@ -116,8 +116,8 @@
   <string id="32111">Letöltött Artwork</string>
   <string id="32112">Bélyegképek és Fanart-ok frissítése</string>
   <string id="32113">A bélyegképek és Fanartok frissítése befejeződött.</string>
-  <string id="32114">MBID adatbázis ellenőrzése és frissítése</string>
-  <string id="32115">Notify while in Background mode</string>
+  <string id="32114">Check Database MBID's to be current during an Update</string>
+  <string id="32115">Adatbázis felépítése a háttérben</string>
   <string id="32116">Értesítés az adatbázis háttérben való felépítéséről (2 másodpercig látható)</string>
   <string id="32117">Adatbázis építése kész</string>
   <string id="32118">Adatbázis felépítése folyamatban (a háttérben)... | | A szkript bezáródik</string>
@@ -150,7 +150,7 @@
   <string id="32145">XBMC Bélyegképek és Fanart-ok frissítése</string>
   <string id="32146">Beállítások</string>
   <string id="32147">Kilépés</string>
-  <string id="32148">(ez eltarthat egy pár percig)</string>
+  <string id="32148">(this can take a long time to complete)</string>
   <string id="32149">Előadó MBID ellenőrzése</string>
   <string id="32150">Album MBID ellenőrzése</string>
   <string id="32151">Hiányzó MBID-k keresése</string>
@@ -160,26 +160,14 @@
   <string id="32155">MBID Bevitele</string>
   <string id="32156">Kiválasztás kereséshez (manuális bevitel)</string>
   <string id="32157">Kiválasztás kereséshez (automatikus)</string>
-  <string id="32158">missing.txt mentésének engedélyezése</string>
-  <string id="32159">Előadó MBID bevitele (36 karakter)</string>
-  <string id="32160">Bevitel (36 karakter)</string>
-  <string id="32161">Szeretné újra beírni?</string>
-  <string id="32162">Ez az MBID helyes?</string>
-  <string id="32163">Valóban törölni akarja az MBID-t?</string>
+  <string id="32158">Enable saving of missing.txt file</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
+  <string id="32160">Please Enter 36 Characters including dashes</string>
+  <string id="32161">Do you want to re-enter?</string>
+  <string id="32162">Is this MBID Correct?</string>
+  <string id="32163">Are you sure you want to delete MBID?</string>
   <string id="32164">Előadó nevének megadása kereséshez</string>
   <string id="32165">Album címének megadása kereséshez</string>
   <string id="32166">Album Kiválasztása</string>
-  <string id="32167">Album MBID bevitele (36 karakter)</string>
-  <string id="32168">Artist Banners</string>
-  <string id="32169">400px X 155px</string>
-  <string id="32170">800px X 310px</string>
-  <string id="32171">Enable HD Music LOGOs</string>
-  <string id="32172">Backup addon database during update</string>
-  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
-  <string id="32174">Number of possible MBID matches:</string>
-  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
-  <string id="32176">   illegal characters to replace</string>
-  <string id="32177">   replacement character</string>
-  <string id="32178">Yes</string>
-  <string id="32179">No</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>

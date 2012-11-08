@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-09-27 03:22+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
@@ -117,7 +117,7 @@
   <string id="32112">Actualizando Miniaturas e Fanarts</string>
   <string id="32113">Actualização de Miniaturas e Fanarts Concluída</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">Notify while in Background mode</string>
+  <string id="32115">Notificar Durante a Construcção da Base de Dados</string>
   <string id="32116">Notificar na conclusão da Base de Dados (exibir por 2 segundos)</string>
   <string id="32117">Construção do Base de Dados concluída</string>
   <string id="32118">Construindo a Base de Dados - em progresso...  Saindo do Add-on...</string>
@@ -170,16 +170,4 @@
   <string id="32165">Introduza o título do Álbum para procurar</string>
   <string id="32166">Seleccionar Álbum</string>
   <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
-  <string id="32168">Artist Banners</string>
-  <string id="32169">400px X 155px</string>
-  <string id="32170">800px X 310px</string>
-  <string id="32171">Enable HD Music LOGOs</string>
-  <string id="32172">Backup addon database during update</string>
-  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
-  <string id="32174">Number of possible MBID matches:</string>
-  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
-  <string id="32176">   illegal characters to replace</string>
-  <string id="32177">   replacement character</string>
-  <string id="32178">Yes</string>
-  <string id="32179">No</string>
 </strings>

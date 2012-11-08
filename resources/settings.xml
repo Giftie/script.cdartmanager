@@ -39,6 +39,8 @@
         <setting label="32177" type="text" id="replace_character" visible="eq(-2,true)" default="_" />
         <setting label="32180" type="bool" id="change_period_atend" visible="eq(-3,true)" default="true" />
         <setting label="32171" type="bool" id="enable_hdlogos" default="true" />
+        <setting label="32183" type="bool" id="enable_fanart_limit" default="false" />
+        <setting label="32184" type="slider" id="fanart_limit" option="int" visible="eq(-1,true)" range="1,60" default="10" />
         <setting type="sep" />
         <setting label="32115" type="bool" id="notify_in_background" default="false" />
         <setting label="32142" type="bool" id="enable_all_artists" default="false" />
