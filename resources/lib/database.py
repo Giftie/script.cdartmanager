@@ -779,6 +779,10 @@ def update_missing_album_mbid( albums, background=False ):
     
 def update_database( background=False ):
     log( "Updating Addon's DB", xbmc.LOGNOTICE )
+    log( "Checking to see if DB already exists", xbmc.LOGDEBUG )
+    if not xbmcvfs.exists( addon_db ):
+        refresh_db( background )
+        return
     if backup_during_update:
         backup_database()
     update_list = []
