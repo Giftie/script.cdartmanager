@@ -69,6 +69,7 @@ def get_musicbrainz_release_group( release_mbid ):
             mbid_match = re.search( '''<release-group (?:.*?)id="(.*?)">''', htmlsource )
         if mbid_match:
             mbid = mbid_match.group( 1 )
+    xbmc.sleep( 900 )
     return mbid
 
 def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=False, by_release=False, use_alias=False ):
