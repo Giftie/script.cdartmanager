@@ -394,11 +394,12 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
                 traceback.print_exc()
     return local_album_artist_list, artist_count
     
-def new_database_setup( background=False ):
+def database_setup( background=False ):
     global local_artist    
     download_count = 0
     cdart_existing = 0
     album_count = 0
+    artist_count = 0
     local_artist_count = 0
     percent=0
     local_artist_list = []
@@ -636,12 +637,12 @@ def refresh_db( background=False ):
                 c.execute('''DROP table IF EXISTS local_artists''')
                 conn.commit()
                 c.close()
-            local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
+            local_album_count, local_artist_count, local_cdart_count = database_setup( background )
         else:
             pass
     else :
         #If file does not exist and some how the program got here, create new database
-        local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
+        local_album_count, local_artist_count, local_cdart_count = database_setup( background )
     #update counts
     log( "Finished Refeshing Database", xbmc.LOGDEBUG )
     return local_album_count, local_artist_count, local_cdart_count
