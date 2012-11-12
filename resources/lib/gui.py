@@ -46,7 +46,7 @@ enable_missing       = sys.modules[ "__main__" ].enable_missing
 from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, retrieve_fanarttv_xml, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
 from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode, change_characters, log, dialog_msg
 from download import download_art, auto_download
-from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, new_database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
+from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, get_musicbrainz_artists
 from file_item import Thumbnails
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
@@ -1040,9 +1040,10 @@ class GUI( xbmcgui.WindowXMLDialog ):
             local_album_count, local_artist_count, local_cdart_count = new_local_count()
         else:
             log( "Addon Db Not Found - Building New Addon Db", xbmc.LOGNOTICE )
-            local_album_count, local_artist_count, local_cdart_count = new_database_setup( self.background )
+            local_album_count, local_artist_count, local_cdart_count = database_setup( self.background )
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         self.local_artists = get_local_artists_db() # retrieve data from addon's database
+        xbmc.sleep( 2000 )
         self.setFocusId( 100 ) # set menu selection to the first option(cdARTs)
         distant_artist = get_distant_artists()
         local_artists = get_local_artists_db( mode="album_artists" )
