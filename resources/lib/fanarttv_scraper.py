@@ -7,6 +7,11 @@ import urllib
 from traceback import print_exc
 from urllib import quote_plus, unquote_plus
 
+if sys.version_info < (2, 7):
+    import json as simplejson
+else:
+    import simplejson
+    
 __language__        = sys.modules[ "__main__" ].__language__
 __scriptname__      = sys.modules[ "__main__" ].__scriptname__
 __scriptID__        = sys.modules[ "__main__" ].__scriptID__
@@ -24,22 +29,27 @@ enable_all_artists  = sys.modules[ "__main__" ].enable_all_artists
 #sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source, unescape, log, dialog_msg
 from musicbrainz_utils import get_musicbrainz_album, get_musicbrainz_artist_id, update_musicbrainzid
+from json_utils import retrieve_json_dict
 
-music_url = "http://fanart.tv/webservice/artist/%s/%s/xml/%s/2/2"
-single_release_group = "http://fanart.tv/webservice/album/%s/%s/xml/%s/2/2"
-artist_url = "http://fanart.tv/webservice/has-art/%s/"
+music_url = "http://api.fanart.tv/webservice/artist/%s/%s/xml/%s/2/2"
+single_release_group = "http://api.fanart.tv/webservice/album/%s/%s/xml/%s/2/2"
+artist_url = "http://api.fanart.tv/webservice/has-art/%s/"
+music_url_json = "http://api.fanart.tv/webservice/artist/%s/%s/json/%s/2/2"
+single_release_group_json = "http://api.fanart.tv/webservice/album/%s/%s/json/%s/2/2"
 lookup_id = False
 
 def remote_cdart_list( artist_menu ):
     log( "Finding remote cdARTs", xbmc.LOGDEBUG )
     cdart_url = []
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 2:
-            album_artwork = art[3]["artwork"]
+            album_artwork = art[5]["artwork"]
             if album_artwork:
                 for artwork in album_artwork:
+                    #print artwork
                     for cdart in artwork["cdart"]:
+                        #print cdart
                         album = {}
                         album["artistl_id"] = artist_menu["local_id"]
                         album["artistd_id"] = artist_menu["musicbrainz_artistid"]
@@ -62,9 +72,9 @@ def remote_coverart_list( artist_menu ):
     log( "Finding remote Cover ARTs", xbmc.LOGDEBUG )
     coverart_url = []
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 2:
-            album_artwork = art[3]["artwork"]
+            album_artwork = art[5]["artwork"]
             if album_artwork:
                 for artwork in album_artwork:
                     if artwork["cover"]:
@@ -86,7 +96,7 @@ def remote_fanart_list( artist_menu ):
     log( "Finding remote fanart", xbmc.LOGDEBUG )
     backgrounds = ""
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             backgrounds = art[ 0 ]["backgrounds"]
     except:
@@ -97,7 +107,7 @@ def remote_clearlogo_list( artist_menu ):
     log( "Finding remote clearlogo", xbmc.LOGDEBUG )
     clearlogo = ""
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             clearlogo = art[ 1 ]["clearlogo"]
     except:
@@ -108,9 +118,9 @@ def remote_hdlogo_list( artist_menu ):
     log( "Finding remote hdlogo", xbmc.LOGDEBUG )
     hdlogo = ""
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
-            hdlogo = art[ 5 ]["hdlogo"]
+            hdlogo = art[ 3 ]["hdlogo"]
     except:
         print_exc()
     return hdlogo
@@ -119,7 +129,7 @@ def remote_banner_list( artist_menu ):
     log( "Finding remote music banners", xbmc.LOGDEBUG )
     banner = ""
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             banner = art[ 4 ]["banner"]
     except:
@@ -131,13 +141,100 @@ def remote_artistthumb_list( artist_menu ):
     artistthumb = ""
     #If there is something in artist_menu["distant_id"] build cdart_url
     try:
-        art = retrieve_fanarttv_xml( artist_menu["musicbrainz_artistid"] )
+        art = retrieve_fanarttv_json( artist_menu["musicbrainz_artistid"] )
         if not len(art) < 3:
             artistthumb = art[ 2 ]["artistthumb"]
     except:
         print_exc()
     return artistthumb
     
+def retrieve_fanarttv_json( id ):
+    log( "Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )
+    url = music_url_json % ( api_key, id, "all" )
+    htmlsource = ( get_html_source( url, id ) ).encode( 'utf-8', 'ignore' )
+    artist_artwork = []
+    backgrounds = []
+    musiclogos = []
+    artistthumbs = []
+    hdlogos = []
+    banners = []
+    albums = []
+    blank = {}
+    fanart = {}
+    clearlogo = {}
+    artistthumb = {}
+    album_art = {}
+    hdlogo = {}
+    banner = {}
+    artist = ""
+    artist_id = ""
+    IMAGE_TYPES = [ 'musiclogo',
+                    'artistthumb',
+                    'artistbackground',
+                    'hdmusiclogo',
+                    'musicbanner',
+                    'albums' ]
+    data = simplejson.loads( htmlsource )
+    for artist, value in data.iteritems():
+        for art in IMAGE_TYPES:
+            if value.has_key(art):
+                for item in value[art]:
+                    print "item:"
+                    print item
+                    print value
+                    if art == "musiclogo":
+                        musiclogos.append( item.get('url') )
+                    if art == "hdmusiclogo":
+                        hdlogos.append( item.get('url') )
+                    if art == "artistbackground":
+                        backgrounds.append( item.get('url' ) )
+                    if art == "musicbanner":
+                        banners.append( item.get('url' ) )
+                    if art == "artistthumb":
+                        artistthumbs.append( item.get( 'url' ) )
+                    if art == "albums" and not albums:
+                        for album_id in data[ artist ][ "albums" ]:
+                            album_artwork = {}
+                            album_artwork["musicbrainz_albumid"] = album_id
+                            album_artwork["cdart"] = []
+                            album_artwork["cover"] = ""
+                            if value[ "albums"][ album_id ].has_key( "cdart" ):
+                                for item in value[ "albums" ][ album_id ][ "cdart" ]:
+                                    cdart = {}
+                                    if item.has_key( "disc" ):
+                                        cdart[ "disc" ] = int( item[ "disc" ] )
+                                    else:
+                                        cdart[ "disc" ] = 1
+                                    if item.has_key( "url" ):
+                                        cdart["cdart"] = item[ "url" ]
+                                    else:
+                                        cdart["cdart"] = ""
+                                    if item.has_key( "size" ):
+                                        cdart["size"] = item[ "size" ]
+                                    album_artwork["cdart"].append(cdart)
+                                    #print album_artwork
+                            try:
+                                if value[ "albums" ][ album_id ][ "albumcover" ]:
+                                    if len( value[ "albums" ][ album_id ][ "albumcover" ] ) < 2:
+                                        album_artwork["cover"] = value[ "albums" ][ album_id ][ "albumcover" ][0][ "url" ]
+                            except:
+                                album_artwork["cover"] = ""
+                            albums.append( album_artwork )
+    fanart["backgrounds"] = backgrounds
+    clearlogo["clearlogo"] = musiclogos
+    hdlogo["hdlogo"] = hdlogos
+    banner["banner"] = banners
+    artistthumb["artistthumb"] = artistthumbs
+    album_art["artwork"] = albums
+    #print album_art
+    artist_artwork.append(fanart)
+    artist_artwork.append(clearlogo)
+    artist_artwork.append(artistthumb)
+    artist_artwork.append(hdlogo)
+    artist_artwork.append(banner)
+    artist_artwork.append(album_art)
+    return artist_artwork
+
 def retrieve_fanarttv_xml( id ):
     log( "Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )
     url = music_url % ( api_key, id, "all" )
@@ -338,3 +435,58 @@ def match_library( local_artist_list ):
     except:
         print_exc()
     return available_artwork
+    
+    
+def junk_delete():
+    match = re.search( '''"musiclogo":\[(.*?)\],''', htmlsource )
+    if match:
+        musiclogos = match.group( 1 )
+        musiclogo = re.findall( '''{"id":"(?:.*?)","url":"(.*?)","likes":"(?:.*?)"}''', musiclogos )
+    match = re.search( '''"hdmusiclogo":\[(.*?)\],''', htmlsource )
+    if match:
+        hdmusiclogos = match.group( 1 )
+        hdmusiclogo = re.findall( '''{"id":"(?:.*?)","url":"(.*?)","likes":"(?:.*?)"}''', hdmusiclogos )
+    match = re.search( '''"artistthumb":\[(.*?)\],''', htmlsource )
+    if match:
+        artistthumbs = match.group( 1 )
+        artistthumb = re.findall( '''{"id":"(?:.*?)","url":"(.*?)","likes":"(?:.*?)"}''', artistthumbs )
+    match = re.search( '''"musicbanner":\[(.*?)\],''', htmlsource )
+    if match:
+        musicbanners = match.group( 1 )
+        musicbanner = re.findall( '''{"id":"(?:.*?)","url":"(.*?)","likes":"(?:.*?)"}''', musicbanners )
+    match = re.search( '''"artistbackground":\[(.*?)\],''', htmlsource )
+    if match:
+        artistbackgrounds = match.group( 1 )
+        artistbackground = re.findall( '''{"id":"(?:.*?)","url":"(.*?)","likes":"(?:.*?)"}''', artistbackgrounds )
+    if data[ artist ].has_key( "albums" ):
+            a_art = []
+            for album_id in data[ artist ][ "albums" ]:
+                album_artwork = {}
+                album_artwork["musicbrainz_albumid"] = album_id
+                album_artwork["cdart"] = []
+                album_artwork["cover"] = ""
+                if data[ artist ][ "albums" ][ album_id ].has_key( "cdart" ):
+                    cdart = {}
+                    for item in data[ artist ][ "albums" ][ album_id ][ "cdart" ]:
+                        cdart = {}
+                        if item.has_key( "disc" ):
+                            cdart[ "disc" ] = int( item[ "disc" ] )
+                        else:
+                            cdart[ "disc" ] = 1
+                        if item.has_key( "url" ):
+                            cdart["cdart"] = item[ "url" ]
+                        else:
+                            cdart["cdart"] = ""
+                        if item.has_key( "size" ):
+                            cdart["size"] = item[ "size" ]
+                        album_artwork["cdart"].append(cdart)
+                try:
+                    if data[ artist ][ "albums" ][ album_id ][ "albumcover" ]:
+                        if len( data[ artist ][ "albums" ][ album_id ][ "albumcover" ] ) < 2:
+                            album_artwork["cover"] = data[ artist ][ "albums" ][ album_id ][ "albumcover" ][0][ "url" ]
+                except:
+                    album_artwork["cover"] = ""
+                a_art.append(album_artwork)
+            album_art["artwork"] = a_art
+            artist_artwork.append(album_art)
+ 
