@@ -46,6 +46,7 @@ if __XBMCisFrodo__:
     from xbmcvfs import listdir
 else:
     from utils import _makedirs
+    enable_fanart_limit = False
 
 def check_size( path, type, size_w, size_h ):
     # first copy from source to work directory since Python does not support SMB://
@@ -296,10 +297,11 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                     else:
                         auto_art["path"] = path
                     if type == "fanart":
-                        fanart_dir, fanart_files = listdir( auto_art["path"] )
-                        fanart_number = len( fanart_files )
-                        if enable_fanart_limit and fanart_number == fanart_limit:
-                            continue
+                        if enable_fanart_limit:
+                            fanart_dir, fanart_files = listdir( auto_art["path"] )
+                            fanart_number = len( fanart_files )
+                            if fanart_number == fanart_limit:
+                                continue
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
                             message, d_success, final_destination, is_canceled = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0, background )
                         for artwork in art:
@@ -313,7 +315,8 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork, auto_art, artist["local_id"], "fanart", "auto", 0, background )
                             if d_success == 1:
-                                fanart_number += 1
+                                if enable_fanart_limit:
+                                    fanart_number += 1
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]
                                 fanart["path"] = final_destination
