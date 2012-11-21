@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-11-08 01:51+0000 -->
+<!-- translation date: 2012-11-02 21:40+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
@@ -175,7 +175,7 @@
   <string id="32170">800px X 310px</string>
   <string id="32171">Ativar Logos de Músicas em formato HD</string>
   <string id="32172">Backup da base de dados do addon durante atualização</string>
-  <string id="32173">Número de dias para cache dados fanart.tv(Agendar)[CR]Cache será limpo com o uso manual do cdART Manager.</string>
+  <string id="32173">Número de dias para cache dados fanart.tv(Agendar)[CR]Cache será limpado com uso manual do cdART Manager.</string>
   <string id="32174">Número de possíveis resultados no MBID: </string>
   <string id="32175">Ativar troca de caracteres ilegais no nome do arquivo em nome de artistas</string>
   <string id="32176">Caracteres ilegais para substituir</string>
@@ -183,8 +183,6 @@
   <string id="32178">Sim</string>
   <string id="32179">Não</string>
   <string id="32180">        Alterar tempo de escape para substituição de caracter</string>
-  <string id="32181">Existe erro nos Ajustes.</string>
-  <string id="32182">Por favor verifique seus ajustes e salve-os[CR](pressione OK em ajustes)</string>
-  <string id="32183">Limit number Extrafanarts</string>
-  <string id="32184">    Extrafanart Limit:</string>
+  <string id="32181">There is an error in Settings.</string>
+  <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
 </strings>

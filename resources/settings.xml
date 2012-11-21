@@ -51,6 +51,5 @@
         <setting type="sep" />
         <setting label="32174" type="number" id="mbid_match_number" default="10" />
         <setting label="32172" type="bool" id="backup_during_update" default="true" />
-        <setting label="32173" type="slider" id="scheduler_cache" option="int" range="2,7" default="3" />
     </category>
 </settings>

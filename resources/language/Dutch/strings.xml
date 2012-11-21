@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-11-08 01:51+0000 -->
+<!-- translation date: 2012-11-02 21:40+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Herkende Artiesten</string>
@@ -185,6 +185,4 @@
   <string id="32180">    change trailing periods to replacement character</string>
   <string id="32181">There is an error in Settings.</string>
   <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
-  <string id="32183">Limit number Extrafanarts</string>
-  <string id="32184">    Extrafanart Limit:</string>
 </strings>

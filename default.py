@@ -82,7 +82,7 @@ socket.setdefaulttimeout(30)
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 
-from utils import empty_tempxml_folder, settings_to_log, get_unicode, change_characters, unescape, log, dialog_msg
+from utils import settings_to_log, get_unicode, change_characters, unescape, log, dialog_msg
 from file_item import Thumbnails
 from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db, update_database, retrieve_album_details_full
 from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
@@ -146,35 +146,7 @@ def select_artwork( details, media_type ):
         if artwork:
             for art in artwork:
                 print art
-        
-def write_cache_file():
-    log( "Cache is being cleared", xbmc.LOGNOTICE )
-    empty_tempxml_folder()
-    cache_file = open( os.path.join( addon_work_folder, "cache.txt" ), "wb" )
-    line = "%s/%s/%s\n" % ( time.strftime( "%m" ), time.strftime( "%d" ), time.strftime( "%Y" ) )
-    cache_file.write( line )
-    cache_file.close()
-        
-def check_cache():
-    line = ""
-    try:
-        if exists( os.path.join( addon_work_folder, "cache.txt" ) ):
-            cache_file = open( os.path.join( addon_work_folder, "cache.txt" ), "rb" )
-            line = str( cache_file.readline() ).replace("\n","")
-            cache_file.close()
-            cache_date = datetime.datetime.strptime( line, "%m/%d/%Y" ).date()
-            check_date = datetime.date.today()-datetime.timedelta( days = int( float( __addon__.getSetting( "scheduler_cache" ) ) ) )
-            print "Cache Date: ", cache_date
-            print "Check Date: ", check_date
-            if not cache_date < check_date:
-                log( "Cache not being cleared", xbmc.LOGNOTICE )
-            else:
-                write_cache_file()
-        else:
-            write_cache_file()
-    except:
-        traceback.print_exc()
-        
+
 def thumbnail_copy( art_path, thumb_path, type="artwork" ):
     if not thumb_path.startswith("http://") or not thumb_path.startswith("image://"):
         if exists( art_path ):
@@ -186,7 +158,7 @@ def thumbnail_copy( art_path, thumb_path, type="artwork" ):
             log( "Destination Path: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
     elif thumb_path.startswith("http://") or thumb_path.startswith("image://"):
         log( "Destination Path is not able to be copied to: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
-        
+
 def update_xbmc_thumbnails( background=False ):
     log( "Updating Thumbnails/fanart Images", xbmc.LOGNOTICE )
     fanart = "fanart.jpg"
