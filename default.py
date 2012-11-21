@@ -26,13 +26,13 @@ __version__            = __addon__.getAddonInfo('version')
 __credits__            = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__           = "Chaos_666, Magnatism, Kode, Martijn"
 __version_date__       = "11-07-12"
-__dbversion__          = "1.5.3"
-__dbversionold__       = "1.3.2"
+__dbversion__          = "2.2.8"
+__dbversionold__       = "1.5.3"
 __dbversionancient__   = "1.1.8"
 __addon_path__         = __addon__.getAddonInfo('path')
 __useragent__          = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
 __XBMCisFrodo__        = False
-if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0-ALPHA" ): # required GIT version
+if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0" ): # required GIT version
     __XBMCisFrodo__    = True
 enable_hdlogos         = eval( __addon__.getSetting("enable_hdlogos") )
 mbid_match_number      = int( __addon__.getSetting("mbid_match_number") )
@@ -87,7 +87,7 @@ from file_item import Thumbnails
 from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db, update_database, retrieve_album_details_full
 from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
-from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
+from fanarttv_scraper import first_check, remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from download import auto_download
 try:
     from xbmcvfs import mkdirs as _makedirs
@@ -325,17 +325,15 @@ if ( __name__ == "__main__" ):
                 xbmcgui.Window( 10000 ).setProperty( "cdartmanager_update", "True" ) 
                 from database import refresh_db
                 local_album_count, local_artist_count, local_cdart_count = refresh_db( True )
+                first_check( all_artists, local_artists, background = True )
                 xbmcgui.Window( 10000 ).setProperty( "cdartmanager_update", "False" )
             elif script_mode in ( "autocdart", "autocover", "autofanart", "autologo", "autothumb", "autobanner", "autoall" ):
-                check_cache()
-                distant_artist = get_distant_artists()
                 local_artists = get_local_artists_db( mode="album_artists", background=True )
                 if enable_all_artists:
                     all_artists = get_local_artists_db( mode="all_artists", background=True )
                 else:
                     all_artists = []
-                if distant_artist:
-                    recognized_artists, all_artists_recognized, all_artists_list, album_artists = get_recognized( distant_artist, all_artists, local_artists, background=True )
+                all_artists_list, album_artists = get_recognized( all_artists, local_artists, background=True )
             if script_mode in ( "autocdart", "autocover", "autofanart", "autologo", "autothumb", "autobanner" ):
                 xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "True" )
                 if script_mode == "autocdart":
@@ -357,9 +355,9 @@ if ( __name__ == "__main__" ):
                     log( "Start method - Autodownload Artist Music Banners in background", xbmc.LOGNOTICE )
                     artwork_type = "musicbanner"
                 if artwork_type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ) and enable_all_artists:
-                    download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
+                    download_count, successfully_downloaded = auto_download( artwork_type, all_artists_list, background=True )
                 else:
-                    download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
+                    download_count, successfully_downloaded = auto_download( artwork_type, album_artists, background=True )
                 log( "Autodownload of %s artwork completed\nTotal artwork downloaded: %d" % ( artwork_type, total_artwork ), xbmc.LOGNOTICE )
             elif script_mode == "autoall":
                 xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "True" )
@@ -368,9 +366,9 @@ if ( __name__ == "__main__" ):
                 for artwork_type in ( "cdart", "cover", "fanart", "clearlogo", "artistthumb", "musicbanner" ):
                     log( "Start method - Autodownload %s in background" % artwork_type, xbmc.LOGNOTICE )
                     if artwork_type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ) and enable_all_artists:
-                        download_count, successfully_downloaded = auto_download( artwork_type, all_artists_recognized, all_artists, background=True )
+                        download_count, successfully_downloaded = auto_download( artwork_type, all_artists_list, background=True )
                     elif artwork_type:
-                        download_count, successfully_downloaded = auto_download( artwork_type, recognized_artists, local_artists, background=True )
+                        download_count, successfully_downloaded = auto_download( artwork_type, album_artists, background=True )
                     total_artwork += download_count
                 log( "Autodownload all artwork completed\nTotal artwork downloaded: %d" % total_artwork, xbmc.LOGNOTICE )
             elif script_mode == "update_thumbs":
@@ -380,6 +378,7 @@ if ( __name__ == "__main__" ):
                 log( "Start method - Update Database in background", xbmc.LOGNOTICE )
                 xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "True" )
                 update_database( background=True )
+                first_check( all_artists, local_artists, background = True )
             elif script_mode == "oneshot":
                 log( "Start method - One Shot Download method", xbmc.LOGNOTICE )
                 if provided_dbid or provided_mbid:
@@ -455,24 +454,27 @@ if ( __name__ == "__main__" ):
                                 log( "Database matched", xbmc.LOGNOTICE )
                                 break
                             elif item[0] == __dbversionold__:
-                                log( "Vserion 1.3.2 found, updating Local Artist Table" , xbmc.LOGNOTICE )
-                                album_count, artist_count, cdart_existing = new_local_count()   
-                                log( "Backing up old Local Database", xbmc.LOGDEBUG )
+                                log( "Version 1.5.3 found, Adding new column to Local Album Artist and Local Artists" , xbmc.LOGNOTICE )
+                                all_artists  = []
+                                local_artists  = []
                                 file_copy( addon_db,addon_db_update )
-                                update = dialog_msg( "yesno", heading = __language__(32140) , line1 = __language__(32141) )
-                                #ask to if user would like to update database with local artists
-                                if update:
-                                    local_artist_count = build_local_artist_table( False )
-                                    store_counts( local_artist_count, artist_count, album_count, cdart_existing )
-                                else:
-                                    # update version to current version, then add local_artists table.  This allows the script to only ask the question once
-                                    c = conn_l.cursor()
-                                    c.execute( '''DROP table IF EXISTS counts''' )
-                                    c.execute( '''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''' )
-                                    c.execute( "insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", ( 0, artist_count, album_count, cdart_existing, __dbversion__ ) )
-                                    c.execute( '''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''' )
-                                    conn_l.commit()
-                                    c.close()
+                                conn = sqlite3.connect( addon_db )
+                                c = conn.cursor()
+                                try:
+                                    c.execute('ALTER TABLE lalist ADD COLUMN fanarttv_has_art;')
+                                except:
+                                    traceback.print_exc()
+                                try:
+                                    c.execute('ALTER TABLE local_artists ADD COLUMN fanarttv_has_art;')
+                                except:
+                                    traceback.print_exc()
+                                c.close()
+                                local_artist_count, album_count, artist_count, cdart_existing = new_local_count()
+                                store_counts( local_artist_count, artist_count, album_count, cdart_existing )
+                                local_artists = get_local_artists_db( mode="album_artists" )
+                                if enable_all_artists:
+                                    all_artists = get_local_artists_db( mode="all_artists" )
+                                first_check( all_artists, local_artists )
                             else:
                                 log( "Database Not Matched - trying to delete" , xbmc.LOGNOTICE )
                                 rebuild = dialog_msg( "yesno", heading = __language__(32108) , line1 = __language__(32109) )
@@ -498,6 +500,8 @@ if ( __name__ == "__main__" ):
                         import gui
                         try:
                             ui = gui.GUI( "script-cdartmanager.xml" , __addon__.getAddonInfo('path'), "Default")
+                            log( "Script calling for GUI", xbmc.LOGNOTICE )
+                            xbmc.sleep(2000)
                             ui.doModal()
                             del ui
                             log( "Script exited properly", xbmc.LOGNOTICE )
@@ -519,3 +523,4 @@ if ( __name__ == "__main__" ):
             raise
             xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
             xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+            
