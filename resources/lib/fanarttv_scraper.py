@@ -254,31 +254,51 @@ def match_library( local_artist_list ):
         print_exc()
     return available_artwork
     
+def check_fanart_new_artwork( present_datecode ):
+    '''This function returns True if fanart.tv has new artwork, False if not.
+       Also it returns the JSON Data'''
+    log( "Checking for new Artwork on fanart.tv since last run...", xbmc.LOGNOTICE )
+    previous_datecode = retrieve_fanarttv_datecode()
+    if xbmcvfs.exists( os.path.join( addon_work_folder, "tempxml", "%s.xml" % previous_datecode ) ):
+        xbmcvfs.delete( os.path.join( addon_work_folder, "tempxml", "%s.xml" % previous_datecode ) )
+    url = new_music % ( api_key, str( previous_datecode ) )
+    htmlsource = ( get_html_source( url, str( present_datecode ) ) ).encode( 'utf-8', 'ignore' )
+    data = simplejson.loads( htmlsource )
+    if htmlsource == "null":
+        log( "No new Artwork found on fanart.tv", xbmc.LOGNOTICE )
+        return False, data
+    else:
+        log( "New Artwork found on fanart.tv", xbmc.LOGNOTICE )
+        return True, data
+
 def check_art( mbid ):
     has_art = "False"
-    url = music_url_json % ( api_key, mbid, "all" )
-    htmlsource = ( get_html_source( url, mbid ) ).encode( 'utf-8', 'ignore' )
-    if not htmlsource == "null":
-        has_art = "True"
-        url = music_url_json % ( api_key, id, "all" )
-        update = ( get_html_source( url, id, overwrite = True ) ).encode( 'utf-8', 'ignore' )
-    else:
+    url = music_url_json % ( api_key, str( mbid ), "all" )
+    htmlsource = ( get_html_source( url, str( mbid ), True, True ) ).encode( 'utf-8', 'ignore' )
+    if htmlsource == "null":
+        log( "No artwork found for MBID: %s" % mbid, xbmc.LOGDEBUG )
         has_art = "False"
+    else:
+        log( "Artwork found for MBID: %s" % mbid, xbmc.LOGDEBUG )
+        has_art = "True"
     return has_art
 
-def update_art( mbid, data ):
-    new_art = False
+def update_art( mbid, data, existing_has_art ):
+    has_art = existing_has_art
     for item in data:
         if item[ "id" ] == mbid:
-            new_art = "True"
-            
+            url = music_url_json % ( api_key, str( mbid ), "all" )
+            has_art = "True"
+            new_art = ( get_html_source( url, str( mbid ), True, True ) ).encode( 'utf-8', 'ignore' )
             break
-        else:
-            new_art = "False"
-    return new_art
+    return has_art
     
-def first_check( all_artists, album_artists, background=False ):
-    log( "Checking for artist match with fanart.tv", xbmc.LOGDEBUG )
+def first_check( all_artists, album_artists, background=False, update_db = False ):
+    log( "Checking for artist match with fanart.tv - First Check", xbmc.LOGNOTICE )
+    if update_db:
+        heading = __language__( 32186 )
+    else:
+        heading = __language__( 32187 )
     album_artists_matched = []
     all_artists_matched = []
     d = datetime.utcnow()
@@ -290,71 +310,69 @@ def first_check( all_artists, album_artists, background=False ):
     recognized = []
     recognized_album = []
     fanart_test = ""
-    dialog_msg( "create", heading = __language__(32048), background = background )
+    dialog_msg( "create", heading = heading, background = background )
     for artist in album_artists:
         percent = int( ( float( count )/len( album_artists ) )*100 )
         log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
         match = {}
-        match["local_id"] = artist[ "local_id" ]
-        match[ "musicbrainz_artistid" ] = artist[ "musicbrainz_artistid" ]
-        match[ "name" ] = get_unicode( artist["name"] )
-        if artist["musicbrainz_artistid"]:
+        match = artist
+        if artist["musicbrainz_artistid"] and artist[ "has_art"] == "False":
             match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
-        else:
+        elif not artist["musicbrainz_artistid"]:
             match[ "has_art" ] = "False"
-        print match
+        else:
+            match[ "has_art" ] = artist[ "has_art"]
         album_artists_matched.append( match )
-        dialog_msg( "update", percent = percent, line1 =  __language__(32049) % count, background = background )
+        dialog_msg( "update", percent = percent, line1 = heading, line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
         count += 1
+    log( "Storing Album Artists List", xbmc.LOGDEBUG )
+    store_lalist( album_artists_matched, len( album_artists_matched ) )
     if enable_all_artists and all_artists:
         count = 0
         for artist in all_artists:
             percent = int( ( float( count )/len( all_artists ) )*100 )
             log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
             match = {}
-            match["local_id"] = artist[ "local_id" ]
-            match[ "musicbrainz_artistid" ] = artist[ "musicbrainz_artistid" ]
-            match[ "name" ] = get_unicode( artist["name"] )
-            if artist["musicbrainz_artistid"]:
+            match = artist
+            if artist["musicbrainz_artistid"] and artist[ "has_art"] == "False":
                 match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
-            else:
+            elif not artist["musicbrainz_artistid"]:
                 match[ "has_art" ] = "False"
-            print match
+            else:
+                match[ "has_art" ] = artist[ "has_art"]
             all_artists_matched.append( match )
-            dialog_msg( "update", percent = percent, line1 =  __language__(32049) % count, background = background )
+            dialog_msg( "update", percent = percent, line1 = heading, line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
             count += 1
-    store_lalist( album_artists_matched, len( album_artists_matched ) )
-    store_local_artist_table( all_artists_matched )
+        store_local_artist_table( all_artists_matched, background = background )
     store_fanarttv_datecode( present_datecode )
+    log( "Finished First Check", xbmc.LOGDEBUG )
     return
 
 def get_recognized( all_artists, album_artists, background=False ):
-    log( "Checking for artist match with fanart.tv", xbmc.LOGDEBUG )
+    log( "Checking for artist match with fanart.tv - Get Recognized artists", xbmc.LOGNOTICE )
     album_artists_matched = []
     all_artists_matched = []
-    previous_datecode = retrieve_fanarttv_datecode()
-    d = datetime.utcnow()
-    present_datecode = calendar.timegm( d.utctimetuple() )
     true = 0
     count = 0
     name = ""
     artist_list = []
     all_artist_list = []
     fanart_test = ""
-    dialog_msg( "create", heading = __language__(32048), background = background )
-    url = new_music % ( api_key, previous_datecode )
-    htmlsource = ( get_html_source( url, str( present_datecode ) ) ).encode( 'utf-8', 'ignore' )
-    data = simplejson.loads( htmlsource )
-    if not htmlsource == "null":
+    previous_datecode = retrieve_fanarttv_datecode()
+    d = datetime.utcnow()
+    present_datecode = calendar.timegm( d.utctimetuple() )
+    dialog_msg( "create", heading = __language__( 32185 ), background = background )
+    new_artwork, data = check_fanart_new_artwork( present_datecode )
+    if new_artwork:
         for artist in album_artists:
             percent = int( ( float( count )/len( album_artists ) )*100 )
             log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
             match = {}
             match = artist
-            if match[ "musicbrainz_artistid" ] and match["has_art"] == "False":
-                match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data )
+            if match[ "musicbrainz_artistid" ]:
+                match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data, artist[ "has_art" ] )
             album_artists_matched.append( match )
-            dialog_msg( "update", percent = percent, line1 =  __language__(32049) % count, background = background )
+            dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
             count += 1
         if enable_all_artists and all_artists:
             count = 0
@@ -363,18 +381,20 @@ def get_recognized( all_artists, album_artists, background=False ):
                 log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
                 match = {}
                 match = artist
-                if match[ "musicbrainz_artistid" ] and not match["has_art"]:
-                    match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data )
+                if match[ "musicbrainz_artistid" ]:
+                    match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data,  artist[ "has_art" ] )
                 all_artists_matched.append( match )
-                dialog_msg( "update", percent = percent, line1 =  __language__(32049) % count, background = background )
+                dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
                 count += 1
     else:
+        log( "No new music artwork on fanart.tv",  xbmc.LOGNOTICE )
         album_artists_matched = album_artists
         all_artists_matched = all_artists
     store_lalist( album_artists_matched, len( album_artists_matched ) )
-    store_local_artist_table( all_artists_matched )
+    store_local_artist_table( all_artists_matched, background = background )
     store_fanarttv_datecode( present_datecode )
     dialog_msg( "close", background = background )
+    log( "Finished Getting Recognized Artists", xbmc.LOGDEBUG )
     return all_artists_matched, album_artists_matched
 
      

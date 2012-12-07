@@ -2,6 +2,9 @@
 - Fix - Remove Extrafanart Limit for Eden version
 - Change - Use the JSON format of the Fanart.TV API
 - Change - remove the old 'get recognized artists' in favour of the new New Music from Fanart.TV
+- Add - make use of fanart.tv's new music option in API
+- Add - User can now set the MusicBrainz server
+- Fix - correct Frodo issue
 
 2.7.7
 - Fix - Add time delay to MusicBrainz Release MBID to Release Group MBID function

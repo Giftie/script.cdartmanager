@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-11-02 21:40+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">인식된 아티스트</string>
@@ -16,8 +16,8 @@
   <string id="32010">로컬 디스크: %s</string>
   <string id="32011">고급</string>
   <string id="32012">추가기능 데이터베이스 새로 고침</string>
-  <string id="32013">Clean XBMC's Music Library</string>
-  <string id="32014">Update XBMC's Music Library</string>
+  <string id="32013">XBMC 음악 데이터베이스 정리</string>
+  <string id="32014">XBMC 음악 데이터베이스 업데이트</string>
   <string id="32015">추가기능 데이터베이스 삭제?</string>
   <string id="32016">디스크:</string>
   <string id="32017">로컬 cdART 목록 저장 폴더</string>
@@ -56,7 +56,7 @@
   <string id="32050">데이터베이스 설정 취소됨...</string>
   <string id="32051">이 스크립트는 애드온 데이터베이스가 중요합니다!</string>
   <string id="32052">고급 메뉴에서</string>
-  <string id="32053">추가기능 데이터베이스 새로고침</string>
+  <string id="32053">추가기능 데이터베이스 새로 고침</string>
   <string id="32054">/아티스트/앨범.png</string>
   <string id="32055">/아티스트 - 앨범.png</string>
   <string id="32056">cdART 복사됨</string>
@@ -81,7 +81,7 @@
   <string id="32075">cdART 삭제</string>
   <string id="32076">업로드를 위해 개인 폴더에 복사</string>
   <string id="32077">레이블 색상 사용자 지정</string>
-  <string id="32078">녹색</string>
+  <string id="32078">다운도드 실패!</string>
   <string id="32079">파랑</string>
   <string id="32080">빨강</string>
   <string id="32081">노랑</string>
@@ -102,11 +102,11 @@
   <string id="32096">중복 항목 발견</string>
   <string id="32097">    개인 cdART 크기를 변경할까요?</string>
   <string id="32098">로컬 cdART 목록</string>
-  <string id="32099">Build Addon Database in background</string>
+  <string id="32099">백그라운드에서 데이터베이스 작성</string>
   <string id="32100">로컬 앨범 카운트</string>
   <string id="32101">앨범 아티스트 정렬</string>
   <string id="32102">로컬 데이터베이스 검색 중</string>
-  <string id="32103">누락 아트워크 목록 저장</string>
+  <string id="32103">아트워크 누락 목록 저장</string>
   <string id="32104">cdART 누락 목록을 웹사이트에 업로드</string>
   <string id="32105">앨범 상세정보 검색 중</string>
   <string id="32106">기존 저해상도 cdART를 덮어 씀</string>
@@ -117,7 +117,7 @@
   <string id="32112">미리보기와 팬아트 업데이트 중</string>
   <string id="32113">미리보기와 팬아트 업데이트 완료</string>
   <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">백드라운드 모드 사용 중 알림</string>
+  <string id="32115">백그라운드 데이터베이스 작성 알림</string>
   <string id="32116">백그라운드 데이터베이스 작성이 끝나면 알림 (2초간 표시)</string>
   <string id="32117">데이터베이스 작성 완료</string>
   <string id="32118">백그라운드 데이터베이스 작성 진행 중...  스크립트 종료...</string>
@@ -128,7 +128,7 @@
   <string id="32123">데이터베이스 백업</string>
   <string id="32124">모든 로컬 아티스트 검색 중</string>
   <string id="32125">아티스트 ID: </string>
-  <string id="32126">Modify Addon Database</string>
+  <string id="32126">로컬 데이터베이스 수정</string>
   <string id="32127">앨범 수정</string>
   <string id="32128">MusicBrainz 검색 제한</string>
   <string id="32129">데이터베이스 업데이트</string>
@@ -138,7 +138,7 @@
   <string id="32133">누락된 MusicBrainz 앨범/아티스트 ID 업데이트</string>
   <string id="32134">추가기능 데이터베이스 업데이트</string>
   <string id="32135">추가기능 데이터베이스 업데이트 - 로컬 아티스트</string>
-  <string id="32136">추가기능 데이터베이스를 업데이트할 때 MusicBrainz ID 업데이트 (누락된 ID)</string>
+  <string id="32136">데이터베이스를 업데이트할 때 MusicBrainz ID 업데이트 (누락된 ID)</string>
   <string id="32137">아티스트</string>
   <string id="32138">앨범</string>
   <string id="32139">추가기능 데이터베이스 백업 성공</string>
@@ -150,39 +150,24 @@
   <string id="32145">XBMC 미리보기 및 팬아트 업데이트</string>
   <string id="32146">설정</string>
   <string id="32147">나가기</string>
-  <string id="32148">(시간이 오래 걸릴 수 있습니다)</string>
-  <string id="32149">아티스트 MBID 검사</string>
-  <string id="32150">앨범 MBID 검사</string>
-  <string id="32151">누락된 MBID 검색</string>
+  <string id="32148">(this can take a long time to complete)</string>
+  <string id="32149">Checking Artist MBIDs</string>
+  <string id="32150">Checking Album MBIDs</string>
+  <string id="32151">Find Missing MBIDs</string>
   <string id="32152">MBID 새로고침</string>
   <string id="32153">MBID 변경</string>
-  <string id="32154">모든 MBID 검사</string>
+  <string id="32154">모든 MBID 확인</string>
   <string id="32155">MBID 입력</string>
-  <string id="32156">찾기에서 선택(수동)</string>
-  <string id="32157">찾기에서 선택(자동)</string>
-  <string id="32158">missing.txt 파일 저장</string>
-  <string id="32159">아티스트 MBID 입력 - Inclusing(36 Characters)</string>
+  <string id="32156">Select from search(manual entry)</string>
+  <string id="32157">Select from search(automatic)</string>
+  <string id="32158">Enable saving of missing.txt file</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
   <string id="32160">Please Enter 36 Characters including dashes</string>
   <string id="32161">다시 입력 하시겠습니까?</string>
   <string id="32162">이 MBID 가 정확합니까?</string>
-  <string id="32163">MBID를 정말 삭제하겠습니까?</string>
+  <string id="32163">정말 MBID 를 삭제하기 원하십니까?</string>
   <string id="32164">검색할 아티스트 이름 입력</string>
   <string id="32165">검색할 앨범 제목 입력</string>
   <string id="32166">앨범 선택</string>
-  <string id="32167">앨범 MBID 입력 - Including dashes(36 Characters)</string>
-  <string id="32168">아티스트 배너</string>
-  <string id="32169">400px X 155px</string>
-  <string id="32170">800px X 310px</string>
-  <string id="32171">HD Music LOGO 사용</string>
-  <string id="32172">업데이트 동안 추가기능 데이터베이스 백업</string>
-  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets cleared with manual use of cdART Manager</string>
-  <string id="32174">Number of possible MBID matches:</string>
-  <string id="32175">아티스트 이름에서 사용할 수 없는 문자 변경</string>
-  <string id="32176">사용할 수 없는 문자</string>
-  <string id="32177">다음 문자로 변경</string>
-  <string id="32178">예</string>
-  <string id="32179">아니오</string>
-  <string id="32180">    change trailing periods to replacement character</string>
-  <string id="32181">There is an error in Settings.</string>
-  <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>
