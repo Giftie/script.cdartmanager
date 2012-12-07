@@ -55,7 +55,7 @@ def get_all_local_artists( all_artists = True ):
         return empty
 
 def retrieve_artist_details( artist_id ):
-    utils.log( "jsonrpc_calls.py - Retrieving Album Path", xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Artist Details", xbmc.LOGDEBUG )
     json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["musicbrainzartistid"], "artistid": %d}, "id": 1}''' % artist_id
     json_artist_details = retrieve_json_dict(json_query, items='artistdetails', force_log=False )
     if json_artist_details:
@@ -64,7 +64,7 @@ def retrieve_artist_details( artist_id ):
         return empty
         
 def retrieve_album_list():
-    utils.log( "jsonrpc_calls.py - Retrieving Album List"        , xbmc.LOGDEBUG )
+    utils.log( "jsonrpc_calls.py - Retrieving Album List", xbmc.LOGDEBUG )
     json_query = '''{"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums", "params": { "limits": { "start": 0 }, "properties": ["title", "artist", "musicbrainzalbumid", "musicbrainzalbumartistid"], "sort": {"order":"ascending"}}, "id": 1}'''
     json_albums = retrieve_json_dict(json_query, items='albums', force_log=False )
     if json_albums:

@@ -141,6 +141,7 @@ def empty_tempxml_folder():
 def get_html_source( url, path, save_file = True, overwrite = False ):
     """ fetch the html source """
     log( "Retrieving HTML Source", xbmc.LOGDEBUG )
+    log( "Fetching URL: %s" % url, xbmc.LOGDEBUG )
     error = False
     htmlsource = ""
     file_name = ""
@@ -157,8 +158,10 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
         try:
             if save_file:
                 if exists( file_name ) and not overwrite:
+                    log( "Retrieving local source", xbmc.LOGDEBUG )
                     sock = open( file_name, "r" )
                 else:
+                    log( "Retrieving online source", xbmc.LOGDEBUG )
                     urllib.urlcleanup()
                     sock = urllib.urlopen( url )
             else:
@@ -166,7 +169,7 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
                 sock = urllib.urlopen( url )
             htmlsource = sock.read()
             if save_file:
-                if not exists( file_name ):
+                if not exists( file_name ) or overwrite:
                     file( file_name , "w" ).write( htmlsource )
             sock.close()
             break

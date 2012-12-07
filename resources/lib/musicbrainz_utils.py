@@ -10,31 +10,35 @@ try:
 except:
     from pysqlite2 import dbapi2 as sqlite3
     
-__language__      = sys.modules[ "__main__" ].__language__
-__scriptname__    = sys.modules[ "__main__" ].__scriptname__
-__scriptID__      = sys.modules[ "__main__" ].__scriptID__
-__version__       = sys.modules[ "__main__" ].__version__
-__addon__         = sys.modules[ "__main__" ].__addon__
-addon_db          = sys.modules[ "__main__" ].addon_db
-addon_work_folder = sys.modules[ "__main__" ].addon_work_folder
-BASE_RESOURCE_PATH= sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+__language__          = sys.modules[ "__main__" ].__language__
+__scriptname__        = sys.modules[ "__main__" ].__scriptname__
+__scriptID__          = sys.modules[ "__main__" ].__scriptID__
+__version__           = sys.modules[ "__main__" ].__version__
+__addon__             = sys.modules[ "__main__" ].__addon__
+use_musicbrainz       = sys.modules[ "__main__" ].use_musicbrainz
+musicbrainz_server    = sys.modules[ "__main__" ].musicbrainz_server
+addon_db              = sys.modules[ "__main__" ].addon_db
+addon_work_folder     = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH    = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+mb_delay              = sys.modules[ "__main__" ].mb_delay
 
 #sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 
 from utils import get_html_source, unescape, log
 
-artist_url = '''http://musicbrainz.org/ws/2/artist/?query=artist:"%s"&limit=%d'''
-alias_url = '''http://musicbrainz.org/ws/2/artist/?query=alias:"%s"&limit=%d'''
-release_group_url_nosingles = '''http://musicbrainz.org/ws/2/release-group/?query="%s"%s AND artist:"%s" NOT type:single&limit=%d'''
-release_group_url_using_release_name = '''http://musicbrainz.org/ws/2/release-group/?query=release:"%s"%s AND artist:"%s"&limit=%d'''
-release_group_url_singles = '''http://musicbrainz.org/ws/2/release-group/?query="%s"%s AND artist:"%s"&limit=%d'''
-release_group_url_nosingles_alias = '''http://musicbrainz.org/ws/2/release-group/?query="%s"%s AND alias:"%s" NOT type:single&limit=%d'''
-release_group_url_using_release_name_alias = '''http://musicbrainz.org/ws/2/release-group/?query=release:"%s"%s AND alias:"%s"&limit=%d'''
-release_group_url_singles_alias = '''http://musicbrainz.org/ws/2/release-group/?query="%s"%s AND alias:"%s"&limit=%d'''
-release_group_url_release_mbid = '''http://musicbrainz.org/ws/2/release-group/?release=%s'''
-release_groups_url_artist_mbid = '''http://musicbrainz.org/ws/2/release-group/?artist="%s"'''
-artist_id_check = '''http://www.musicbrainz.org/ws/2/artist/%s'''
-release_group_id_check = '''http://www.musicbrainz.org/ws/2/release-group/%s'''
+artist_url = '''%s/ws/2/artist/?query=artist:"%s"&limit=%d'''
+alias_url = '''%s/ws/2/artist/?query=alias:"%s"&limit=%d'''
+release_group_url_nosingles = '''%s/ws/2/release-group/?query="%s"%s AND artist:"%s" NOT type:single&limit=%d'''
+release_group_url_using_release_name = '''%s/ws/2/release-group/?query=release:"%s"%s AND artist:"%s"&limit=%d'''
+release_group_url_singles = '''%s/ws/2/release-group/?query="%s"%s AND artist:"%s"&limit=%d'''
+release_group_url_nosingles_alias = '''%s/ws/2/release-group/?query="%s"%s AND alias:"%s" NOT type:single&limit=%d'''
+release_group_url_using_release_name_alias = '''%s/ws/2/release-group/?query=release:"%s"%s AND alias:"%s"&limit=%d'''
+release_group_url_singles_alias = '''%s/ws/2/release-group/?query="%s"%s AND alias:"%s"&limit=%d'''
+release_group_url_release_mbid = '''%s/ws/2/release-group/?release=%s'''
+release_groups_url_artist_mbid = '''%s/ws/2/release-group/?artist="%s"'''
+artist_id_check = '''%s/ws/2/artist/%s'''
+release_group_id_check = '''%s/ws/2/release-group/%s'''
+server = musicbrainz_server
 
 def split_album_info( album_result, index ):
     album = {}
@@ -59,7 +63,7 @@ def get_musicbrainz_release_group( release_mbid ):
         release_mbid - valid release mbid
     """
     log( "Retrieving MusicBrainz Release Group MBID from Album Release MBID", xbmc.LOGDEBUG )
-    url = release_group_url_release_mbid % quote_plus( release_mbid )
+    url = release_group_url_release_mbid % ( server, quote_plus( release_mbid ) )
     mbid = ""
     htmlsource = get_html_source( url, release_mbid, True )
     match = re.search( '''<release-group(.*?)</release-group>''', htmlsource )
@@ -69,7 +73,7 @@ def get_musicbrainz_release_group( release_mbid ):
             mbid_match = re.search( '''<release-group (?:.*?)id="(.*?)">''', htmlsource )
         if mbid_match:
             mbid = mbid_match.group( 1 )
-    xbmc.sleep( 900 )
+    xbmc.sleep( mb_delay )
     return mbid
 
 def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=False, by_release=False, use_alias=False ):
@@ -101,22 +105,22 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     if limit == 1:
         if not with_singles and not by_release and not use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Artist - Not including Singles", xbmc.LOGDEBUG )
-            url = release_group_url_nosingles % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_nosingles % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and not by_release and use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Alias - Not including Singles", xbmc.LOGDEBUG )
-            url = release_group_url_nosingles_alias % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_nosingles_alias % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         elif not by_release and not use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Artist - Including Singles", xbmc.LOGDEBUG )
-            url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_singles % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         elif not by_release and use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Alias - Including Singles", xbmc.LOGDEBUG )
-            url = release_group_url_singles_alias % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_singles_alias % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and not use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Artist - Using Release Name", xbmc.LOGDEBUG )
-            url = release_group_url_using_release_name % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_using_release_name % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         elif not with_singles and use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Alias - Using Release Name", xbmc.LOGDEBUG )
-            url = release_group_url_using_release_name_alias % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+            url = release_group_url_using_release_name_alias % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         htmlsource = get_html_source( url, "", False )
         match = re.search( '''<release-group(.*?)</release-group>''', htmlsource )
         if match:
@@ -134,34 +138,29 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
             except:
                 pass            
         if not album["id"]:
+            xbmc.sleep( mb_delay ) # sleep for allowing proper use of webserver
             if not with_singles and not by_release and not use_alias:
                 log( "No releases found on MusicBrainz, Checking by Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, False, True ) # try again by using artist alias
             elif use_alias and not with_singles and not by_release:
                 log( "No releases found on MusicBrainz, Checking by Release name", xbmc.LOGDEBUG )
-                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, True, False ) # try again by using release name
             elif by_release and not with_singles and not use_alias:
                 log( "No releases found on MusicBrainz, Checking by Release name and Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, False, True, True ) # try again by using release name and artist alias
             elif by_release and not with_singles and use_alias:
                 log( "No releases found on MusicBrainz, checking singles", xbmc.LOGDEBUG )
-                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, True, False, False ) # try again with singles
             elif with_singles and not use_alias and not by_release:
                 log( "No releases found on MusicBrainz, checking singles and Artist Alias", xbmc.LOGDEBUG )
-                xbmc.sleep( 900 ) # sleep for allowing proper use of webserver
                 album, albums = get_musicbrainz_album( album_title, artist, 0, limit, True, False, True ) # try again with singles and artist alias
             else:
-                xbmc.sleep( 900 )
                 log( "No releases found on MusicBrainz.", xbmc.LOGDEBUG )
                 album["artist"], album["artist_id"], sort_name = get_musicbrainz_artist_id( artist )
             
     else:
         match_within = "~4"
-        url = release_group_url_singles % ( quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
+        url = release_group_url_singles % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
         htmlsource = get_html_source( url, "", False )
         match = re.findall( '''<release-group(.*?)</release-group>''', htmlsource )
         if match:
@@ -196,7 +195,7 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
                 
         else:
             pass
-    xbmc.sleep( 910 ) # sleep for allowing proper use of webserver
+    xbmc.sleep( mb_delay ) # sleep for allowing proper use of webserver
     return album, albums
 
 def get_musicbrainz_artists( artist_search, limit=1 ):
@@ -209,7 +208,7 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
     id = ""
     sortname = ""
     artists = []
-    url = artist_url % ( quote_plus( artist_search.encode("utf-8") ), limit )
+    url = artist_url % ( server, quote_plus( artist_search.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False)
     match = re.findall( '''<artist(.*?)</artist>''', htmlsource )
     if match:
@@ -247,9 +246,9 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
     id = ""
     sortname = ""
     if not alias:
-        url = artist_url % ( quote_plus( artist.encode("utf-8") ), limit )
+        url = artist_url % ( server, quote_plus( artist.encode("utf-8") ), limit )
     else:
-        url = alias_url % ( quote_plus( artist.encode("utf-8") ), limit )
+        url = alias_url % ( server, quote_plus( artist.encode("utf-8") ), limit )
     htmlsource = get_html_source( url, "", False)
     match = re.search( '''<artist(.*?)</artist>''', htmlsource )
     if match:
@@ -272,14 +271,13 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
         log( "Id        : %s" % id, xbmc.LOGDEBUG )
         log( "Name      : %s" % name, xbmc.LOGDEBUG )
         log( "Sort Name : %s" % sortname, xbmc.LOGDEBUG )
-        xbmc.sleep( 900 )
     else:
-        xbmc.sleep( 910 ) # sleep for allowing proper use of webserver
         if not alias:
             log( "No Artist ID found trying aliases: %s" % artist, xbmc.LOGDEBUG )
             name, id, sortname = get_musicbrainz_artist_id( artist, limit, True )
         else:
             log( "No Artist ID found for Artist: %s" % artist, xbmc.LOGDEBUG )
+    xbmc.sleep( mb_delay )
     return name, id, sortname
 
 def update_musicbrainzid( type, info ):
@@ -313,9 +311,9 @@ def mbid_check( database_mbid, type ):
     new_mbid = ""
     mbid_match = False
     if type == "release-group":
-        url = release_group_id_check % database_mbid
+        url = release_group_id_check % ( server, database_mbid )
     elif type == "artist":
-        url = artist_id_check % database_mbid
+        url = artist_id_check % ( server, database_mbid )
     htmlsource = get_html_source( url, "", False)
     if type == "release-group":
         match = re.search( '''<release-group id="(.*?)"(?:.*?)>''', htmlsource )
@@ -352,5 +350,6 @@ def mbid_check( database_mbid, type ):
         log( "MBID is current. No Need to change", xbmc.LOGDEBUG )
     else:
         log( "MBID is not current. Need to change", xbmc.LOGDEBUG )
+    xbmc.sleep( mb_delay )
     return mbid_match, new_mbid
 

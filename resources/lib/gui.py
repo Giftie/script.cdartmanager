@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #system imports
-import sys, os, re, traceback
+import sys, os, re, traceback, calendar
+from datetime import datetime
 #xbmc module imports
 import xbmcgui, xbmcaddon, xbmc, xbmcvfs
 ### this probably can be removed
@@ -43,8 +44,8 @@ enable_all_artists   = sys.modules[ "__main__" ].enable_all_artists
 enable_missing       = sys.modules[ "__main__" ].enable_missing
 
 # script imports
-from fanarttv_scraper import first_check, remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
-from utils import get_html_source, clear_image_cache, empty_tempxml_folder, get_unicode, change_characters, log, dialog_msg
+from fanarttv_scraper import check_fanart_new_artwork, first_check, remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
+from utils import get_html_source, clear_image_cache, get_unicode, change_characters, log, dialog_msg
 from download import download_art, auto_download
 from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, get_musicbrainz_artists
@@ -284,8 +285,8 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if not local_artist_list:
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             return
-        xbmc.executebuiltin( "ActivateWindow(busydialog)" )
         try:
+            xbmc.executebuiltin( "ActivateWindow(busydialog)" )
             for artist in local_artist_list:
                 if artist["has_art"] != "False":                    
                     listitem = xbmcgui.ListItem( label=self.coloring( artist["name"] , "green" , artist["name"] ) )
@@ -1048,12 +1049,19 @@ class GUI( xbmcgui.WindowXMLDialog ):
         self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
         self.local_artists = get_local_artists_db() # retrieve data from addon's database
         self.setFocusId( 100 ) # set menu selection to the first option(cdARTs)
-        local_artists = get_local_artists_db( mode="album_artists" )
+        album_artists = get_local_artists_db( mode="album_artists" )
         if enable_all_artists:
             all_artists = get_local_artists_db( mode="all_artists" )
         else:
             all_artists = []
-        self.all_artists_list, self.album_artists = get_recognized( all_artists, local_artists )
+        d = datetime.utcnow()
+        present_datecode = calendar.timegm( d.utctimetuple() )
+        new_artwork, data = check_fanart_new_artwork( present_datecode )
+        if new_artwork:
+            self.all_artists_list, self.album_artists = get_recognized( all_artists, album_artists )
+        else:
+            self.all_artists_list = all_artists
+            self.album_artists = album_artists
 
     def onClick( self, controlId ):
         #print controlId
@@ -1146,6 +1154,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                         log( "Error updating database(lalist)", xbmc.LOGERROR )
                         traceback.print_exc()
                     try:
+                        c.execute('''UPDATE alblist SET musicbrainz_artistid="%s" WHERE musicbrainz_artistid="%s"''' % ( mbid, self.artist_menu["musicbrainz_artistid"] ) )
+                    except:
+                        log( "Error updating database(lalist)", xbmc.LOGERROR )
+                        traceback.print_exc()
+                    try:
                         c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( mbid, self.artist_menu["local_id"] ) )
                     except:
                         log( "Error updating database(local_artists)", xbmc.LOGERROR )
@@ -1182,7 +1195,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 all_artists = get_local_artists_db( mode="all_artists" )
             else:
                 all_artists = []
-            self.album_recognized_artists, self.all_artists_recognized, self.all_artists_list, self.album_artists = get_recognized( all_artists, local_artists )
+            self.all_artists_list, self.album_artists = get_recognized( all_artists, local_artists )
             if self.menu_mode == 11:
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 145 ).reset()
@@ -1274,7 +1287,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 all_artists = get_local_artists_db( mode="all_artists" )
             else:
                 all_artists = []
-            first_check( all_artists, local_artists )
+            first_check( all_artists, local_artists, background = False, update_db = True )
             self.all_artists_list, self.album_artists = get_recognized( all_artists, local_artists )
             all_artist_count, local_album_count, local_artist_count, local_cdart_count = new_local_count()
             self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
@@ -1339,7 +1352,6 @@ class GUI( xbmcgui.WindowXMLDialog ):
             self.setup_colors()
         if controlId == 111 : #Exit
             self.menu_mode = 0
-            empty_tempxml_folder()
             if enable_missing:
                 self.missing_list()
             self.close()
@@ -1385,7 +1397,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 120 ).reset()
                 self.local_artists = self.album_artists
-                self.populate_artist_list( elf.local_artists )
+                self.populate_artist_list( self.local_artists )
             elif controlId in ( 181, 185, 198, 206 ) and enable_all_artists:
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 self.getControl( 120 ).reset()
@@ -1506,6 +1518,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if updated_artist["musicbrainz_artistid"]:
                     try:
                         c.execute('''UPDATE lalist SET musicbrainz_artistid="%s" WHERE local_id=%s''' % ( updated_artist["musicbrainz_artistid"], updated_artist["local_id"] ) )
+                    except:
+                        log( "Error updating database", xbmc.LOGERROR )
+                        traceback.print_exc()
+                    try:
+                        c.execute('''UPDATE alblist SET musicbrainz_artistid="%s" WHERE artist="%s"''' % ( updated_artist["musicbrainz_artistid"], updated_artist["name"] ) )
                     except:
                         log( "Error updating database", xbmc.LOGERROR )
                         traceback.print_exc()
@@ -1636,6 +1653,11 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 artist_name = self.artists[self.getControl( 161 ).getSelectedPosition()]["name"]
                 try:
                     c.execute('''UPDATE lalist SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( artist_musicbrainzid, artist_name, self.artist_menu["local_id"] ) )
+                except:
+                    log( "Error updating database", xbmc.LOGERROR )
+                    traceback.print_exc()
+                try:
+                    c.execute('''UPDATE alblist SET musicbrainz_artistid="%s", artist="%s" WHERE artist="%s"''' % ( artist_musicbrainzid, artist_name, self.artist_menu["name"] ) )
                 except:
                     log( "Error updating database", xbmc.LOGERROR )
                     traceback.print_exc()

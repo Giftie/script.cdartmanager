@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-11-02 21:40+0000 -->
+<!-- translation date: 2012-07-19 02:10+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconocidos</string>
@@ -16,8 +16,8 @@
   <string id="32010">Local Albumes: %s</string>
   <string id="32011">Avanzado</string>
   <string id="32012">Refrescar la Base de Datos del Addon</string>
-  <string id="32013">Clean XBMC's Music Library</string>
-  <string id="32014">Update XBMC's Music Library</string>
+  <string id="32013">Limpiar Base de Datos de Música</string>
+  <string id="32014">Actualizar Base de Datos de Música</string>
   <string id="32015">Borrar Base de Datos Local?</string>
   <string id="32016">Disc:</string>
   <string id="32017">Carpeta donde guardar cdART Locales</string>
@@ -102,7 +102,7 @@
   <string id="32096">Duplicados Encontrados</string>
   <string id="32097">    Redimensionar cdARTs Únicos?</string>
   <string id="32098">Lista Local de cdART</string>
-  <string id="32099">Build Addon Database in background</string>
+  <string id="32099">Build Database</string>
   <string id="32100">Cuenta Local de Albumes</string>
   <string id="32101">Organizando Álbum de Artistas</string>
   <string id="32102">Buscando Base de Datos Local</string>
@@ -117,7 +117,7 @@
   <string id="32112">Actualizando Miniaturas y Fanarts</string>
   <string id="32113">Finalizada actualización de Miniaturas y Fanarts</string>
   <string id="32114">Compruebe que la MBID de la Base de datos sea la actual cuando se actualiza</string>
-  <string id="32115">Notify while in Background mode</string>
+  <string id="32115">Notificar Mientras la Base de Datos se Crea en 2º Plano</string>
   <string id="32116">Notificar al Finalizar La Creación de la Base de Datos (se verá 2 segundos)</string>
   <string id="32117">Creación de la base de datos completada</string>
   <string id="32118">Creando Base de Datos en 2º Plano...  Saliendo del Script...</string>
@@ -128,7 +128,7 @@
   <string id="32123">Realizar copia de seguridad de la base de datos</string>
   <string id="32124">Recuperando Todos los Artistas Locales</string>
   <string id="32125">Artista: </string>
-  <string id="32126">Modify Addon Database</string>
+  <string id="32126">Modifica la base de datos local</string>
   <string id="32127">Editar Álbum</string>
   <string id="32128">Límite de búsqueda en MusicBrainz</string>
   <string id="32129">Actualiza la base de datos</string>
@@ -161,28 +161,13 @@
   <string id="32156">Selección de búsqueda (entrada manual)</string>
   <string id="32157">Selección de búsqueda (entrada automática)</string>
   <string id="32158">Activar la creación de archivo missing.txt</string>
-  <string id="32159">Introducir MBID del intérprete - Incluyendo los guiones (36 carácteres)</string>
-  <string id="32160">Por favor introduzca 36 carácteres incluidos los guiones</string>
+  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
+  <string id="32160">Por favor Introduzca 36 carácteres incluidas almohadillas</string>
   <string id="32161">¿Desea volver a introducirlo?</string>
   <string id="32162">¿Este MBID es correcto?</string>
   <string id="32163">¿Seguro que desea borrar este MBID?</string>
   <string id="32164">Introduzca Artista a buscar</string>
   <string id="32165">Introduzca Álbum a buscar</string>
   <string id="32166">Seleccione Álbum</string>
-  <string id="32167">Introducir MBID del álbum - Incluyendo los guiones (36 carácteres)</string>
-  <string id="32168">Artist Banners</string>
-  <string id="32169">400px X 155px</string>
-  <string id="32170">800px X 310px</string>
-  <string id="32171">Enable HD Music LOGOs</string>
-  <string id="32172">Backup addon database during update</string>
-  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
-  <string id="32174">Number of possible MBID matches:</string>
-  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
-  <string id="32176">   illegal characters to replace</string>
-  <string id="32177">   replacement character</string>
-  <string id="32178">Yes</string>
-  <string id="32179">No</string>
-  <string id="32180">    change trailing periods to replacement character</string>
-  <string id="32181">There is an error in Settings.</string>
-  <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
+  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
 </strings>
