@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-21 09:53+0000 -->
-<!-- translator: Attila Zsigus -->
+<!-- translation date: 2012-12-07 14:03+0000 -->
+<!-- translator: giftie -->
 <strings>
   <string id="32000">Felismert előadók</string>
   <string id="32001">Minden előadó</string>
@@ -16,8 +16,8 @@
   <string id="32010">Helyi albumok: %s</string>
   <string id="32011">Haladó</string>
   <string id="32012">Helyi adatbázis frissítése</string>
-  <string id="32013">Zenei adatbázis tisztítása</string>
-  <string id="32014">Zenei adatbázis frissítése</string>
+  <string id="32013">Clean XBMC's Music Library</string>
+  <string id="32014">Update XBMC's Music Library</string>
   <string id="32015">Helyi adatbázis törlése?</string>
   <string id="32016">Disc:</string>
   <string id="32017">Helyi cd-kép lista mentési helye</string>
@@ -102,7 +102,7 @@
   <string id="32096">duplikált volt</string>
   <string id="32097">    Egyedi cd-képek átméretezése</string>
   <string id="32098">Helyi cdART lista</string>
-  <string id="32099">Adatbázis felépítése a háttérben</string>
+  <string id="32099">Build Addon Database in background</string>
   <string id="32100">Helyi albumok</string>
   <string id="32101">Album előadók rendezése</string>
   <string id="32102">Helyi adatbázis lekérdezése</string>
@@ -116,8 +116,8 @@
   <string id="32111">Letöltött Artwork</string>
   <string id="32112">Bélyegképek és Fanart-ok frissítése</string>
   <string id="32113">A bélyegképek és Fanartok frissítése befejeződött.</string>
-  <string id="32114">Check Database MBID's to be current during an Update</string>
-  <string id="32115">Adatbázis felépítése a háttérben</string>
+  <string id="32114">MBID adatbázis ellenőrzése és frissítése</string>
+  <string id="32115">Notify while in Background mode</string>
   <string id="32116">Értesítés az adatbázis háttérben való felépítéséről (2 másodpercig látható)</string>
   <string id="32117">Adatbázis építése kész</string>
   <string id="32118">Adatbázis felépítése folyamatban (a háttérben)... | | A szkript bezáródik</string>
@@ -128,7 +128,7 @@
   <string id="32123">Biztonsági másolat az adatbázisról</string>
   <string id="32124">Minden helyi művész lekérdezése</string>
   <string id="32125">Előadó azonosító:</string>
-  <string id="32126">Helyi adatbázis módosítása</string>
+  <string id="32126">Modify Addon Database</string>
   <string id="32127">Album Szerkesztése</string>
   <string id="32128">MusicBrainz Keresési Limit</string>
   <string id="32129">Adatbázis frissítése</string>
@@ -150,7 +150,7 @@
   <string id="32145">XBMC Bélyegképek és Fanart-ok frissítése</string>
   <string id="32146">Beállítások</string>
   <string id="32147">Kilépés</string>
-  <string id="32148">(this can take a long time to complete)</string>
+  <string id="32148">(ez eltarthat egy pár percig)</string>
   <string id="32149">Előadó MBID ellenőrzése</string>
   <string id="32150">Album MBID ellenőrzése</string>
   <string id="32151">Hiányzó MBID-k keresése</string>
@@ -160,14 +160,37 @@
   <string id="32155">MBID Bevitele</string>
   <string id="32156">Kiválasztás kereséshez (manuális bevitel)</string>
   <string id="32157">Kiválasztás kereséshez (automatikus)</string>
-  <string id="32158">Enable saving of missing.txt file</string>
-  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
-  <string id="32160">Please Enter 36 Characters including dashes</string>
-  <string id="32161">Do you want to re-enter?</string>
-  <string id="32162">Is this MBID Correct?</string>
-  <string id="32163">Are you sure you want to delete MBID?</string>
+  <string id="32158">missing.txt mentésének engedélyezése</string>
+  <string id="32159">Előadó MBID bevitele (36 karakter)</string>
+  <string id="32160">Bevitel (36 karakter)</string>
+  <string id="32161">Szeretné újra beírni?</string>
+  <string id="32162">Ez az MBID helyes?</string>
+  <string id="32163">Valóban törölni akarja az MBID-t?</string>
   <string id="32164">Előadó nevének megadása kereséshez</string>
   <string id="32165">Album címének megadása kereséshez</string>
   <string id="32166">Album Kiválasztása</string>
-  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
+  <string id="32167">Album MBID bevitele (36 karakter)</string>
+  <string id="32168">Artist Banners</string>
+  <string id="32169">400px X 155px</string>
+  <string id="32170">800px X 310px</string>
+  <string id="32171">Enable HD Music LOGOs</string>
+  <string id="32172">Backup addon database during update</string>
+  <string id="32173">Number of days to cache fanart.tv data(The Scheduler)[CR]Cache gets clearedwith manual use of cdART Manage</string>
+  <string id="32174">Number of possible MBID matches:</string>
+  <string id="32175">Enable replacement of illegal filename characters in artist names</string>
+  <string id="32176">   illegal characters to replace</string>
+  <string id="32177">   replacement character</string>
+  <string id="32178">Yes</string>
+  <string id="32179">No</string>
+  <string id="32180">    change trailing periods to replacement character</string>
+  <string id="32181">There is an error in Settings.</string>
+  <string id="32182">Please check your settings and save settings[CR](press OK in settings)</string>
+  <string id="32183">Limit number Extrafanarts</string>
+  <string id="32184">    Extrafanart Limit:</string>
+  <string id="32185">Checking fanart.tv for new artwork...</string>
+  <string id="32186">Updating Database to new version...</string>
+  <string id="32187">Checking fanart.tv for artwork...</string>
+  <string id="32188">Use http://musicbrainz.org as the MusicBrainz Server</string>
+  <string id="32189">     Url path to MusicBrainz Server(example - http://192.168.1.20)</string>
+  <string id="32190">     Delay between MusicBrainz Server requests(100's of Milliseconds)</string>
 </strings>

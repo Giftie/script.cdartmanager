@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--Project: cdART Manager -->
-<!-- translation date: 2012-07-19 02:10+0000 -->
+<!-- translation date: 2012-12-07 14:03+0000 -->
 <!-- translator: giftie -->
 <strings>
   <string id="32000">Artistas Reconhecidos</string>
@@ -16,8 +16,8 @@
   <string id="32010">Álbuns Locais: %s</string>
   <string id="32011">Avançado</string>
   <string id="32012">Atualizar Database Local</string>
-  <string id="32013">Limpar Database de Músicas XBMC</string>
-  <string id="32014">Atualizar Database de Músicas XBMC</string>
+  <string id="32013">Limpar Coleção de Músicas no XBMC</string>
+  <string id="32014">Atualizar Coleção de Músicas no XBMC</string>
   <string id="32015">Apagar Database Local?</string>
   <string id="32016">Disco:</string>
   <string id="32017">Pasta de Armazenamento da Lista Local do cdART</string>
@@ -102,7 +102,7 @@
   <string id="32096">Duplicatas Encontradas</string>
   <string id="32097">    Redimensionar cdARTs Únicos?</string>
   <string id="32098">Lista de Imagens</string>
-  <string id="32099">Construir Database em Segundo Plano</string>
+  <string id="32099">Construir Banco de Dados do Addon em Segundo Plano</string>
   <string id="32100">Contando Álbuns locais</string>
   <string id="32101">Ordenando Álbum Artistas</string>
   <string id="32102">Recuperando o Database Local</string>
@@ -117,7 +117,7 @@
   <string id="32112">Atualizando miniaturas e fanarts</string>
   <string id="32113">Terminou de atualizar Miniaturas e fanarts</string>
   <string id="32114">Verificar se o Banco de Dados MBID´s é o atual durante atualização </string>
-  <string id="32115">Notificar Durante a construção do Database</string>
+  <string id="32115">Notificar enquanto em modo Background</string>
   <string id="32116">Notificar ao final da construção do Database em Background(2 segundos)</string>
   <string id="32117">Construção do Banco de Dados completado</string>
   <string id="32118">Construindo o Banco de Dados - em progresso...  Saíndo do Script...</string>
@@ -128,7 +128,7 @@
   <string id="32123">Backup Base de Dados</string>
   <string id="32124">Recuperando Todos os Artistas Locais</string>
   <string id="32125">Artista ID: </string>
-  <string id="32126">Modificar Database Local</string>
+  <string id="32126">Modificar Banco de Dados do Addon</string>
   <string id="32127">Editar Álbum</string>
   <string id="32128">MusicBrainz Limite Pesquisa</string>
   <string id="32129">Atualizar Database Add-On</string>
@@ -161,7 +161,7 @@
   <string id="32156">Selecione a partir de pesquisa (entrada manual)</string>
   <string id="32157">Selecione a partir de busca (automático)</string>
   <string id="32158">Ativar salvar o arquivo missing.txt</string>
-  <string id="32159">Enter Artist MBID - Including dashes(36 Characters)</string>
+  <string id="32159">Digite Artista MBID - Incluindo traços (36 caracteres)</string>
   <string id="32160">Por favor Entre 36 caracteres, incluindo traços</string>
   <string id="32161">Você quer voltar a entrar?</string>
   <string id="32162">Está o MBID Correto?</string>
@@ -169,5 +169,28 @@
   <string id="32164">Entre nome do Artista para procurar</string>
   <string id="32165">Entre nome do Álbum para procurar</string>
   <string id="32166">Selecione Álbum</string>
-  <string id="32167">Enter Album MBID - Including dashes(36 Characters)</string>
+  <string id="32167">Digite Álbum MBID - Incluindo traços (36 caracteres)</string>
+  <string id="32168">Banners de Artistas</string>
+  <string id="32169">400px X 155px</string>
+  <string id="32170">800px X 310px</string>
+  <string id="32171">Ativar Logos de Músicas em formato HD</string>
+  <string id="32172">Backup da base de dados do addon durante atualização</string>
+  <string id="32173">Número de dias para cache dados fanart.tv(Agendar)[CR]Cache será limpo com o uso manual do cdART Manager.</string>
+  <string id="32174">Número de possíveis resultados no MBID: </string>
+  <string id="32175">Ativar troca de caracteres ilegais no nome do arquivo em nome de artistas</string>
+  <string id="32176">Caracteres ilegais para substituir</string>
+  <string id="32177">Substituir caractere</string>
+  <string id="32178">Sim</string>
+  <string id="32179">Não</string>
+  <string id="32180">        Alterar tempo de escape para substituição de caracter</string>
+  <string id="32181">Existe erro nos Ajustes.</string>
+  <string id="32182">Por favor verifique seus ajustes e salve-os[CR](pressione OK em ajustes)</string>
+  <string id="32183">Número Limite Extrafanarts</string>
+  <string id="32184">    Extrafanart Limite:</string>
+  <string id="32185">Checking fanart.tv for new artwork...</string>
+  <string id="32186">Updating Database to new version...</string>
+  <string id="32187">Checking fanart.tv for artwork...</string>
+  <string id="32188">Use http://musicbrainz.org as the MusicBrainz Server</string>
+  <string id="32189">     Url path to MusicBrainz Server(example - http://192.168.1.20)</string>
+  <string id="32190">     Delay between MusicBrainz Server requests(100's of Milliseconds)</string>
 </strings>
