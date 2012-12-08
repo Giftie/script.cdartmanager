@@ -316,7 +316,7 @@ def first_check( all_artists, album_artists, background=False, update_db = False
         log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
         match = {}
         match = artist
-        if artist["musicbrainz_artistid"] and artist[ "has_art"] == "False":
+        if artist["musicbrainz_artistid"] and ( artist[ "has_art"] == "False" or update_db ):
             match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
         elif not artist["musicbrainz_artistid"]:
             match[ "has_art" ] = "False"
@@ -334,7 +334,7 @@ def first_check( all_artists, album_artists, background=False, update_db = False
             log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
             match = {}
             match = artist
-            if artist["musicbrainz_artistid"] and artist[ "has_art"] == "False":
+            if artist["musicbrainz_artistid"] and ( artist[ "has_art"] == "False" or update_db ):
                 match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
             elif not artist["musicbrainz_artistid"]:
                 match[ "has_art" ] = "False"

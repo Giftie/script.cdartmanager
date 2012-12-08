@@ -248,7 +248,6 @@ def update_xbmc_thumbnails( background=False ):
 
 def write_cache_file():
     log( "Cache is being cleared", xbmc.LOGNOTICE )
-    empty_tempxml_folder()
     cache_file = open( os.path.join( addon_work_folder, "cache.txt" ), "wb" )
     line = "%s/%s/%s\n" % ( time.strftime( "%m" ), time.strftime( "%d" ), time.strftime( "%Y" ) )
     cache_file.write( line )
@@ -356,7 +355,7 @@ if ( __name__ == "__main__" ):
                 d = datetime.datetime.utcnow()
                 present_datecode = calendar.timegm( d.utctimetuple() )
                 new_artwork, data = check_fanart_new_artwork( present_datecode )
-                if not new_artwork:
+                if new_artwork:
                     all_artists_list, album_artists = get_recognized( all_artists, local_artists, background = True )
                 else:
                     all_artists_list = all_artists
