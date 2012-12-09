@@ -29,7 +29,6 @@ backup_during_update  = sys.modules[ "__main__" ].backup_during_update
 image                 = sys.modules[ "__main__" ].image
 
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, mbid_check, get_musicbrainz_release_group
-from fanarttv_scraper import retrieve_fanarttv_xml, remote_cdart_list
 from utils import get_unicode, log, dialog_msg
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
 
@@ -68,7 +67,7 @@ def get_xbmc_database_info( background=False ):
     if not album_list:
         dialog_msg( "close", background = background )
         return None
-    album_detail_list = retrieve_album_details_full( album_list, total, background, False, False )
+    album_detail_list = retrieve_album_details_full( album_list, total, background = background, simple = False, update = False )
     dialog_msg( "close", background = background )
     return album_detail_list 
 
@@ -124,9 +123,8 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                     paths.append( detail['path'] )                    
                 for path in paths:
                     try:
-                        if not background:
-                            if dialog_msg( "iscanceled", background = background):
-                                break
+                        if dialog_msg( "iscanceled", background = background):
+                            break
                         album_artist = {}
                         if path == previous_path:
                             continue
@@ -276,9 +274,8 @@ def store_alblist( local_album_list, background=False ):
             except:
                 log( "Error Saving to Database", xbmc.LOGDEBUG )
                 traceback.print_exc()
-            if not background:
-                if dialog_msg( "iscanceled", background = background):
-                    break
+            if dialog_msg( "iscanceled", background = background):
+                break
     except:
         log( "Error Saving to Database", xbmc.LOGDEBUG )
         traceback.print_exc()
@@ -300,29 +297,42 @@ def recount_cdarts():
     c.close()
     return cdart_existing
         
-def store_lalist( local_artist_list, count_artist_local, background=False ):
+def store_lalist( local_artist_list, count_artist_local ):
     log( "Storing lalist", xbmc.LOGDEBUG )
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
     artist_count = 0
+    c.execute('''DROP table IF EXISTS lalist''')
+    c.execute('''CREATE TABLE lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')  # create local artists database
     for artist in local_artist_list:
         try:
             try:
-                c.execute("insert into lalist(local_id, name, musicbrainz_artistid) values (?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"]))
+                c.execute("insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
             except TypeError:
-                c.execute("insert into lalist(local_id, name, musicbrainz_artistid) values (?, ?, ?)", (artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"]))
+                c.execute("insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", (artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
             artist_count += 1
-            percent = int((artist_count / float(count_artist_local)) * 100)
-            if not background:
-                if dialog_msg( "iscanceled", background = background):
-                    break
+            percent = int(( artist_count / float( count_artist_local ) ) * 100)
         except:
             traceback.print_exc()
     conn.commit()
     c.close()
     log( "Finished Storing lalist", xbmc.LOGDEBUG )
     return artist_count
-        
+
+def retrieve_fanarttv_datecode():
+    query = "SELECT datecode FROM counts"
+    conn_l = sqlite3.connect(addon_db)
+    c = conn_l.cursor()
+    c.execute(query)
+    result = c.fetchall()
+    c.close
+    datecode = result[0][0]
+    return datecode
+
+def store_fanarttv_datecode( datecode ):
+    local_artist_count, album_count, artist_count, cdart_existing = new_local_count()
+    store_counts( local_artist_count, artist_count, album_count, cdart_existing, datecode=datecode )
+
 def retrieve_distinct_album_artists():
     log( "Retrieving Distinct Album Artist", xbmc.LOGDEBUG )
     album_artists = []
@@ -334,18 +344,18 @@ def retrieve_distinct_album_artists():
         artist = {}
         artist["name"] = get_unicode( item[0] )
         artist["musicbrainz_artistid"] = get_unicode( item[1] )
-        #log( (artist["name"]), xbmc.LOGDEBUG )
         album_artists.append(artist)
     c.close()
     log( "Finished Retrieving Distinct Album Artists", xbmc.LOGDEBUG )
     return album_artists
 
-def store_counts( local_artists_count, artist_count, album_count, cdart_existing ):
+def store_counts( local_artists_count, artist_count, album_count, cdart_existing, datecode=0 ):
     log( "Storing Counts", xbmc.LOGNOTICE )
     log( "    Album Count: %s" % album_count, xbmc.LOGNOTICE )
     log( "    Album Artist Count: %s" % artist_count, xbmc.LOGNOTICE )
     log( "    Local Artist Count: %s" % local_artists_count, xbmc.LOGNOTICE )
     log( "    cdARTs Existing Count: %s" % cdart_existing, xbmc.LOGNOTICE )
+    log( "    Unix Date Code: %s" % datecode, xbmc.LOGNOTICE )
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
     try:
@@ -354,10 +364,13 @@ def store_counts( local_artists_count, artist_count, album_count, cdart_existing
         # table missing
         traceback.print_exc()
     try:
-        c.execute('''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''')
+        c.execute('''CREATE TABLE counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT, datecode INTEGER)''')
     except:
         traceback.print_exc()
-    c.execute("insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__ ))
+    if datecode == 0:
+        c.execute("insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__))
+    else:
+        c.execute("insert into counts(local_artists, artists, albums, cdarts, version, datecode) values (?, ?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__, datecode ))
     conn.commit()
     c.close()
     log( "Finished Storing Counts", xbmc.LOGDEBUG )
@@ -386,7 +399,8 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
             album_artist_1["name"] = name                                   # store name and
             album_artist_1["local_id"] = id                                 # local id
             album_artist_1["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
-            local_album_artist_list.append(album_artist_1)
+            album_artist_1["has_art"] = "False"
+            local_album_artist_list.append( album_artist_1 )
         else:
             try:
                 print repr( artist_list_to_string( artist["name"] ) )
@@ -394,11 +408,12 @@ def check_local_albumartist( album_artist, local_artist_list, background=False )
                 traceback.print_exc()
     return local_album_artist_list, artist_count
     
-def new_database_setup( background=False ):
+def database_setup( background=False ):
     global local_artist    
     download_count = 0
     cdart_existing = 0
     album_count = 0
+    artist_count = 0
     local_artist_count = 0
     percent=0
     local_artist_list = []
@@ -411,38 +426,36 @@ def new_database_setup( background=False ):
         dialog_msg( "ok", heading = __language__(32071), line1 = __language__(32072), line2 = __language__(32073), background = background )
         log( "Settings not set, aborting database creation", xbmc.LOGDEBUG )
         return album_count, artist_count, cdart_existing
-    local_album_list = get_xbmc_database_info( background )
+    local_album_list = get_xbmc_database_info( background = background )
     if not local_album_list:
         dialog_msg( "ok", heading = __language__(32130), line1 = __language__(32131), background = background )
         log( "XBMC Music Library does not exist, aborting database creation", xbmc.LOGDEBUG )
         return album_count, artist_count, cdart_existing
-    if not background:
-        dialog_msg( "create", heading =  __language__(32021),line1 =  __language__(20186), background = background )
+    dialog_msg( "create", heading =  __language__(32021),line1 =  __language__(20186), background = background )
     #Onscreen Dialog - Creating Addon Database
     #                      Please Wait....
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
-    c.execute('''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''') 
-    c.execute('''create table lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')   # create local album artists database
-    c.execute('''create table alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
-    c.execute('''create table unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
-    c.execute('''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')
+    c.execute('''CREATE TABLE counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT, datecode INTEGER)''') 
+    c.execute('''CREATE TABLE lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')   # create local album artists database
+    c.execute('''CREATE TABLE alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
+    c.execute('''CREATE TABLE unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
+    c.execute('''CREATE TABLE local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')
     conn.commit()
     c.close()
-    album_count, cdart_existing = store_alblist( local_album_list, background ) # store album details first
+    album_count, cdart_existing = store_alblist( local_album_list, background = background ) # store album details first
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
-    local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background )
-    count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
+    local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background = background )
+    count = store_lalist( local_album_artist_list, artist_count )         # then store in database
     if enable_all_artists:
-        local_artist_count = build_local_artist_table( background )
+        local_artist_count = build_local_artist_table( background = background )
     store_counts( local_artist_count, artist_count, album_count, cdart_existing )
     if dialog_msg( "iscanceled", background = background):
         dialog_msg( "close", background = background )
         ok = dialog_msg( "ok", heading = __language__(32050), line1 = __language__(32051), line2 = __language__(32052), line3 = __language__(32053), background = background )
     log( "Finished Storing Database", xbmc.LOGDEBUG )
-    if not background:
-        dialog_msg( "close", background = background )
+    dialog_msg( "close", background = background )
     return album_count, artist_count, cdart_existing
     
 #retrieve the addon's database - saves time by no needing to search system for infomation on every addon access
@@ -454,8 +467,7 @@ def get_local_albums_db( artist_name, background=False ):
     c = conn_l.cursor()
     try:
         if artist_name == "all artists":
-            if not background:
-                dialog_msg( "create", heading =  __language__(32102), line1 = __language__(20186), background = background )
+            dialog_msg( "create", heading =  __language__(32102), line1 = __language__(20186), background = background )
             query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist, title ASC"
             c.execute(query)
         else:
@@ -484,12 +496,10 @@ def get_local_albums_db( artist_name, background=False ):
             local_album_list.append(album)
     except:
         traceback.print_exc()
-        if not background:
-            dialog_msg( "close", background = background )
+        dialog_msg( "close", background = background )
     #log( local_album_list, xbmc.LOGDEBUG )
     if artist_name == "all artists":
-        if not background:
-            dialog_msg( "close", background = background )
+        dialog_msg( "close", background = background )
     log( "Finished Retrieving Local Albums from Database", xbmc.LOGDEBUG )
     return local_album_list
         
@@ -497,29 +507,57 @@ def get_local_artists_db( mode="album_artists", background=False ):
     local_artist_list = []    
     if mode == "album_artists":
         log( "Retrieving Local Album Artists from Database", xbmc.LOGDEBUG )
-        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid FROM lalist ORDER BY name ASC"
+        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM lalist ORDER BY name ASC"
     else:
         log( "Retrieving All Local Artists from Database", xbmc.LOGDEBUG )
-        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid FROM local_artists ORDER BY name ASC"
+        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM local_artists ORDER BY name ASC"
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
     try:
         c.execute(query)
         db=c.fetchall()
         c.close
-        count = 0
         for item in db:
-            count += 1
             artists = {}
             artists["local_id"] = ( item[0] )
             artists["name"] = get_unicode( item[1] )
             artists["musicbrainz_artistid"] = get_unicode( item[2] )
-            #log( (artists), xbmc.LOGDEBUG )
+            try:
+                if not item[3]:
+                    artists["has_art"] = "False"
+                else:
+                    artists["has_art"] = ( item[3] )
+            except:
+                artists["has_art"] = ( item[3] )
             local_artist_list.append(artists)
     except:
         traceback.print_exc()
     #log( local_artist_list, xbmc.LOGDEBUG )
     return local_artist_list
+
+def store_local_artist_table( artist_list, background = False ):
+    count = 0
+    percent = 0
+    conn = sqlite3.connect(addon_db)
+    c = conn.cursor()
+    dialog_msg( "create", heading =  __language__(32124), line1 = __language__(20186), background = background )
+    c.execute('''DROP table IF EXISTS local_artists''')
+    c.execute('''CREATE TABLE local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')  # create local artists database
+    for artist in artist_list:
+        percent = int( ( count/float( len( artist_list ) ) ) * 100 )
+        dialog_msg( "update", percent = percent, line1 = __language__(32124), line2 = "%s%s" % ( __language__(32125), artist["local_id"] ), line3 = "%s%s" % ( __language__(32028), get_unicode( artist["name"] ) ), background = background )
+        try:
+            c.execute("insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ) )
+            count += 1
+        except KeyError:
+            c.execute("insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], "False" ) )
+            count += 1
+        except:
+            traceback.print_exc()
+    conn.commit()
+    dialog_msg( "close", background = background )
+    c.close
+    return count
     
 def build_local_artist_table( background=False ):
     log( "Retrieving All Local Artists From XBMC", xbmc.LOGDEBUG )
@@ -531,8 +569,7 @@ def build_local_artist_table( background=False ):
     total = len( local_artist_list ) 
     conn = sqlite3.connect(addon_db)
     c = conn.cursor()
-    if not background:
-        dialog_msg( "create", heading =  __language__(32124), line1 = __language__(20186), background = background )
+    dialog_msg( "create", heading =  __language__(32124), line1 = __language__(20186), background = background )
     try:
         for local_artist in local_artist_list:
             if dialog_msg( "iscanceled", background = background):
@@ -542,16 +579,14 @@ def build_local_artist_table( background=False ):
             dialog_msg( "update", percent = percent, line1 = __language__(20186), line2 = "%s: %s" % ( __language__(32125), local_artist["artistid"] ), line3 = "%s: %s" % ( __language__(32137), get_unicode( artist_list_to_string( local_artist["artist"] ) ) ), background = background )
             count += 1
             for album_artist in local_album_artist_list:
-                if not background:
-                    if dialog_msg( "iscanceled", background = background):
-                        break
+                if dialog_msg( "iscanceled", background = background):
+                    break
                 if local_artist["artistid"] == album_artist["local_id"]:
                     artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
                     artist["local_id"] = local_artist["artistid"]
                     artist["musicbrainz_artistid"] = album_artist["musicbrainz_artistid"]
+                    artist["has_art"] = album_artist["has_art"]
                     break
-                else:
-                    continue
             if not artist:
                 try:
                     artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
@@ -560,25 +595,14 @@ def build_local_artist_table( background=False ):
                     artist["name"] = get_unicode( artist_list_to_string( local_artist["artist"] ) )
                     name, artist["musicbrainz_artistid"], sort_name = get_musicbrainz_artist_id( artist_list_to_string( local_artist["artist"] ) )
                 artist["local_id"] = artist_list_to_string( local_artist["artistid"] )
+                artist["has_art"] = "False"
             new_local_artist_list.append( artist )
-        count = 0
-        percent = 0
-        for artist in new_local_artist_list:
-            percent = int( ( count/float( len(new_local_artist_list ) ) ) * 100 )
-            dialog_msg( "update", percent = percent, line1 = __language__(32124), line2 = "%s%s" % ( __language__(32125), artist["local_id"] ), line3 = "%s%s" % ( __language__(32028), get_unicode( artist["name"] ) ), background = background )
-            try:
-                c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
-                count += 1
-            except:
-                traceback.print_exc()
-        conn.commit()
-        if not background:
-            dialog_msg( "close", background = background )
+        store_local_artist_table( new_local_artist_list, background = background )
+        dialog_msg( "close", background = background )
     except:
         log( "Problem with making all artists table", xbmc.LOGDEBUG )
         traceback.print_exc()
-        if not background:
-            dialog_msg( "close", background = background )
+        dialog_msg( "close", background = background )
     c.close
     return count
     
@@ -588,23 +612,23 @@ def new_local_count():
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
     try:
-        query = "SELECT artists, albums, cdarts FROM counts"
+        query = "SELECT local_artists, artists, albums, cdarts FROM counts"
         c.execute(query)
         counts=c.fetchall()
         c.close
         for item in counts:
-            album_artist = item[0]
-            album_count = item[1]
-            cdart_existing = item[2]
+            local_artist_count = item[0]
+            album_artist = item[1]
+            album_count = item[2]
+            cdart_existing = item[3]
         cdart_existing = recount_cdarts()
-        return album_count, album_artist, cdart_existing
+        return local_artist_count, album_count, album_artist, cdart_existing
     except UnboundLocalError:
         log( "Counts Not Available in Local DB, Rebuilding DB", xbmc.LOGDEBUG )
         c.close
-        return 0,0,0
+        return 0,0,0,0
     
 #user call from Advanced menu to refresh the addon's database
-
 def refresh_db( background=False ):
     log( "Refreshing Local Database", xbmc.LOGDEBUG )
     local_album_count = 0
@@ -613,7 +637,7 @@ def refresh_db( background=False ):
     if xbmcvfs.exists( addon_db ):
         #File exists needs to be deleted
         if not background:
-            db_delete = dialog_msg( "yesno", line1 = __language__(32042) , line2 = __language__(32015) )
+            db_delete = dialog_msg( "yesno", line1 = __language__(32042) , line2 = __language__(32015), background = background )
         else:
             db_delete = True
         if db_delete:
@@ -636,12 +660,12 @@ def refresh_db( background=False ):
                 c.execute('''DROP table IF EXISTS local_artists''')
                 conn.commit()
                 c.close()
-            local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
+            local_album_count, local_artist_count, local_cdart_count = database_setup( background = background )
         else:
             pass
     else :
         #If file does not exist and some how the program got here, create new database
-        local_album_count, local_artist_count, local_cdart_count = new_database_setup( background )
+        local_album_count, local_artist_count, local_cdart_count = database_setup( background = background )
     #update counts
     log( "Finished Refeshing Database", xbmc.LOGDEBUG )
     return local_album_count, local_artist_count, local_cdart_count
@@ -672,10 +696,8 @@ def check_album_mbid( albums, background=False ):
             mbid_match, current_mbid = mbid_check( album["musicbrainz_albumid"], "release-group" )
             if not mbid_match:
                 update_album["musicbrainz_albumid"] = current_mbid
-            xbmc.sleep( 900 )
         updated_albums.append( update_album )
-    if not background:
-        dialog_msg( "close", background = background )
+    dialog_msg( "close", background = background )
     return updated_albums, canceled
 
 def check_artist_mbid( artists, background=False, mode = "all_artists" ):
@@ -707,10 +729,8 @@ def check_artist_mbid( artists, background=False, mode = "all_artists" ):
             mbid_match, current_mbid = mbid_check( update_artist["musicbrainz_artistid"], "artist" )
             if not mbid_match:
                 update_artist["musicbrainz_artistid"] = current_mbid
-            xbmc.sleep( 900 )
         updated_artists.append( update_artist )
-    if not background:
-        dialog_msg( "close", background = background )
+    dialog_msg( "close", background = background )
     return updated_artists, canceled
 
 def update_missing_artist_mbid( artists, background=False, mode = "all_artists" ):
@@ -804,13 +824,14 @@ def update_database( background=False ):
     local_artist_count = 0
     artist_count = 0
     album_count = 0
+    album_artists = get_local_artists_db( mode="album_artists", background = background )
     log( "Updating Addon's DB - Checking Albums", xbmc.LOGNOTICE )
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) # retrieving all artist from xbmc
     local_album_list = get_local_albums_db( "all artists", background )
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) # retrieving album list
     album_list, total = retrieve_album_list()
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) #  retrieving album details
-    album_detail_list = retrieve_album_details_full( album_list, total, background, True, False )
+    album_detail_list = retrieve_album_details_full( album_list, total, background = background, simple = True, update = False )
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) #  retrieving local artist details
     for item in album_detail_list:
         album_detail_list_indexed[( item["disc"], get_unicode( item["artist"] ), get_unicode( item["title"] ), item["cover"], item["cdart"], item["local_id"], get_unicode( item["path"] ) )] = item
@@ -822,7 +843,7 @@ def update_database( background=False ):
     for item in album_detail_list:
         if not ( item["disc"], get_unicode( item["artist"] ), get_unicode( item["title"] ), item["cover"], item["cdart"], item["local_id"], get_unicode( item["path"] ) ) in matched_indexed:
             unmatched.append(item)
-    unmatched_details = retrieve_album_details_full( unmatched, len( unmatched ), background, False, True )
+    unmatched_details = retrieve_album_details_full( unmatched, len( unmatched ), background = background, simple = False, update = True )
     combined = matched
     combined.extend( unmatched_details )
     if enable_all_artists:
@@ -847,75 +868,71 @@ def update_database( background=False ):
             if not ( item["local_id"], get_unicode( item["name"] ) ) in local_artists_matched_indexed:
                 local_artists_unmatched.append( item )
         if update_musicbraniz_id and not canceled:  # update missing MusicBrainz ID's
-            combined_artists, canceled = update_missing_artist_mbid( local_artists_matched, background, mode = "all_artists" )
+            combined_artists, canceled = update_missing_artist_mbid( local_artists_matched, background = background, mode = "all_artists" )
         else:
             combined_artists = local_artists_matched
         if check_mbid and not canceled:
-            temp_local_artists, canceled = check_artist_mbid( combined_artists, background, mode = "all_artists" )
+            temp_local_artists, canceled = check_artist_mbid( combined_artists, background = background, mode = "all_artists" )
             combined_artists = temp_local_artists
         if local_artists_unmatched:
-            updated_artists, canceled = update_missing_artist_mbid( local_artists_unmatched, background, mode = "all_artists" )
+            updated_artists, canceled = update_missing_artist_mbid( local_artists_unmatched, background = background, mode = "all_artists" )
             combined_artists.extend( updated_artists )
     percent = 0
     count = 0
     log( "Updating Addon's DB - Getting MusicBrainz ID's for Artist and Albums", xbmc.LOGNOTICE )
     if update_musicbraniz_id and not canceled:  # update missing MusicBrainz ID's
         if not canceled:
-            updated_albums, canceled = update_missing_album_mbid( combined, background )  
+            updated_albums, canceled = update_missing_album_mbid( combined, background = background )  
         combined = updated_albums
     if check_mbid and not canceled:
-        updated_albums, canceled = check_album_mbid( combined, background )
+        updated_albums, canceled = check_album_mbid( combined, background = background )
         combined = updated_albums
         if enable_all_artists and not canceled:
-            updated_artists, canceled = check_artist_mbid( combined_artists, background, mode = "all_artists" )
+            updated_artists, canceled = check_artist_mbid( combined_artists, background = background, mode = "all_artists" )
             combined_artist = updated_artists
     if canceled:
-        if not background:
-            dialog_msg( "close", background = background )
+        dialog_msg( "close", background = background )
         return
     conn = sqlite3.connect( addon_db )
     c = conn.cursor()
     if xbmcvfs.exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
-        c.execute('''DROP table IF EXISTS counts''') 
-        c.execute('''DROP table IF EXISTS lalist''')   # drop local album artists database
-        c.execute('''DROP table IF EXISTS alblist''')  # drop local album database
-        c.execute('''DROP table IF EXISTS unqlist''')  # drop unique database
+        c.execute('''CREATE TABLE lalist_bk AS SELECT * FROM lalist''') # create a backup of the Album artist table
+        c.execute('''CREATE TABLE local_artists_bk AS SELECT * FROM local_artists''') # create a backup of the Local Artist table
+        c.execute('''DROP table IF EXISTS counts''')   # drop the count table
+        c.execute('''DROP table IF EXISTS lalist''')   # drop local album artists table
+        c.execute('''DROP table IF EXISTS alblist''')  # drop local album table
+        c.execute('''DROP table IF EXISTS unqlist''')  # drop unique table
         c.execute('''DROP table IF EXISTS local_artists''')
-    c.execute('''create table counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''') 
-    c.execute('''create table lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')   # create local album artists database
-    c.execute('''create table alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
-    c.execute('''create table unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
-    c.execute('''create table local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''')  # create local artists database
-    album_count, cdart_existing = store_alblist( combined, background )
+    c.execute('''CREATE TABLE counts(local_artists INTEGER, artists INTEGER, albums INTEGER, cdarts INTEGER, version TEXT)''') 
+    c.execute('''CREATE TABLE lalist(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')   # create local album artists database
+    c.execute('''CREATE TABLE alblist(album_id INTEGER, title TEXT, artist TEXT, path TEXT, cdart TEXT, cover TEXT, disc INTEGER, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''')  # create local album database
+    c.execute('''CREATE TABLE unqlist(title TEXT, disc INTEGER, artist TEXT, path TEXT, cdart TEXT)''')  # create unique database
+    c.execute('''CREATE TABLE local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')  # create local artists database
     conn.commit()
     c.close()
+    album_count, cdart_existing = store_alblist( combined, background = background )
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists( all_artists = False )                    # retrieve local artists(to get idArtist)
-    local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background )
-    count = store_lalist( local_album_artist_list, artist_count, background )         # then store in database
+    local_album_artist_list, artist_count = check_local_albumartist( album_artist, local_artist_list, background =background )
+    count = store_lalist( local_album_artist_list, artist_count )         # then store in database
     if enable_all_artists:
         local_artist_count = len( combined_artists )
     store_counts( local_artist_count, artist_count, album_count, cdart_existing )
     if not background:
         dialog_msg( "close", background = background )
         xbmc.sleep( 5000 )
-    conn = sqlite3.connect( addon_db )
-    c = conn.cursor()
     if enable_all_artists:
         if len( combined_artists ) > 0:
             log( "Updating Addon's DB - Adding All Artists to Database", xbmc.LOGNOTICE )
             dialog_msg( "create", heading = __language__(32135), background = background )
-            for artist in combined_artists:
-                percent = int( ( count/float( len( combined_artists ) ) ) * 100 )
-                dialog_msg( "update", percent = percent, line1 = __language__(32124), line2 = "%s%s" % ( __language__(32125), artist["local_id"] ), line3 = "%s%s" % ( __language__(32028), ( get_unicode( artist["name"] ) ) ), background = background )
-                try:
-                    c.execute("insert into local_artists(local_id, name, musicbrainz_artistid) values (?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"] ) )
-                    count += 1
-                except:
-                    traceback.print_exc()
-                    continue
-            if not background:
-                dialog_msg( "close", background = background )
+            store_local_artist_table( combined_artists, background = background )
+    conn = sqlite3.connect( addon_db )
+    c = conn.cursor()
+    # copy fanarttv_has_art values from backup tables if MBIDs match
+    c.execute('''UPDATE lalist SET fanarttv_has_art = (SELECT lalist_bk.fanarttv_has_art FROM lalist_bk WHERE lalist_bk.musicbrainz_artistid = lalist.musicbrainz_artistid ) WHERE EXISTS ( SELECT * FROM lalist_bk WHERE lalist_bk.musicbrainz_artistid = lalist.musicbrainz_artistid )''')
+    c.execute('''UPDATE local_artists SET fanarttv_has_art = (SELECT local_artists_bk.fanarttv_has_art FROM local_artists_bk WHERE local_artists_bk.musicbrainz_artistid = local_artists.musicbrainz_artistid ) WHERE EXISTS ( SELECT * FROM local_artists_bk WHERE local_artists_bk.musicbrainz_artistid = local_artists.musicbrainz_artistid )''')
+    c.execute('''DROP table IF EXISTS lalist_bk''')   # drop local album artists backup table
+    c.execute('''DROP table IF EXISTS local_artists_bk''')
     conn.commit()
     c.close()
 

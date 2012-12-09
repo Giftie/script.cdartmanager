@@ -32,7 +32,7 @@ enable_hdlogos     = sys.modules[ "__main__" ].enable_hdlogos
 fanart_limit       = sys.modules[ "__main__" ].fanart_limit
 enable_fanart_limit= sys.modules[ "__main__" ].enable_fanart_limit
 
-from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_distant_artists, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
+from fanarttv_scraper import remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
 from database import get_local_artists_db, get_local_albums_db, artwork_search
 from utils import clear_image_cache, get_unicode, change_characters, log, dialog_msg
 from file_item import Thumbnails
@@ -46,6 +46,7 @@ if __XBMCisFrodo__:
     from xbmcvfs import listdir
 else:
     from utils import _makedirs
+    enable_fanart_limit = False
 
 def check_size( path, type, size_w, size_h ):
     # first copy from source to work directory since Python does not support SMB://
@@ -222,7 +223,7 @@ def cdart_search( cdart_url, id, disc ):
     return cdart
     
 #Automatic download of non existing cdarts and refreshes addon's db
-def auto_download( type, recognized_artists, artist_list, background=False ):
+def auto_download( type, artist_list, background=False ):
     is_canceled = False
     log( "Autodownload", xbmc.LOGDEBUG )
     try:
@@ -242,17 +243,17 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                 type = "musicbanner"
             else:
                 type = "fanart"
-        count_artist_local = len( recognized_artists )
+        count_artist_local = len( artist_list )
         dialog_msg( "create", heading = __language__(32046), background = background )
         #Onscreen Dialog - Automatic Downloading of Artwork
         key_label = type
-        for artist in recognized_artists:
+        for artist in artist_list:
             low_res = True
             if dialog_msg( "iscanceled", background = background ) or is_canceled:
                 is_canceled = True
                 break
             artist_count += 1
-            if not artist["distant_id"] or not artist["musicbrainz_artistid"]:
+            if not artist["has_art"] == "True":
             # If fanart.tv does not report that it has an artist match skip it.
                 continue
             percent = int( (artist_count / float(count_artist_local) ) * 100)
@@ -260,13 +261,13 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                 percent = 1
             if percent > 100:
                 percent = 100
-            log( "Artist: %-40s Local ID: %-10s   Distant MBID: %s" % ( artist["name"], artist["local_id"], artist["distant_id"] ), xbmc.LOGNOTICE )
-            if type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ):
+            log( "Artist: %-40s Local ID: %-10s   Distant MBID: %s" % ( artist["name"], artist["local_id"], artist["musicbrainz_artistid"] ), xbmc.LOGNOTICE )
+            if type in ( "fanart", "clearlogo", "artistthumb", "musicbanner" ) and artist[ "has_art" ]:
                 dialog_msg( "update", percent = percent, line1 = "%s%s" % ( __language__(32038), get_unicode( artist["name"] ) ), background = background )
                 auto_art = {}
                 temp_art = {}
-                temp_art["musicbrainz_artistid"] = artist["distant_id"]
-                auto_art["musicbrainz_artistid"] = artist["distant_id"]
+                temp_art["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
+                auto_art["musicbrainz_artistid"] = artist["musicbrainz_artistid"]
                 temp_art["artist"] = artist["name"]
                 auto_art["artist"] = artist["name"]
                 path = os.path.join( music_path, change_characters( artist["name"] ) )
@@ -296,10 +297,11 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                     else:
                         auto_art["path"] = path
                     if type == "fanart":
-                        fanart_dir, fanart_files = listdir( auto_art["path"] )
-                        fanart_number = len( fanart_files )
-                        if enable_fanart_limit and fanart_number == fanart_limit:
-                            continue
+                        if enable_fanart_limit:
+                            fanart_dir, fanart_files = listdir( auto_art["path"] )
+                            fanart_number = len( fanart_files )
+                            if fanart_number == fanart_limit:
+                                continue
                         if not exists( os.path.join( path, "fanart.jpg" ).replace( "\\\\", "\\" ) ):
                             message, d_success, final_destination, is_canceled = download_art( art[0], temp_art, artist["local_id"], "fanart", "single", 0, background )
                         for artwork in art:
@@ -313,7 +315,8 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                             else:
                                 message, d_success, final_destination, is_canceled = download_art( artwork, auto_art, artist["local_id"], "fanart", "auto", 0, background )
                             if d_success == 1:
-                                fanart_number += 1
+                                if enable_fanart_limit:
+                                    fanart_number += 1
                                 download_count += 1
                                 fanart["artist"] = auto_art["artist"]
                                 fanart["path"] = final_destination
@@ -364,7 +367,7 @@ def auto_download( type, recognized_artists, artist_list, background=False ):
                             d_error = True
                 else :
                         log( "Artist Match not found", xbmc.LOGDEBUG )
-            elif type in ( "cdart", "cover" ):
+            elif type in ( "cdart", "cover" ) and artist[ "has_art" ]:
                 local_album_list = get_local_albums_db( artist["name"], background )
                 if type == "cdart":
                     remote_art_url = remote_cdart_list( artist )

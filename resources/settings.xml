@@ -51,6 +51,9 @@
         <setting type="sep" />
         <setting label="32174" type="number" id="mbid_match_number" default="10" />
         <setting label="32172" type="bool" id="backup_during_update" default="true" />
-        <setting label="32173" type="slider" id="scheduler_cache" option="int" range="2,7" default="3" />
+        <setting type="sep" />
+        <setting label="32188" type="bool" id="use_musicbrainz" default="true" />
+        <setting label="32189" type="text" id="musicbrainz_server" visible="eq(-1,false)" default="http://musicbrainz.org" />
+        <setting label="32190" type="slider" id="mb_delay" option="int" visible="eq(-2,false)" range="0,9" default="9" />
     </category>
 </settings>

@@ -138,14 +138,15 @@ def empty_tempxml_folder():
     else:
         pass
         
-def get_html_source( url, path, save_file = True ):
+def get_html_source( url, path, save_file = True, overwrite = False ):
     """ fetch the html source """
     log( "Retrieving HTML Source", xbmc.LOGDEBUG )
+    log( "Fetching URL: %s" % url, xbmc.LOGDEBUG )
     error = False
     htmlsource = ""
     file_name = ""
     if save_file:
-        path = path.replace("http://fanart.tv/api/music.php?id=", "")
+        path = path.replace("http://api.fanart.tv/api/music.php?id=", "")
         path = path + ".xml"
         if not exists( tempxml_folder ):
             os.mkdir( tempxml_folder )
@@ -156,9 +157,11 @@ def get_html_source( url, path, save_file = True ):
     for i in range(0, 4):
         try:
             if save_file:
-                if exists( file_name ):
+                if exists( file_name ) and not overwrite:
+                    log( "Retrieving local source", xbmc.LOGDEBUG )
                     sock = open( file_name, "r" )
                 else:
+                    log( "Retrieving online source", xbmc.LOGDEBUG )
                     urllib.urlcleanup()
                     sock = urllib.urlopen( url )
             else:
@@ -166,7 +169,7 @@ def get_html_source( url, path, save_file = True ):
                 sock = urllib.urlopen( url )
             htmlsource = sock.read()
             if save_file:
-                if not exists( file_name ):
+                if not exists( file_name ) or overwrite:
                     file( file_name , "w" ).write( htmlsource )
             sock.close()
             break
