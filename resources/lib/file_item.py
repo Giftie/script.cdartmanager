@@ -25,7 +25,6 @@ print thumbnails.get_cached_plugin_thumbs( "plugin type", "plugin name" )# tuple
 
 import os, sys
 import xbmc
-__XBMCisFrodo__ = sys.modules[ "__main__" ].__XBMCisFrodo__
 
 THUMBS_CACHE_PATH = os.path.join( xbmc.translatePath( "special://profile/" ), "Thumbnails" ).decode("utf-8").replace("////", "//")
 
@@ -41,10 +40,7 @@ class Thumbnails:
         return os.path.join( path2, thumb )
 
     def get_cached_artist_thumb( self, strLabel ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH, "Music", "Artists" ) )
+        return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH, "Music", "Artists" ) )
 
     def get_cached_profile_thumb( self ):
         return xbmc.translatePath( xbmc.getInfoImage( "System.ProfileThumb" ) )
@@ -59,10 +55,7 @@ class Thumbnails:
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Pictures" ), True )
         
     def get_cached_album_thumb( self, strPath ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music" ), True )
+        return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music" ), True )
 
     def get_cached_video_thumb( self, strPath ):
         if strPath.startswith( "stack://" ):
@@ -74,13 +67,10 @@ class Thumbnails:
         #return self.get_cached_thumb( "%sepisode%i" % ( strPath, iEpisode ), os.path.join( THUMBS_CACHE_PATH, "Video" ), True )
 
     def get_cached_fanart_thumb( self, strPath, fanart="" ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            if fanart.lower() in [ "music", "artist" ]:
-                return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music", "Fanart" ) )
-            if fanart.lower() in [ "video", "tvshow" ]:
-                return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Video", "Fanart" ) )
+        if fanart.lower() in [ "music", "artist" ]:
+            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music", "Fanart" ) )
+        if fanart.lower() in [ "video", "tvshow" ]:
+            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Video", "Fanart" ) )
         return ""
 
     def get_cached_program_thumb( self, strPath ):

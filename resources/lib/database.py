@@ -20,7 +20,6 @@ addon_db_backup       = sys.modules[ "__main__" ].addon_db_backup
 addon_work_folder     = sys.modules[ "__main__" ].addon_work_folder
 BASE_RESOURCE_PATH    = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 __dbversion__         = sys.modules[ "__main__" ].__dbversion__
-__XBMCisFrodo__       = sys.modules[ "__main__" ].__XBMCisFrodo__
 music_path            = sys.modules[ "__main__" ].music_path
 check_mbid            = sys.modules[ "__main__" ].check_mbid
 update_musicbraniz_id = sys.modules[ "__main__" ].update_musicbraniz_id

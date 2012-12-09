@@ -31,9 +31,6 @@ __dbversionold__       = "1.5.3"
 __dbversionancient__   = "1.1.8"
 __addon_path__         = __addon__.getAddonInfo('path')
 __useragent__          = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
-__XBMCisFrodo__        = False
-if str( xbmc.getInfoLabel( "System.BuildVersion" ) ).startswith( "12.0" ): # required GIT version
-    __XBMCisFrodo__    = True
 enable_hdlogos         = eval( __addon__.getSetting("enable_hdlogos") )
 mbid_match_number      = int( __addon__.getSetting("mbid_match_number") )
 use_musicbrainz        = eval( __addon__.getSetting("use_musicbrainz") )
@@ -208,14 +205,12 @@ def update_xbmc_thumbnails( background=False ):
             file_rename( artistthumb_rename, artistthumb_path )
         if exists( fanart_path ):
             xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
-            if not __XBMCisFrodo__:
-                thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( change_characters( artist["name"] ), "artist" )
-                thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
+            thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( change_characters( artist["name"] ), "artist" )
+            thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
         elif exists( artistthumb_path ):
             xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
-            if not __XBMCisFrodo__:
-                thumb_artist_path = Thumbnails().get_cached_artist_thumb( change_characters( artist["name"] ) )
-                thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
+            thumb_artist_path = Thumbnails().get_cached_artist_thumb( change_characters( artist["name"] ) )
+            thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
         else:
             continue
         if xbmc_fanart_path:  # copy to XBMC supplied fanart path
@@ -237,9 +232,8 @@ def update_xbmc_thumbnails( background=False ):
         coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
         if exists( coverart_path ):
             xbmc_thumbnail_path = get_thumbnail_path( album["local_id"], "album" )
-            if not __XBMCisFrodo__:
-                thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
-                thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
+            thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
+            thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
         if xbmc_thumbnail_path:
             thumbnail_copy( coverart_path, xbmc_thumbnail_path, "album cover" )
         count += 1
@@ -314,7 +308,7 @@ if ( __name__ == "__main__" ):
     log( "#    %-50s    #" % __credits__, xbmc.LOGNOTICE )
     log( "#    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     log( "#    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
-    log( "#    %-50s    #" % ( "Eden", "Frodo" )[__XBMCisFrodo__], xbmc.LOGNOTICE )
+    log( "#    %-50s    #" % "Eden", xbmc.LOGNOTICE )
     log( "############################################################", xbmc.LOGNOTICE )
     log( "Looking for settings.xml", xbmc.LOGNOTICE )
     if not exists(settings_file): # Open Settings if settings.xml does not exists
