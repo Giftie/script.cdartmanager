@@ -1037,7 +1037,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
             all_artist_count, local_album_count, local_artist_count, local_cdart_count = new_local_count()
         else:
             log( "Addon Db Not Found - Building New Addon Db", xbmc.LOGNOTICE )
-            all_artist_count, local_album_count, local_artist_count, local_cdart_count = database_setup( self.background )
+            local_album_count, local_artist_count, local_cdart_count = database_setup( self.background )
             self.local_artists = get_local_artists_db() # retrieve data from addon's database
             self.setFocusId( 100 ) # set menu selection to the first option(cdARTs)
             local_artists = get_local_artists_db( mode="album_artists" )
