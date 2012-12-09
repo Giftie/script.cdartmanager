@@ -4,7 +4,7 @@
        version="2.7.9"
        provider-name="Giftie">
   <requires>
-    <import addon="xbmc.python" version="2.0"/>
+    <import addon="xbmc.python" version="2.1"/>
     <import addon="script.module.pil" version="1.1.7"/>
   </requires>
   <extension point="xbmc.python.script"

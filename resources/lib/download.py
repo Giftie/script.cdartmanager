@@ -27,7 +27,6 @@ BASE_RESOURCE_PATH = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 __useragent__      = sys.modules[ "__main__" ].__useragent__
 resizeondownload   = eval( __addon__.getSetting( "resizeondownload" ) )
 music_path         = sys.modules[ "__main__" ].music_path
-__XBMCisFrodo__    = sys.modules[ "__main__" ].__XBMCisFrodo__
 enable_hdlogos     = sys.modules[ "__main__" ].enable_hdlogos
 fanart_limit       = sys.modules[ "__main__" ].fanart_limit
 enable_fanart_limit= sys.modules[ "__main__" ].enable_fanart_limit
@@ -40,13 +39,8 @@ from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_a
 from xbmcvfs import delete as delete_file
 from xbmcvfs import exists as exists
 from xbmcvfs import copy as file_copy
-
-if __XBMCisFrodo__:
-    from xbmcvfs import mkdirs as _makedirs
-    from xbmcvfs import listdir
-else:
-    from utils import _makedirs
-    enable_fanart_limit = False
+from xbmcvfs import mkdirs as _makedirs
+from xbmcvfs import listdir
 
 def check_size( path, type, size_w, size_h ):
     # first copy from source to work directory since Python does not support SMB://
@@ -170,18 +164,6 @@ def download_art( url_cdart, album, database_id, type, mode, size, background = 
             #message = ["Download Sucessful!"]
             message = [__language__(32023), __language__(32024), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart )]
             success = file_copy( destination, final_destination ) # copy it to album folder
-            if not __XBMCisFrodo__:
-                if type == "fanart":
-                    thumb_path = Thumbnails().get_cached_fanart_thumb( album["artist"], "artist" )
-                elif type == "artistthumb":
-                    thumb_path = Thumbnails().get_cached_artist_thumb( album["artist"] )
-                elif type == "cover":
-                    thumb_path = Thumbnails().get_cached_album_thumb( path )
-                if thumb_path:
-                    if not thumb_path.startswith("http://"):
-                        success2 = file_copy( destination, thumb_path ) # copy to thumbnail image
-                    else:
-                        log( "Online Thumbnail Path, can not update: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
             # update database
             try:
                 conn = sqlite3.connect(addon_db)
