@@ -1,3 +1,7 @@
+2.7.9
+- Fix - change setting to float then integer
+- Fix - requesting too many values from first time database building.
+
 2.7.8 
 - Fix - Remove Extrafanart Limit for Eden version
 - Change - Use the JSON format of the Fanart.TV API
