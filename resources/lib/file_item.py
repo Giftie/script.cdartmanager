@@ -17,7 +17,6 @@ print thumbnails.get_cached_video_thumb( "full Path" )
 print thumbnails.get_cached_episode_thumb( "full Path", iEpisode=0 ) # iEpisode, currently not used
 print thumbnails.get_cached_fanart_thumb( "full Path", "fanart type" ) # fanart type ("music", "artist", "video", "tvshow" )
 print thumbnails.get_cached_program_thumb( "full Path" )
-print thumbnails.get_cached_gamesave_thumb( "E:\games\[game name]\default.xbe" )
 print thumbnails.get_cached_script_thumb( "script name" )
 print thumbnails.get_cached_plugin_thumbs( "plugin type", "plugin name" )# tuple: default and folder thumbs
 
@@ -25,10 +24,8 @@ print thumbnails.get_cached_plugin_thumbs( "plugin type", "plugin name" )# tuple
 
 import os, sys
 import xbmc
-__XBMCisFrodo__ = sys.modules[ "__main__" ].__XBMCisFrodo__
 
 THUMBS_CACHE_PATH = os.path.join( xbmc.translatePath( "special://profile/" ), "Thumbnails" ).decode("utf-8").replace("////", "//")
-
 
 class Thumbnails:
     def get_cached_thumb( self, path1, path2, SPLIT=False ):
@@ -41,11 +38,8 @@ class Thumbnails:
         return os.path.join( path2, thumb )
 
     def get_cached_artist_thumb( self, strLabel ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH, "Music", "Artists" ) )
-
+        return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH ), True )
+        
     def get_cached_profile_thumb( self ):
         return xbmc.translatePath( xbmc.getInfoImage( "System.ProfileThumb" ) )
 
@@ -59,11 +53,8 @@ class Thumbnails:
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Pictures" ), True )
         
     def get_cached_album_thumb( self, strPath ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music" ), True )
-
+        return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
+        
     def get_cached_video_thumb( self, strPath ):
         if strPath.startswith( "stack://" ):
             strPath = strPath[ 8 : ].split( " , " )[ 0 ]
@@ -74,15 +65,8 @@ class Thumbnails:
         #return self.get_cached_thumb( "%sepisode%i" % ( strPath, iEpisode ), os.path.join( THUMBS_CACHE_PATH, "Video" ), True )
 
     def get_cached_fanart_thumb( self, strPath, fanart="" ):
-        if __XBMCisFrodo__:
-            return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        else:
-            if fanart.lower() in [ "music", "artist" ]:
-                return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Music", "Fanart" ) )
-            if fanart.lower() in [ "video", "tvshow" ]:
-                return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Video", "Fanart" ) )
-        return ""
-
+        return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
+        
     def get_cached_program_thumb( self, strPath ):
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Programs" ) )
 
@@ -104,10 +88,5 @@ class Thumbnails:
                 self.get_cached_program_thumb( "special://home/plugins/%s/%s/" % ( strType, strLabel ) )
         return "", ""
 
-
-
 if ( __name__ == "__main__" ):
     thumbnails = Thumbnails()
-    print thumbnails.get_cached_script_thumb( "Calculator" )
-    print thumbnails.get_cached_plugin_thumbs( "video", "passion-xbmc nfo creator" )# default and folder thumbs
-    print thumbnails.get_cached_season_thumb( "F:\serietv\csi\Spécial" )
