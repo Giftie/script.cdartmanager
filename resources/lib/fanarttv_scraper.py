@@ -14,19 +14,20 @@ if sys.version_info < (2, 7):
 else:
     import simplejson
     
-__language__        = sys.modules[ "__main__" ].__language__
-__scriptname__      = sys.modules[ "__main__" ].__scriptname__
-__scriptID__        = sys.modules[ "__main__" ].__scriptID__
-__author__          = sys.modules[ "__main__" ].__author__
-__credits__         = sys.modules[ "__main__" ].__credits__
-__credits2__        = sys.modules[ "__main__" ].__credits2__
-__version__         = sys.modules[ "__main__" ].__version__
-__addon__           = sys.modules[ "__main__" ].__addon__
-addon_db            = sys.modules[ "__main__" ].addon_db
-addon_work_folder   = sys.modules[ "__main__" ].addon_work_folder
-BASE_RESOURCE_PATH  = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
-api_key             = sys.modules[ "__main__" ].api_key
-enable_all_artists  = sys.modules[ "__main__" ].enable_all_artists
+__language__           = sys.modules[ "__main__" ].__language__
+__scriptname__         = sys.modules[ "__main__" ].__scriptname__
+__scriptID__           = sys.modules[ "__main__" ].__scriptID__
+__author__             = sys.modules[ "__main__" ].__author__
+__credits__            = sys.modules[ "__main__" ].__credits__
+__credits2__           = sys.modules[ "__main__" ].__credits2__
+__version__            = sys.modules[ "__main__" ].__version__
+__addon__              = sys.modules[ "__main__" ].__addon__
+addon_db               = sys.modules[ "__main__" ].addon_db
+addon_work_folder      = sys.modules[ "__main__" ].addon_work_folder
+BASE_RESOURCE_PATH     = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
+api_key                = sys.modules[ "__main__" ].api_key
+enable_all_artists     = sys.modules[ "__main__" ].enable_all_artists
+tempxml_folder         = sys.modules[ "__main__" ].tempxml_folder
 
 #sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 from utils import get_html_source, unescape, log, dialog_msg, get_unicode
@@ -152,7 +153,7 @@ def remote_artistthumb_list( artist_menu ):
 def retrieve_fanarttv_json( id ):
     log( "Retrieving artwork for artist id: %s" % id, xbmc.LOGDEBUG )
     url = music_url_json % ( api_key, id, "all" )
-    htmlsource = ( get_html_source( url, id ) ).encode( 'utf-8', 'ignore' )
+    htmlsource = ( get_html_source( url, id, save_file = False, overwrite = False ) ).encode( 'utf-8', 'ignore' )
     artist_artwork = []
     backgrounds = []
     musiclogos = []
@@ -232,7 +233,6 @@ def retrieve_fanarttv_json( id ):
     artist_artwork.append(banner)
     artist_artwork.append(album_art)
     return artist_artwork
-    
 
 def match_library( local_artist_list ):
     available_artwork = []
@@ -264,7 +264,7 @@ def check_fanart_new_artwork( present_datecode ):
     if xbmcvfs.exists( os.path.join( addon_work_folder, "tempxml", "%s.xml" % previous_datecode ) ):
         xbmcvfs.delete( os.path.join( addon_work_folder, "tempxml", "%s.xml" % previous_datecode ) )
     url = new_music % ( api_key, str( previous_datecode ) )
-    htmlsource = ( get_html_source( url, str( present_datecode ) ) ).encode( 'utf-8', 'ignore' )
+    htmlsource = ( get_html_source( url, str( present_datecode ), save_file = True, overwrite = False ) ).encode( 'utf-8', 'ignore' )
     if htmlsource == "null":
         log( "No new Artwork found on fanart.tv", xbmc.LOGNOTICE )
         return False, htmlsource
@@ -278,10 +278,13 @@ def check_fanart_new_artwork( present_datecode ):
             print_exc()
             return False, htmlsource
 
-def check_art( mbid ):
+def check_art( mbid, artist_type = "album" ):
     has_art = "False"
     url = music_url_json % ( api_key, str( mbid ), "all" )
-    htmlsource = ( get_html_source( url, str( mbid ), True, True ) ).encode( 'utf-8', 'ignore' )
+    if artist_type == "album":
+        htmlsource = ( get_html_source( url, str( mbid ), save_file = True, overwrite = True ) ).encode( 'utf-8', 'ignore' )
+    else:
+        htmlsource = ( get_html_source( url, str( mbid ), save_file = True, overwrite = True ) ).encode( 'utf-8', 'ignore' )
     if htmlsource == "null":
         log( "No artwork found for MBID: %s" % mbid, xbmc.LOGDEBUG )
         has_art = "False"
@@ -296,16 +299,13 @@ def update_art( mbid, data, existing_has_art ):
         if item[ "id" ] == mbid:
             url = music_url_json % ( api_key, str( mbid ), "all" )
             has_art = "True"
-            new_art = ( get_html_source( url, str( mbid ), True, True ) ).encode( 'utf-8', 'ignore' )
+            new_art = ( get_html_source( url, str( mbid ), save_file = True, overwrite = True ) ).encode( 'utf-8', 'ignore' )
             break
     return has_art
     
 def first_check( all_artists, album_artists, background=False, update_db = False ):
     log( "Checking for artist match with fanart.tv - First Check", xbmc.LOGNOTICE )
-    if update_db:
-        heading = __language__( 32186 )
-    else:
-        heading = __language__( 32187 )
+    heading = __language__( 32187 )
     album_artists_matched = []
     all_artists_matched = []
     d = datetime.utcnow()
@@ -317,20 +317,20 @@ def first_check( all_artists, album_artists, background=False, update_db = False
     recognized = []
     recognized_album = []
     fanart_test = ""
-    dialog_msg( "create", heading = heading, background = background )
+    dialog_msg( "create", heading = "", background = background )
     for artist in album_artists:
         percent = int( ( float( count )/len( album_artists ) )*100 )
         log( "Checking artist MBID: %s" % artist[ "musicbrainz_artistid" ], xbmc.LOGDEBUG )
         match = {}
         match = artist
         if artist["musicbrainz_artistid"] and ( artist[ "has_art"] == "False" or update_db ):
-            match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
+            match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ], artist_type = "album" )
         elif not artist["musicbrainz_artistid"]:
             match[ "has_art" ] = "False"
         else:
             match[ "has_art" ] = artist[ "has_art"]
         album_artists_matched.append( match )
-        dialog_msg( "update", percent = percent, line1 = heading, line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
+        dialog_msg( "update", percent = percent, line1 = heading, line2 = "", line3 =  __language__( 32049 ) % artist[ "name" ], background = background )
         count += 1
     log( "Storing Album Artists List", xbmc.LOGDEBUG )
     store_lalist( album_artists_matched, len( album_artists_matched ) )
@@ -342,13 +342,13 @@ def first_check( all_artists, album_artists, background=False, update_db = False
             match = {}
             match = artist
             if artist["musicbrainz_artistid"] and ( artist[ "has_art"] == "False" or update_db ):
-                match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ] )
+                match[ "has_art" ] = check_art( artist[ "musicbrainz_artistid" ], artist_type = "all_artist" )
             elif not artist["musicbrainz_artistid"]:
                 match[ "has_art" ] = "False"
             else:
                 match[ "has_art" ] = artist[ "has_art"]
             all_artists_matched.append( match )
-            dialog_msg( "update", percent = percent, line1 = heading, line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
+            dialog_msg( "update", percent = percent, line1 = heading, line2 = "", line3 =  __language__( 32049 ) % artist[ "name" ], background = background )
             count += 1
         store_local_artist_table( all_artists_matched, background = background )
     store_fanarttv_datecode( present_datecode )
@@ -368,7 +368,7 @@ def get_recognized( all_artists, album_artists, background=False ):
     previous_datecode = retrieve_fanarttv_datecode()
     d = datetime.utcnow()
     present_datecode = calendar.timegm( d.utctimetuple() )
-    dialog_msg( "create", heading = __language__( 32185 ), background = background )
+    dialog_msg( "create", heading = "", background = background )
     new_artwork, data = check_fanart_new_artwork( present_datecode )
     if new_artwork:
         for artist in album_artists:
@@ -379,7 +379,7 @@ def get_recognized( all_artists, album_artists, background=False ):
             if match[ "musicbrainz_artistid" ]:
                 match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data, artist[ "has_art" ] )
             album_artists_matched.append( match )
-            dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
+            dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 = "", line3 =  __language__( 32049 ) % artist[ "name" ], background = background )
             count += 1
         if enable_all_artists and all_artists:
             count = 0
@@ -391,7 +391,7 @@ def get_recognized( all_artists, album_artists, background=False ):
                 if match[ "musicbrainz_artistid" ]:
                     match[ "has_art" ] = update_art( match[ "musicbrainz_artistid" ], data,  artist[ "has_art" ] )
                 all_artists_matched.append( match )
-                dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 =  __language__( 32049 ) % artist[ "name" ], line3 = "", background = background )
+                dialog_msg( "update", percent = percent, line1 = __language__( 32185 ), line2 = "", line3 =  __language__( 32049 ) % artist[ "name" ], background = background )
                 count += 1
     else:
         log( "No new music artwork on fanart.tv",  xbmc.LOGNOTICE )

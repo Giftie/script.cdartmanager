@@ -114,7 +114,7 @@ def artist_list_to_string( artist ):
         else:
             artist_string = "".join( artist )
     return artist_string
-    
+
 def artwork_search( cdart_url, id, disc, type ):
     log( "Finding Artwork", xbmc.LOGDEBUG )
     art = {}
@@ -509,6 +509,7 @@ def database_setup( background=False ):
     c.execute('''CREATE TABLE local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')
     conn.commit()
     c.close()
+    store_counts( 0, 0, 0 ,0 )
     album_count, cdart_existing = store_alblist( local_album_list, background = background ) # store album details first
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists()         # retrieve local artists(to get idArtist)
@@ -978,6 +979,7 @@ def update_database( background=False ):
     c.execute('''CREATE TABLE local_artists(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT, fanarttv_has_art TEXT)''')  # create local artists database
     conn.commit()
     c.close()
+    store_counts( 0, 0, 0 ,0 )
     album_count, cdart_existing = store_alblist( combined, background = background )
     album_artist = retrieve_distinct_album_artists()               # then retrieve distinct album artists
     local_artist_list = get_all_local_artists( all_artists = False )                    # retrieve local artists(to get idArtist)

@@ -73,6 +73,7 @@ enable_missing         = eval( __addon__.getSetting("enable_missing") )
 enable_fanart_limit    = eval( __addon__.getSetting("enable_fanart_limit") )
 fanart_limit           = int( float( __addon__.getSetting("fanart_limit") ) )
 skin_art_path          = addon_image_path
+tempxml_folder         = os.path.join( addon_work_folder, "tempxml" )
 script_fail            = False
 first_run              = False
 rebuild                = False

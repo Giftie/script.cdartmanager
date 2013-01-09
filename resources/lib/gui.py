@@ -1504,7 +1504,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 113:
             self.setFocusId( 107 )
         if controlId == 114: # Refresh Artist MBIDs
-            self.setFocusId( 139 ) # change to 138 when selected artist is added to script
+            self.setFocusId( 138 ) # change to 138 when selected artist is added to script
         if controlId == 189: # Edit By Album
             self.setFocusId( 123 )
         if controlId == 115: # Find Missing Artist MBIDs
