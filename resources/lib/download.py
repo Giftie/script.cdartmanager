@@ -164,6 +164,7 @@ def download_art( url_cdart, album, database_id, type, mode, size, background = 
             #message = ["Download Sucessful!"]
             message = [__language__(32023), __language__(32024), "File: %s" % get_unicode( path ), "Url: %s" % get_unicode( url_cdart )]
             success = file_copy( destination, final_destination ) # copy it to album folder
+                        log( "Online Thumbnail Path, can not update: %s" % repr( thumb_path ), xbmc.LOGDEBUG )
             # update database
             try:
                 conn = sqlite3.connect(addon_db)

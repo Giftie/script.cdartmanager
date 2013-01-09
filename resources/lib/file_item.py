@@ -39,7 +39,7 @@ class Thumbnails:
 
     def get_cached_artist_thumb( self, strLabel ):
         return self.get_cached_thumb( "artist" + strLabel, os.path.join( THUMBS_CACHE_PATH ), True )
-        
+
     def get_cached_profile_thumb( self ):
         return xbmc.translatePath( xbmc.getInfoImage( "System.ProfileThumb" ) )
 
@@ -54,7 +54,7 @@ class Thumbnails:
         
     def get_cached_album_thumb( self, strPath ):
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        
+
     def get_cached_video_thumb( self, strPath ):
         if strPath.startswith( "stack://" ):
             strPath = strPath[ 8 : ].split( " , " )[ 0 ]
@@ -66,7 +66,6 @@ class Thumbnails:
 
     def get_cached_fanart_thumb( self, strPath, fanart="" ):
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH ), True )
-        
     def get_cached_program_thumb( self, strPath ):
         return self.get_cached_thumb( strPath, os.path.join( THUMBS_CACHE_PATH, "Programs" ) )
 

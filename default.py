@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+<<<<<<< HEAD
 import sys, os, traceback, time, datetime, calendar
+=======
+import sys, os, traceback, socket, time, datetime, calendar
+>>>>>>> 5d2b9ea1f78aa6eebfd0cb265e15deb40a3d66d9
 import xbmcaddon, xbmc, xbmcgui
 
 try:
@@ -84,6 +88,12 @@ else:
         mb_delay = 1
     else:
         mb_delay = mb_delay * 100
+<<<<<<< HEAD
+=======
+
+#time socket out at 30 seconds
+socket.setdefaulttimeout(30)
+>>>>>>> 5d2b9ea1f78aa6eebfd0cb265e15deb40a3d66d9
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
@@ -202,8 +212,17 @@ def update_xbmc_thumbnails( background=False ):
             file_rename( artistthumb_rename, artistthumb_path )
         if exists( fanart_path ):
             xbmc_fanart_path = get_fanart_path( artist["local_id"], "artist" )
+<<<<<<< HEAD
         elif exists( artistthumb_path ):
             xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
+=======
+            thumb_fanart_path = Thumbnails().get_cached_fanart_thumb( change_characters( artist["name"] ), "artist" )
+            thumbnail_copy( fanart_path, thumb_fanart_path, "thumbnail" )
+        elif exists( artistthumb_path ):
+            xbmc_thumbnail_path = get_thumbnail_path( artist["local_id"], "artist" )
+            thumb_artist_path = Thumbnails().get_cached_artist_thumb( change_characters( artist["name"] ) )
+            thumbnail_copy( artistthumb_path, thumb_artist_path, "thumbnail" )
+>>>>>>> 5d2b9ea1f78aa6eebfd0cb265e15deb40a3d66d9
         else:
             continue
         if xbmc_fanart_path:  # copy to XBMC supplied fanart path
@@ -225,6 +244,11 @@ def update_xbmc_thumbnails( background=False ):
         coverart_path = os.path.join( album["path"], albumthumb ).replace( "\\\\","\\" )
         if exists( coverart_path ):
             xbmc_thumbnail_path = get_thumbnail_path( album["local_id"], "album" )
+<<<<<<< HEAD
+=======
+            thumb_album_path = Thumbnails().get_cached_album_thumb( album["path"] )
+            thumbnail_copy( coverart_path, thumb_album_path, "thumbnail" )
+>>>>>>> 5d2b9ea1f78aa6eebfd0cb265e15deb40a3d66d9
         if xbmc_thumbnail_path:
             thumbnail_copy( coverart_path, xbmc_thumbnail_path, "album cover" )
         count += 1
@@ -299,7 +323,11 @@ if ( __name__ == "__main__" ):
     log( "#    %-50s    #" % __credits__, xbmc.LOGNOTICE )
     log( "#    %-50s    #" % __credits2__, xbmc.LOGNOTICE )
     log( "#    Thanks for the help guys...                           #", xbmc.LOGNOTICE )
+<<<<<<< HEAD
     log( "#    %-50s    #" % "Frodo", xbmc.LOGNOTICE )
+=======
+    log( "#    %-50s    #" % "Eden", xbmc.LOGNOTICE )
+>>>>>>> 5d2b9ea1f78aa6eebfd0cb265e15deb40a3d66d9
     log( "############################################################", xbmc.LOGNOTICE )
     log( "Looking for settings.xml", xbmc.LOGNOTICE )
     if not exists(settings_file): # Open Settings if settings.xml does not exists

@@ -910,10 +910,6 @@ def update_database( background=False ):
     for item in album_detail_list:
         if not ( item["disc"], get_unicode( item["artist"] ), get_unicode( item["title"] ), item["cover"], item["cdart"], item["local_id"], get_unicode( item["path"] ) ) in matched_indexed:
             unmatched.append(item)
-    print "#### album_detail_list ####"
-    print album_detail_list
-    print "#### local_album_list ####"
-    print local_album_list
     unmatched_details = retrieve_album_details_full( unmatched, len( unmatched ), background = background, simple = False, update = True )
     combined = matched
     combined.extend( unmatched_details )

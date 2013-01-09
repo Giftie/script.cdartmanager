@@ -220,8 +220,7 @@ def retrieve_fanarttv_json( id ):
                                 albums.append( album_artwork )
     except:
         print_exc()
-    fanart["backgrounds"] = backgrounds
-    clearlogo["clearlogo"] = musiclogos
+    fanart["backgrounds"] = backgrounds    clearlogo["clearlogo"] = musiclogos
     hdlogo["hdlogo"] = hdlogos
     banner["banner"] = banners
     artistthumb["artistthumb"] = artistthumbs
@@ -404,5 +403,3 @@ def get_recognized( all_artists, album_artists, background=False ):
     dialog_msg( "close", background = background )
     log( "Finished Getting Recognized Artists", xbmc.LOGDEBUG )
     return all_artists_matched, album_artists_matched
-
-     
