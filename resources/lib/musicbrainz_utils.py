@@ -2,7 +2,7 @@
 
 import xbmc
 import sys, os, re
-from urllib import quote_plus
+from urllib import quote_plus, quote
 from traceback import print_exc
 
 try:
@@ -65,12 +65,12 @@ def get_musicbrainz_release_group( release_mbid ):
     log( "Retrieving MusicBrainz Release Group MBID from Album Release MBID", xbmc.LOGDEBUG )
     url = release_group_url_release_mbid % ( server, quote_plus( release_mbid ) )
     mbid = ""
-    htmlsource = get_html_source( url, release_mbid, True )
-    match = re.search( '''<release-group(.*?)</release-group>''', htmlsource )
+    htmlsource = get_html_source( url, release_mbid, save_file = False, overwrite = False )
+    match = re.search( '''<release-group-list count="(?:.*?)">(.*?)</release-group-list>''', htmlsource )
     if match:
-        mbid_match = re.search( '''<release-group id="(.*?)"(?:.*?)">''', htmlsource)
+        mbid_match = re.search( '''<release-group id="(.*?)"(?:.*?)">''', match.group( 1 ) )
         if not mbid_match:
-            mbid_match = re.search( '''<release-group (?:.*?)id="(.*?)">''', htmlsource )
+            mbid_match = re.search( '''<release-group (?:.*?)id="(.*?)">''', match.group( 1 ) )
         if mbid_match:
             mbid = mbid_match.group( 1 )
     xbmc.sleep( mb_delay )
@@ -98,7 +98,7 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
     album["title"] = ""
     album["artist"] = ""
     album["artist_id"] = ""
-    artist_temp = artist
+    log( "Artist: %s" % get_unicode( artist ), xbmc.LOGDEBUG )
     album_temp = album_title
     artist = get_unicode( artist )
     album_title = get_unicode( album_title )
@@ -125,8 +125,8 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
         elif not with_singles and use_alias:
             log( "Retrieving MusicBrainz Info - Checking by Alias - Using Release Name", xbmc.LOGDEBUG )
             url = release_group_url_using_release_name_alias % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
-        htmlsource = get_html_source( url, "", False )
-        match = re.search( '''<release-group(.*?)</release-group>''', htmlsource )
+        htmlsource = get_html_source( url, "", save_file = False, overwrite = False )
+        match = re.search( '''<release-group-list count="(?:.*?)" offset="(?:.*?)">(.*?)</release-group-list>''', htmlsource )
         if match:
             try:
                 mbid = re.search( '''<release-group id="(.*?)"(?:.*?)">''', htmlsource)
@@ -161,44 +161,47 @@ def get_musicbrainz_album( album_title, artist, e_count, limit=1, with_singles=F
             else:
                 log( "No releases found on MusicBrainz.", xbmc.LOGDEBUG )
                 album["artist"], album["artist_id"], sort_name = get_musicbrainz_artist_id( artist )
-            
     else:
         match_within = "~4"
-        url = release_group_url_singles % ( server, quote_plus( album_title.encode("utf-8") ), match_within, quote_plus( artist.encode("utf-8") ), limit )
-        htmlsource = get_html_source( url, "", False )
-        match = re.findall( '''<release-group(.*?)</release-group>''', htmlsource )
+        url = release_group_url_singles % ( server, ( album_title.encode("utf-8") ), match_within, ( artist.encode("utf-8") ), limit )
+        htmlsource = get_html_source( url, "", save_file = False, overwrite = False )
+        match = re.search( '''<release-group-list count="(?:.*?)" offset="(?:.*?)">(.*?)</release-group-list>''', htmlsource )
         if match:
-            for item in match:
-                album = {}
-                album["score"] = ""
-                album["id"] = ""
-                album["title"] = ""
-                album["artist"] = ""
-                album["artist_id"] = ""
-                try:
-                    mbscore = re.search( '''score="(.*?)"''', item)
-                    mbid = re.search( '''<release-group id="(.*?)"(?:.*?)">''', item)
-                    if not mbid:
-                        mbid = re.search( '''id="(.*?)"(?:.*?)">''', item)
+            match_release_group = re.findall( '''<release-group(.*?)</release-group>''', match.group( 1 ) )
+            if match_release_group:
+                for item in match_release_group:
+                    album = {}
+                    album["score"] = ""
+                    album["id"] = ""
+                    album["title"] = ""
+                    album["artist"] = ""
+                    album["artist_id"] = ""
+                    try:
+                        mbscore = re.search( '''score="(.*?)"''', item)
+                        mbid = re.search( '''<release-group id="(.*?)"(?:.*?)">''', item)
                         if not mbid:
-                            mbid = re.search( '''<release-group (?:.*?)id="(.*?)">''', htmlsource )
-                    mbtitle = re.search( '''<title>(.*?)</title>''', item)
-                    mbartist = re.search( '''<name>(.*?)</name>''', item)
-                    mbartistid = re.search( '''<artist id="(.*?)">''', item)
-                    album["score"] = mbscore.group(1)
-                    album["id"] = mbid.group(1)
-                    album["title"] = get_unicode( unescape( mbtitle.group(1) ) )
-                    album["artist"] = get_unicode( unescape( mbartist.group(1) ) )
-                    album["artist_id"] = mbartistid.group(1)
-                    log( "Score     : %s" % album["score"], xbmc.LOGDEBUG )
-                    log( "Title     : %s" % album["title"], xbmc.LOGDEBUG )
-                    log( "Id        : %s" % album["id"], xbmc.LOGDEBUG )
-                    log( "Artist    : %s" % album["artist"], xbmc.LOGDEBUG )
-                    log( "Artist ID : %s" % album["artist_id"], xbmc.LOGDEBUG )
-                    albums.append(album)
-                except:
-                    print_exc()
-                
+                            mbid = re.search( '''id="(.*?)"(?:.*?)">''', item)
+                            if not mbid:
+                                mbid = re.search( '''<release-group (?:.*?)id="(.*?)">''', htmlsource )
+                        mbtitle = re.search( '''<title>(.*?)</title>''', item)
+                        mbartist = re.search( '''<name>(.*?)</name>''', item)
+                        mbartistid = re.search( '''<artist id="(.*?)">''', item)
+                        album["score"] = mbscore.group(1)
+                        album["id"] = mbid.group(1)
+                        album["title"] = unescape( mbtitle.group(1) )
+                        album["artist"] = unescape( mbartist.group(1) )
+                        album["artist_id"] = mbartistid.group(1)
+                        log( "Score     : %s" % album["score"], xbmc.LOGDEBUG )
+                        log( "Title     : %s" % album["title"], xbmc.LOGDEBUG )
+                        log( "Id        : %s" % album["id"], xbmc.LOGDEBUG )
+                        log( "Artist    : %s" % album["artist"], xbmc.LOGDEBUG )
+                        log( "Artist ID : %s" % album["artist_id"], xbmc.LOGDEBUG )
+                        albums.append(album)
+                    except:
+                        print_exc()
+                    
+            else:
+                pass
         else:
             pass
     xbmc.sleep( mb_delay ) # sleep for allowing proper use of webserver
@@ -216,7 +219,7 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
     artists = []
     artist_name = artist_search.replace( '"', '?' )
     url = artist_url % ( server, quote_plus( artist_name.encode("utf-8") ), limit )
-    htmlsource = get_html_source( url, "", False)
+    htmlsource = get_html_source( url, "", save_file = False, overwrite = False )
     match = re.findall( '''<artist(.*?)</artist>''', htmlsource )
     if match:
         for item in match:
@@ -246,6 +249,7 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
         artists.append(artist)
     else:
         log( "No Artist ID found for Artist: %s" % repr( artist_search ), xbmc.LOGDEBUG )
+    xbmc.sleep( mb_delay )
     return artists
 
 def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
@@ -257,7 +261,7 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
         url = artist_url % ( server, quote_plus( artist_name.encode("utf-8") ), limit )
     else:
         url = alias_url % ( server, quote_plus( artist_name.encode("utf-8") ), limit )
-    htmlsource = get_html_source( url, "", False)
+    htmlsource = get_html_source( url, "", save_file = False)
     match = re.search( '''<artist(.*?)</artist>''', htmlsource )
     if match:
         score_match = re.search( '''score="(.*?)"''', htmlsource )
@@ -322,7 +326,7 @@ def mbid_check( database_mbid, type ):
         url = release_group_id_check % ( server, database_mbid )
     elif type == "artist":
         url = artist_id_check % ( server, database_mbid )
-    htmlsource = get_html_source( url, "", False)
+    htmlsource = get_html_source( url, "", save_file = False)
     if type == "release-group":
         match = re.search( '''<release-group id="(.*?)"(?:.*?)>''', htmlsource )
         if match:

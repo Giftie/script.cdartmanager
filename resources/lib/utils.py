@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui
-import urllib2, urllib, sys, re, os, socket, errno
+import urllib2, sys, re, os, socket, urllib
 import htmlentitydefs
 from traceback import print_exc
 
@@ -18,7 +18,7 @@ __version__            = sys.modules[ "__main__" ].__version__
 __addon__              = sys.modules[ "__main__" ].__addon__
 addon_db               = sys.modules[ "__main__" ].addon_db
 addon_work_folder      = sys.modules[ "__main__" ].addon_work_folder
-tempxml_folder         = os.path.join( addon_work_folder, "tempxml" )
+tempxml_folder         = sys.modules[ "__main__" ].tempxml_folder
 __useragent__          = sys.modules[ "__main__" ].__useragent__
 BASE_RESOURCE_PATH     = sys.modules[ "__main__" ].BASE_RESOURCE_PATH
 illegal_characters     = sys.modules[ "__main__" ].illegal_characters
@@ -224,7 +224,7 @@ def get_html_source2( url, path, save_file = True, overwrite = False ):
             break
         except:
             print_exc()
-            log( "!!Unable to open page %s" % url, xbmc.LOGDEBUG )
+            log( "!!Unable to open page %s" % url, xbmc.LOGNOTICE )
             error = True
     if error:
         return htmlsource
