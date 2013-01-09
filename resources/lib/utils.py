@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui
-import urllib, sys, re, os
+import urllib2, urllib, sys, re, os, socket, errno
 import htmlentitydefs
 from traceback import print_exc
 
@@ -172,6 +172,55 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
                 if not exists( file_name ) or overwrite:
                     file( file_name , "w" ).write( htmlsource )
             sock.close()
+            break
+        except IOError, e:
+            print "error: ", e
+            print "e.errno: ", e.errno
+            print "errn.errorcode: ", errno.errorcode[e.errno]
+        except:
+            print_exc()
+            log( "!!Unable to open page %s" % url, xbmc.LOGDEBUG )
+            error = True
+    if error:
+        return htmlsource
+    else:
+        log( "HTML Source:\n%s" % htmlsource, xbmc.LOGDEBUG )
+        return htmlsource
+        
+def get_html_source2( url, path, save_file = True, overwrite = False ):
+    """ fetch the html source """
+    log( "Retrieving HTML Source", xbmc.LOGDEBUG )
+    log( "Fetching URL: %s" % url, xbmc.LOGDEBUG )
+    error = False
+    htmlsource = "null"
+    file_name = ""
+    socket.setdefaulttimeout( 30 )
+    request = urllib2.Request( url )
+    opener = urllib2.build_opener()
+    request.add_header( 'User-Agent',  __useragent__ )
+    if save_file:
+        path = path.replace("http://api.fanart.tv/api/music.php?id=", "")
+        path = path + ".xml"
+        if not exists( tempxml_folder ):
+            os.mkdir( tempxml_folder )
+        file_name = os.path.join( tempxml_folder, path )
+    for i in range(0, 4):
+        try:
+            if save_file:
+                if exists( file_name ) and not overwrite:
+                    log( "Retrieving local source", xbmc.LOGDEBUG )
+                    sock = open( file_name, "r" )
+                else:
+                    log( "Retrieving online source", xbmc.LOGDEBUG )
+                    sock = opener.open(request)
+            else:
+                sock = opener.open(request)
+            htmlsource = sock.read()
+            if save_file:
+                if not exists( file_name ) or overwrite:
+                    file( file_name , "w" ).write( htmlsource )
+            sock.close()
+            error = False
             break
         except:
             print_exc()

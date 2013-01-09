@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, os, traceback, socket, time, datetime, calendar
+import sys, os, traceback, time, datetime, calendar
 import xbmcaddon, xbmc, xbmcgui
 
 try:
@@ -84,9 +84,6 @@ else:
         mb_delay = 1
     else:
         mb_delay = mb_delay * 100
-
-#time socket out at 30 seconds
-socket.setdefaulttimeout(30)
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "skins", "Default" ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))

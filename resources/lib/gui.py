@@ -47,7 +47,7 @@ enable_missing       = sys.modules[ "__main__" ].enable_missing
 from fanarttv_scraper import check_fanart_new_artwork, first_check, remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_fanart_list, remote_clearlogo_list, remote_coverart_list, remote_artistthumb_list
 from utils import get_html_source, clear_image_cache, get_unicode, change_characters, log, dialog_msg
 from download import download_art, auto_download
-from database import backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
+from database import user_updates, backup_database, store_alblist, store_lalist, retrieve_distinct_album_artists, store_counts, database_setup, get_local_albums_db, get_local_artists_db, new_local_count, refresh_db, artwork_search, update_database, check_album_mbid, check_artist_mbid, update_missing_artist_mbid, update_missing_album_mbid
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album, update_musicbrainzid, get_musicbrainz_artists
 from file_item import Thumbnails
 from jsonrpc_calls import get_all_local_artists, retrieve_album_list, retrieve_album_details, get_album_path
@@ -1538,7 +1538,7 @@ class GUI( xbmcgui.WindowXMLDialog ):
         if controlId == 123:
             self.setFocusId( 126 )
         if controlId == 124: # Refresh Album MBIDs
-            self.setFocusId( 148 ) # change to 147 when selected album is added to script
+            self.setFocusId( 147 ) # change to 147 when selected album is added to script
         if controlId == 125:
             updated_albums, canceled = update_missing_album_mbid( empty, False )
             conn = sqlite3.connect(addon_db)
@@ -1646,28 +1646,12 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 if self.albums:
                     self.populate_search_list_mbid( self.albums, "albums" )
         if controlId == 161:
-            conn = sqlite3.connect(addon_db)
-            c = conn.cursor()
             if self.menu_mode == 10:
-                artist_musicbrainzid = self.artists[self.getControl( 161 ).getSelectedPosition()]["id"]
-                artist_name = self.artists[self.getControl( 161 ).getSelectedPosition()]["name"]
-                try:
-                    c.execute('''UPDATE lalist SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( artist_musicbrainzid, artist_name, self.artist_menu["local_id"] ) )
-                except:
-                    log( "Error updating database", xbmc.LOGERROR )
-                    traceback.print_exc()
-                try:
-                    c.execute('''UPDATE alblist SET musicbrainz_artistid="%s", artist="%s" WHERE artist="%s"''' % ( artist_musicbrainzid, artist_name, self.artist_menu["name"] ) )
-                except:
-                    log( "Error updating database", xbmc.LOGERROR )
-                    traceback.print_exc()
-                try:
-                    c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( artist_musicbrainzid, artist_name, self.artist_menu["local_id"] ) )
-                except:
-                    log( "Error updating database", xbmc.LOGERROR )
-                    traceback.print_exc()
-                conn.commit()
-                c.close()
+                artist_details = {}
+                artist_details["musicbrainz_artistid"] = self.artists[self.getControl( 161 ).getSelectedPosition()]["id"]
+                artist_details["name"] = self.artists[self.getControl( 161 ).getSelectedPosition()]["name"]
+                artist_details["local_id"] = self.artist_menu["local_id"]
+                user_updates( artist_details, type = "artist" )
                 self.getControl( 145 ).reset()
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 if enable_all_artists:
@@ -1676,17 +1660,14 @@ class GUI( xbmcgui.WindowXMLDialog ):
                     self.local_artists = get_local_artists_db( "album_artists")
                 self.populate_artist_list_mbid( self.local_artists, self.selected_item )
             if self.menu_mode in ( 11, 12 ):
-                artist_name = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist"]
-                album_title = self.albums[self.getControl( 161 ).getSelectedPosition()]["title"]
-                artist_musicbrainzid = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist_id"]
-                album_musicbrainzid = self.albums[self.getControl( 161 ).getSelectedPosition()]["id"]
-                try:
-                    c.execute('''UPDATE alblist SET artist="%s", title="%s", musicbrainz_albumid="%s", musicbrainz_artistid="%s" WHERE album_id=%s and path="%s"''' % ( artist_name, album_title, album_musicbrainzid, artist_musicbrainzid, self.album_menu["local_id"], self.album_menu["path"] ) )
-                except:
-                    log( "Error updating database", xbmc.LOGERROR )
-                    traceback.print_exc()
-                conn.commit()
-                c.close()
+                album_details = {}
+                album_details["artist"] = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist"]
+                album_details["title"] = self.albums[self.getControl( 161 ).getSelectedPosition()]["title"]
+                album_details["musicbrainz_artistid"] = self.albums[self.getControl( 161 ).getSelectedPosition()]["artist_id"]
+                album_details["musicbrainz_albumid"] = self.albums[self.getControl( 161 ).getSelectedPosition()]["id"]
+                album_details["path"] = self.album_menu["path"]
+                album_details["local_id"] = self.album_menu["local_id"]
+                user_updates( album_details, type = "album" )
                 self.getControl( 145 ).reset()
                 xbmc.executebuiltin( "ActivateWindow(busydialog)" )
                 if self.menu_mode == 12:

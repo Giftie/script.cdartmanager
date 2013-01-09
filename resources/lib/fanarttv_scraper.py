@@ -175,48 +175,51 @@ def retrieve_fanarttv_json( id ):
                     'hdmusiclogo',
                     'musicbanner',
                     'albums' ]
-    data = simplejson.loads( htmlsource )
-    for artist, value in data.iteritems():
-        for art in IMAGE_TYPES:
-            if value.has_key(art):
-                for item in value[art]:
-                    if art == "musiclogo":
-                        musiclogos.append( item.get('url') )
-                    if art == "hdmusiclogo":
-                        hdlogos.append( item.get('url') )
-                    if art == "artistbackground":
-                        backgrounds.append( item.get('url' ) )
-                    if art == "musicbanner":
-                        banners.append( item.get('url' ) )
-                    if art == "artistthumb":
-                        artistthumbs.append( item.get( 'url' ) )
-                    if art == "albums" and not albums:
-                        for album_id in data[ artist ][ "albums" ]:
-                            album_artwork = {}
-                            album_artwork["musicbrainz_albumid"] = album_id
-                            album_artwork["cdart"] = []
-                            album_artwork["cover"] = ""
-                            if value[ "albums"][ album_id ].has_key( "cdart" ):
-                                for item in value[ "albums" ][ album_id ][ "cdart" ]:
-                                    cdart = {}
-                                    if item.has_key( "disc" ):
-                                        cdart[ "disc" ] = int( item[ "disc" ] )
-                                    else:
-                                        cdart[ "disc" ] = 1
-                                    if item.has_key( "url" ):
-                                        cdart["cdart"] = item[ "url" ]
-                                    else:
-                                        cdart["cdart"] = ""
-                                    if item.has_key( "size" ):
-                                        cdart["size"] = int( item[ "size" ] )
-                                    album_artwork["cdart"].append(cdart)
-                            try:
-                                if value[ "albums" ][ album_id ][ "albumcover" ]:
-                                    if len( value[ "albums" ][ album_id ][ "albumcover" ] ) < 2:
-                                        album_artwork["cover"] = value[ "albums" ][ album_id ][ "albumcover" ][0][ "url" ]
-                            except:
+    try:
+        data = simplejson.loads( htmlsource )
+        for artist, value in data.iteritems():
+            for art in IMAGE_TYPES:
+                if value.has_key(art):
+                    for item in value[art]:
+                        if art == "musiclogo":
+                            musiclogos.append( item.get('url') )
+                        if art == "hdmusiclogo":
+                            hdlogos.append( item.get('url') )
+                        if art == "artistbackground":
+                            backgrounds.append( item.get('url' ) )
+                        if art == "musicbanner":
+                            banners.append( item.get('url' ) )
+                        if art == "artistthumb":
+                            artistthumbs.append( item.get( 'url' ) )
+                        if art == "albums" and not albums:
+                            for album_id in data[ artist ][ "albums" ]:
+                                album_artwork = {}
+                                album_artwork["musicbrainz_albumid"] = album_id
+                                album_artwork["cdart"] = []
                                 album_artwork["cover"] = ""
-                            albums.append( album_artwork )
+                                if value[ "albums"][ album_id ].has_key( "cdart" ):
+                                    for item in value[ "albums" ][ album_id ][ "cdart" ]:
+                                        cdart = {}
+                                        if item.has_key( "disc" ):
+                                            cdart[ "disc" ] = int( item[ "disc" ] )
+                                        else:
+                                            cdart[ "disc" ] = 1
+                                        if item.has_key( "url" ):
+                                            cdart["cdart"] = item[ "url" ]
+                                        else:
+                                            cdart["cdart"] = ""
+                                        if item.has_key( "size" ):
+                                            cdart["size"] = int( item[ "size" ] )
+                                        album_artwork["cdart"].append(cdart)
+                                try:
+                                    if value[ "albums" ][ album_id ][ "albumcover" ]:
+                                        if len( value[ "albums" ][ album_id ][ "albumcover" ] ) < 2:
+                                            album_artwork["cover"] = value[ "albums" ][ album_id ][ "albumcover" ][0][ "url" ]
+                                except:
+                                    album_artwork["cover"] = ""
+                                albums.append( album_artwork )
+    except:
+        print_exc()
     fanart["backgrounds"] = backgrounds
     clearlogo["clearlogo"] = musiclogos
     hdlogo["hdlogo"] = hdlogos
@@ -263,13 +266,18 @@ def check_fanart_new_artwork( present_datecode ):
         xbmcvfs.delete( os.path.join( addon_work_folder, "tempxml", "%s.xml" % previous_datecode ) )
     url = new_music % ( api_key, str( previous_datecode ) )
     htmlsource = ( get_html_source( url, str( present_datecode ) ) ).encode( 'utf-8', 'ignore' )
-    data = simplejson.loads( htmlsource )
     if htmlsource == "null":
         log( "No new Artwork found on fanart.tv", xbmc.LOGNOTICE )
-        return False, data
+        return False, htmlsource
     else:
-        log( "New Artwork found on fanart.tv", xbmc.LOGNOTICE )
-        return True, data
+        try:
+            log( "New Artwork found on fanart.tv", xbmc.LOGNOTICE )
+            data = simplejson.loads( htmlsource )
+            return True, data
+        except:
+            htmlsource = "null"
+            print_exc()
+            return False, htmlsource
 
 def check_art( mbid ):
     has_art = "False"

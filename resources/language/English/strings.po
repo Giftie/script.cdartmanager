@@ -162,8 +162,8 @@ msgid " *DOWNLOADING Artwork* "
 msgstr " *DOWNLOADING Artwork* "
 
 msgctxt "#32036"
-msgid "Path to Music Library(for Artwork)"
-msgstr "Path to Music Library(for Artwork)"
+msgid "Music folder path(for Artwork)"
+msgstr "Music folder path(for Artwork)"
 
 msgctxt "#32037"
 msgid "Getting local artists"

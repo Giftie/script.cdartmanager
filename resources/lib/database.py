@@ -35,7 +35,75 @@ try:
     from xbmcvfs import mkdirs as _makedirs
 except:
     from utils import _makedirs
+    
+def user_updates( details, type ):
+    log( "Storing User edit", xbmc.LOGNOTICE )
+    conn = sqlite3.connect(addon_db)
+    c = conn.cursor()
+    c.execute( '''CREATE table IF NOT EXISTS artist_updates(local_id INTEGER, name TEXT, musicbrainz_artistid TEXT)''' )
+    c.execute( '''CREATE table IF NOT EXISTS album_updates(album_id INTEGER, title TEXT, artist TEXT, path TEXT, musicbrainz_albumid TEXT, musicbrainz_artistid TEXT)''' )
+    if type == "artist":
+        log( "Storing artist update", xbmc.LOGNOTICE )
+        try:
+            c.execute( '''SELECT DISTINCT musicbrainz_artistid FROM artist_updates WHERE local_id=%s''' % details["local_id"] )
+            db_details = c.fetchall()
+            if db_details:
+                log( "Updating existing artist edit", xbmc.LOGNOTICE )
+                c.execute( '''UPDATE artist_updates SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( details["musicbrainz_artistid"], details["name"], details["local_id"] ) )
+            else:
+                log( "Storing new artist edit", xbmc.LOGNOTICE )
+                c.execute( '''INSERT INTO artist_updates(local_id, name, musicbrainz_artistid) values (?, ?, ?)''', ( details["local_id"], details["name"], details["musicbrainz_artistid"] ) )
+        except:
+            log( "Error updating artist_updates table", xbmc.LOGERROR )
+            traceback.print_exc()
+        try:
+            c.execute('''UPDATE lalist SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( details["musicbrainz_artistid"], details["name"], details["local_id"] ) )
+        except:
+            log( "Error updating album artist table", xbmc.LOGERROR )
+            traceback.print_exc()
+        try:
+            c.execute('''UPDATE alblist SET musicbrainz_artistid="%s", artist="%s" WHERE artist="%s"''' % ( details["musicbrainz_artistid"], details["name"], details["name"] ) )
+        except:
+            log( "Error updating album table", xbmc.LOGERROR )
+            traceback.print_exc()
+        try:
+            c.execute('''UPDATE local_artists SET musicbrainz_artistid="%s", name="%s" WHERE local_id=%s''' % ( details["musicbrainz_artistid"], details["name"], details["local_id"] ) )
+        except:
+            log( "Error updating local artist table", xbmc.LOGERROR )
+            traceback.print_exc()
+    if type == "album":
+        log( "Storing album update", xbmc.LOGNOTICE )
+        try:
+            c.execute( '''SELECT DISTINCT album_id FROM album_updates WHERE album_id=%s and path="%s"''' % ( details["local_id"], get_unicode( details["path"] ) ) )
+            db_details = c.fetchall()
+            print db_details
+            if db_details:
+                log( "Updating existing album edit", xbmc.LOGNOTICE )
+                c.execute( '''UPDATE album_updates SET artist="%s", title="%s", musicbrainz_albumid="%s", musicbrainz_artistid="%s" WHERE album_id=%s and path="%s"''' % ( get_unicode( details["artist"] ), get_unicode( details["title"] ), details["musicbrainz_albumid"], details["musicbrainz_artistid"], details["local_id"], get_unicode( details["path"] ) ) )
+            else:
+                log( "Storing new album edit", xbmc.LOGNOTICE )
+                c.execute( '''INSERT INTO album_updates(album_id, title, artist, path, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?)''', ( details["local_id"], get_unicode( details["title"] ), get_unicode( details["artist"] ), get_unicode( details["path"] ), details["musicbrainz_albumid"], details["musicbrainz_artistid"] ) )
+        except:
+            log( "Error updating album_updates table", xbmc.LOGERROR )
+            traceback.print_exc()
+        try:
+            c.execute('''UPDATE alblist SET artist="%s", title="%s", musicbrainz_albumid="%s", musicbrainz_artistid="%s" WHERE album_id=%s and path="%s"''' % ( get_unicode( details["artist"] ), get_unicode( details["title"] ), details["musicbrainz_albumid"], details["musicbrainz_artistid"], details["local_id"], get_unicode( details["path"] ) ) )
+        except:
+            log( "Error updating album table", xbmc.LOGERROR )
+            traceback.print_exc()
+    conn.commit()
+    c.close()
 
+def restore_user_updates():
+    conn = sqlite3.connect(addon_db)
+    c = conn.cursor()
+    c.execute( '''UPDATE lalist SET musicbrainz_artistid = (SELECT artist_updates.musicbrainz_artistid FROM artist_updates WHERE artist_updates.local_id = lalist.local_id ) WHERE EXISTS ( SELECT * FROM artist_updates WHERE artist_updates.name = lalist.name )''' )
+    c.execute( '''UPDATE local_artists SET musicbrainz_artistid = (SELECT artist_updates.musicbrainz_artistid FROM artist_updates WHERE artist_updates.local_id = local_artists.local_id ) WHERE EXISTS ( SELECT * FROM artist_updates WHERE artist_updates.name = local_artists.name )''' )
+    c.execute( '''UPDATE alblist SET musicbrainz_artistid = (SELECT album_updates.musicbrainz_artistid FROM album_updates WHERE album_updates.album_id = alblist.album_id ) WHERE EXISTS ( SELECT * FROM album_updates WHERE album_updates.album_id = alblist.album_id )''' )
+    c.execute( '''UPDATE alblist SET musicbrainz_albumid = (SELECT album_updates.musicbrainz_albumid FROM album_updates WHERE album_updates.album_id = alblist.album_id ) WHERE EXISTS ( SELECT * FROM album_updates WHERE album_updates.album_id = alblist.album_id )''' )
+    conn.commit()
+    c.close()
+    
 def artist_list_to_string( artist ):
     artist_string = ""
     if not ( type( artist ) is list ):
@@ -136,7 +204,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                     album_artist["local_id"] = detail['albumid']
                                 title = detail['title']
                                 album_artist["artist"] = get_unicode( artist_list_to_string( album['artist'] ).split(" / ")[0] )
-                                album_artist["path"] = path
+                                album_artist["path"] = get_unicode( path )
                                 album_artist["cdart"] = xbmcvfs.exists( os.path.join( path , "cdart.png").replace("\\\\" , "\\") )
                                 album_artist["cover"] = xbmcvfs.exists( os.path.join( path , "folder.jpg").replace("\\\\" , "\\") )
                                 previous_path = path
@@ -148,7 +216,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                             log( "Title has CD count", xbmc.LOGDEBUG )
                                             log( "    Disc %s" % title_match.group( 2 ), xbmc.LOGDEBUG )
                                             album_artist["disc"] = int( title_match.group( 2 ) )
-                                            album_artist["title"] = ( title_match.group( 1 ).replace(" -", "") ).rstrip()
+                                            album_artist["title"] = get_unicode( ( title_match.group( 1 ).replace(" -", "") ).rstrip() )
                                         else:
                                             if path_match:
                                                 if len( path_match.groups() ) > 0:
@@ -162,7 +230,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                                     album_artist["disc"] = 1
                                             else:
                                                 album_artist["disc"] = 1
-                                            album_artist["title"] = ( title.replace(" -", "") ).rstrip()
+                                            album_artist["title"] = get_unicode( ( title.replace(" -", "") ).rstrip() )
                                     else:
                                         if path_match:
                                             if len( path_match.groups() ) > 0:
@@ -176,7 +244,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                                 album_artist["disc"] = 1
                                         else:
                                             album_artist["disc"] = 1
-                                        album_artist["title"] = ( title.replace(" -", "") ).rstrip()
+                                        album_artist["title"] = get_unicode( ( title.replace(" -", "") ).rstrip() )
                                 else:
                                     if path_match:
                                         if len( path_match.groups() ) > 0:
@@ -190,7 +258,7 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                             album_artist["disc"] = 1
                                     else:
                                         album_artist["disc"] = 1
-                                    album_artist["title"] = ( title.replace(" -", "") ).rstrip()
+                                    album_artist["title"] = get_unicode( ( title.replace(" -", "") ).rstrip() )
                                 log( "Album Title: %s" % album_artist["title"], xbmc.LOGDEBUG )
                                 log( "Album Artist: %s" % album_artist["artist"], xbmc.LOGDEBUG )
                                 log( "Album ID: %s" % album_artist["local_id"], xbmc.LOGDEBUG )
@@ -207,7 +275,6 @@ def retrieve_album_details_full( album_list, total, background=False, simple=Fal
                                         album_artist["musicbrainz_albumid"] = get_musicbrainz_release_group( albumrelease_mbid )
                                     if not album_artist["musicbrainz_albumid"]:
                                         try:
-                                            album_artist["title"] = get_unicode( album_artist["title"] )
                                             musicbrainz_albuminfo, discard = get_musicbrainz_album( album_artist["title"], album_artist["artist"], 0, 1 )
                                             album_artist["musicbrainz_albumid"] = musicbrainz_albuminfo["id"]
                                             album_artist["musicbrainz_artistid"] = musicbrainz_albuminfo["artist_id"]
@@ -269,7 +336,7 @@ def store_alblist( local_album_list, background=False ):
                 if album["cdart"]:
                     cdart_existing += 1
                 album_count += 1
-                c.execute("insert into alblist(album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ( album["local_id"], get_unicode( album["title"] ), get_unicode( album["artist"] ), get_unicode( album["path"].replace("\\\\" , "\\") ), ("False","True")[album["cdart"]], ("False","True")[album["cover"]], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
+                c.execute('''insert into alblist(album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)''', ( album["local_id"], get_unicode( album["title"] ), get_unicode( album["artist"] ), get_unicode( album["path"].replace("\\\\" , "\\") ), ("False","True")[album["cdart"]], ("False","True")[album["cover"]], album["disc"], album["musicbrainz_albumid"], album["musicbrainz_artistid"] ))
             except:
                 log( "Error Saving to Database", xbmc.LOGDEBUG )
                 traceback.print_exc()
@@ -306,9 +373,9 @@ def store_lalist( local_artist_list, count_artist_local ):
     for artist in local_artist_list:
         try:
             try:
-                c.execute("insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
+                c.execute( '''insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)''', (artist["local_id"], unicode(artist["name"], 'utf-8', ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
             except TypeError:
-                c.execute("insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", (artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
+                c.execute( '''insert into lalist(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)''', (artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ))
             artist_count += 1
             percent = int(( artist_count / float( count_artist_local ) ) * 100)
         except:
@@ -367,9 +434,9 @@ def store_counts( local_artists_count, artist_count, album_count, cdart_existing
     except:
         traceback.print_exc()
     if datecode == 0:
-        c.execute("insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__))
+        c.execute( '''insert into counts(local_artists, artists, albums, cdarts, version) values (?, ?, ?, ?, ?)''', (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__))
     else:
-        c.execute("insert into counts(local_artists, artists, albums, cdarts, version, datecode) values (?, ?, ?, ?, ?, ?)", (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__, datecode ))
+        c.execute( '''insert into counts(local_artists, artists, albums, cdarts, version, datecode) values (?, ?, ?, ?, ?, ?)''', (local_artists_count, artist_count, album_count, cdart_existing, __dbversion__, datecode ))
     conn.commit()
     c.close()
     log( "Finished Storing Counts", xbmc.LOGDEBUG )
@@ -467,14 +534,14 @@ def get_local_albums_db( artist_name, background=False ):
     try:
         if artist_name == "all artists":
             dialog_msg( "create", heading =  __language__(32102), line1 = __language__(20186), background = background )
-            query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist, title ASC"
+            query = '''SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist ORDER BY artist, title ASC'''
             c.execute(query)
         else:
-            query='SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s" ORDER BY title ASC' % artist_name
+            query = '''SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s" ORDER BY title ASC''' % artist_name
             try:
                 c.execute(query)
             except sqlite3.OperationalError:
-                query="SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist='%s' ORDER BY title ASC" % artist_name
+                query = '''SELECT DISTINCT album_id, title, artist, path, cdart, cover, disc, musicbrainz_albumid, musicbrainz_artistid FROM alblist WHERE artist="%s" ORDER BY title ASC''' % artist_name
                 c.execute(query)
             except:
                 traceback.print_exc()
@@ -506,10 +573,10 @@ def get_local_artists_db( mode="album_artists", background=False ):
     local_artist_list = []    
     if mode == "album_artists":
         log( "Retrieving Local Album Artists from Database", xbmc.LOGDEBUG )
-        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM lalist ORDER BY name ASC"
+        query = '''SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM lalist ORDER BY name ASC'''
     else:
         log( "Retrieving All Local Artists from Database", xbmc.LOGDEBUG )
-        query = "SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM local_artists ORDER BY name ASC"
+        query = '''SELECT DISTINCT local_id, name, musicbrainz_artistid, fanarttv_has_art FROM local_artists ORDER BY name ASC'''
     conn_l = sqlite3.connect(addon_db)
     c = conn_l.cursor()
     try:
@@ -546,10 +613,10 @@ def store_local_artist_table( artist_list, background = False ):
         percent = int( ( count/float( len( artist_list ) ) ) * 100 )
         dialog_msg( "update", percent = percent, line1 = __language__(32124), line2 = "%s%s" % ( __language__(32125), artist["local_id"] ), line3 = "%s%s" % ( __language__(32028), get_unicode( artist["name"] ) ), background = background )
         try:
-            c.execute("insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ) )
+            c.execute( '''insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)''', ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], artist[ "has_art" ] ) )
             count += 1
         except KeyError:
-            c.execute("insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)", ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], "False" ) )
+            c.execute( '''insert into local_artists(local_id, name, musicbrainz_artistid, fanarttv_has_art) values (?, ?, ?, ?)''', ( artist["local_id"], get_unicode( artist["name"] ), artist["musicbrainz_artistid"], "False" ) )
             count += 1
         except:
             traceback.print_exc()
@@ -832,6 +899,7 @@ def update_database( background=False ):
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) #  retrieving album details
     album_detail_list = retrieve_album_details_full( album_list, total, background = background, simple = True, update = False )
     dialog_msg( "create", heading = __language__(32134), line1 = __language__(32105), background = background ) #  retrieving local artist details
+    # album matching
     for item in album_detail_list:
         album_detail_list_indexed[( item["disc"], get_unicode( item["artist"] ), get_unicode( item["title"] ), item["cover"], item["cdart"], item["local_id"], get_unicode( item["path"] ) )] = item
     for item in local_album_list:
@@ -842,9 +910,14 @@ def update_database( background=False ):
     for item in album_detail_list:
         if not ( item["disc"], get_unicode( item["artist"] ), get_unicode( item["title"] ), item["cover"], item["cdart"], item["local_id"], get_unicode( item["path"] ) ) in matched_indexed:
             unmatched.append(item)
+    print "#### album_detail_list ####"
+    print album_detail_list
+    print "#### local_album_list ####"
+    print local_album_list
     unmatched_details = retrieve_album_details_full( unmatched, len( unmatched ), background = background, simple = False, update = True )
     combined = matched
     combined.extend( unmatched_details )
+    # artist matching
     if enable_all_artists:
         local_artists = get_all_local_artists( True )
         log( "Updating Addon's DB - Checking Artists", xbmc.LOGNOTICE )
@@ -934,6 +1007,7 @@ def update_database( background=False ):
     c.execute('''DROP table IF EXISTS local_artists_bk''')
     conn.commit()
     c.close()
+    restore_user_updates()
 
 def backup_database():
     todays_date = today = datetime.datetime.today().strftime("%m-%d-%Y")
