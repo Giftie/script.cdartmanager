@@ -1,3 +1,9 @@
+2.8.0 - 3.0.0
+- Fix - Set counts to zero at the start of the building of database
+- Fix - MusicBrainz retrieval code
+- Add - Adjust socket timeout
+- Add - User edits now stored in database and restores on an update
+
 2.7.9
 - Fix - change setting to float then integer
 - Fix - requesting too many values from first time database building.

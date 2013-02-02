@@ -221,7 +221,8 @@ def retrieve_fanarttv_json( id ):
                                 albums.append( album_artwork )
     except:
         print_exc()
-    fanart["backgrounds"] = backgrounds    clearlogo["clearlogo"] = musiclogos
+    fanart["backgrounds"] = backgrounds
+    clearlogo["clearlogo"] = musiclogos
     hdlogo["hdlogo"] = hdlogos
     banner["banner"] = banners
     artistthumb["artistthumb"] = artistthumbs

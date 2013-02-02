@@ -143,7 +143,7 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
     log( "Retrieving HTML Source", xbmc.LOGDEBUG )
     log( "Fetching URL: %s" % url, xbmc.LOGDEBUG )
     error = False
-    htmlsource = ""
+    htmlsource = "null"
     file_name = ""
     if save_file:
         path = path.replace("http://api.fanart.tv/api/music.php?id=", "")
@@ -168,7 +168,7 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
                 urllib.urlcleanup()
                 sock = urllib.urlopen( url )
             htmlsource = sock.read()
-            if save_file:
+            if save_file and not htmlsource == "null":
                 if not exists( file_name ) or overwrite:
                     file( file_name , "w" ).write( htmlsource )
             sock.close()
@@ -216,7 +216,7 @@ def get_html_source2( url, path, save_file = True, overwrite = False ):
             else:
                 sock = opener.open(request)
             htmlsource = sock.read()
-            if save_file:
+            if save_file and not htmlsource == "null":
                 if not exists( file_name ) or overwrite:
                     file( file_name , "w" ).write( htmlsource )
             sock.close()
