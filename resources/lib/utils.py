@@ -2,7 +2,7 @@
 import xbmc, xbmcgui
 import urllib2, sys, re, os, socket, urllib
 import htmlentitydefs
-from traceback import print_exc
+from traceback
 
 try:
     from sqlite3 import dbapi2 as sqlite3
@@ -178,7 +178,7 @@ def get_html_source( url, path, save_file = True, overwrite = False ):
             print "e.errno: ", e.errno
             print "errn.errorcode: ", errno.errorcode[e.errno]
         except:
-            print_exc()
+            traceback.print_exc()
             log( "!!Unable to open page %s" % url, xbmc.LOGDEBUG )
             error = True
     if error:
@@ -223,7 +223,7 @@ def get_html_source2( url, path, save_file = True, overwrite = False ):
             error = False
             break
         except:
-            print_exc()
+            traceback.print_exc()
             log( "!!Unable to open page %s" % url, xbmc.LOGNOTICE )
             error = True
     if error:
