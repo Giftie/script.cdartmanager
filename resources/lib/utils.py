@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui
-import urllib2, sys, re, os, socket, urllib
+import urllib2, sys, re, os, socket, urllib, traceback
 import htmlentitydefs
-from traceback
 
 try:
     from sqlite3 import dbapi2 as sqlite3
