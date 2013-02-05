@@ -89,7 +89,7 @@ def settings_to_log( settings_path, script_heading="[utils.py]" ):
             if not match:
                 match = re.search("""    <setting id="(.*?)" value='(.*?)'""", setting)
             if match:
-                log( "%30s: %s" % ( match.group(1), str( unescape( match.group(2) ) ) ), xbmc.LOGDEBUG )
+                log( "%30s: %s" % ( match.group(1), str( unescape( match.group(2).decode('utf-8', 'ignore') ) ) ), xbmc.LOGDEBUG )
     except:
         traceback.print_exc()
 
