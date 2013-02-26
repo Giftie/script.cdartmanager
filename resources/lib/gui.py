@@ -1676,7 +1676,17 @@ class GUI( xbmcgui.WindowXMLDialog ):
                 else:
                     self.local_albums = get_local_albums_db( self.artist_menu["name"] )
                     self.populate_album_list_mbid( self.local_albums, self.selected_item )
-
+        if controlId == 141:
+            local_artists = get_local_artists_db( mode="album_artists" )
+            if enable_all_artists:
+                all_artists = get_local_artists_db( mode="all_artists" )
+            else:
+                all_artists = []
+            first_check( all_artists, local_artists, background = False, update_db = True )
+            self.all_artists_list, self.album_artists = get_recognized( all_artists, local_artists )
+            all_artist_count, local_album_count, local_artist_count, local_cdart_count = new_local_count()
+            self.refresh_counts( local_album_count, local_artist_count, local_cdart_count )
+            
     def onFocus( self, controlId ):
         if not controlId in( 122, 140, 160, 167, 199 ):
             xbmcgui.Window(10001).clearProperty( "artwork" )

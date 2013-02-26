@@ -974,6 +974,8 @@ def update_database( background=False ):
     conn = sqlite3.connect( addon_db )
     c = conn.cursor()
     if xbmcvfs.exists( addon_db ): # if database file still exists even after trying to delete it. Wipe out its contents
+        c.execute('''DROP table IF EXISTS lalist_bk''')   # drop the local artists list backup table
+        c.execute('''DROP table IF EXISTS local_artists_bk''')   # drop local artists backup table
         c.execute('''CREATE TABLE lalist_bk AS SELECT * FROM lalist''') # create a backup of the Album artist table
         c.execute('''CREATE TABLE local_artists_bk AS SELECT * FROM local_artists''') # create a backup of the Local Artist table
         c.execute('''DROP table IF EXISTS counts''')   # drop the count table
