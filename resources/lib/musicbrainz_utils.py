@@ -26,8 +26,8 @@ mb_delay              = sys.modules[ "__main__" ].mb_delay
 
 from utils import get_html_source, unescape, log, get_unicode, smart_unicode
 
-artist_url = '''%s/ws/2/artist/?query=artist:%s&limit=%d'''
-alias_url = '''%s/ws/2/artist/?query=alias:%s&limit=%d'''
+artist_url = '''%s/ws/2/artist/?query=artist:"%s"&limit=%d'''
+alias_url = '''%s/ws/2/artist/?query=alias:"%s"&limit=%d'''
 release_group_url                          = '''%s/ws/2/release-group/'''
 release_group_url_artist                   = release_group_url + '''?query="%s"%s AND artist:"%s"'''
 release_group_url_alias                    = release_group_url + '''?query="%s"%s AND alias:"%s"'''
@@ -243,9 +243,9 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
             artist["sortname"] = ""
             score_match = re.search( '''score="(.*?)"''', item )
             name_match = re.search( '''<name>(.*?)</name>''', item )
-            id_match = re.search( '''<artist id="(.*?)"(?:.*?)>''', htmlsource )
+            id_match = re.search( '''id="(.*?)"(?:.*?)>''', item )
             if not id_match:
-                id_match = re.search( '''<artist (?:.*?)id="(.*?)">''', htmlsource )
+                id_match = re.search( '''id="(.*?)">''', item )
             sort_name_match = re.search( '''<sort-name>(.*?)</sort-name>''', item )
             if score_match:
                 artist["score"] = score_match.group(1)
@@ -259,7 +259,7 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
             log( "Id        : %s" % artist["id"], xbmc.LOGDEBUG )
             log( "Name      : %s" % artist["name"], xbmc.LOGDEBUG )
             log( "Sort Name : %s" % artist["sortname"], xbmc.LOGDEBUG )
-        artists.append(artist)
+            artists.append(artist)
     else:
         log( "No Artist ID found for Artist: %s" % repr( artist_search ), xbmc.LOGDEBUG )
     xbmc.sleep( mb_delay )
