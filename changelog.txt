@@ -1,3 +1,6 @@
+3.0.4
+- Fix - Correct JSON module import logic
+
 3.0.3
 - Add - Remove all MBIDs that match "24f1766e-9635-4d58-a4d4-9413f9f98a4c" then download correct matching MBIDs - only runs on an old database version
 - Update - New Database version
