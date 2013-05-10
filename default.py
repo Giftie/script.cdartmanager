@@ -25,10 +25,10 @@ __author__             = __addon__.getAddonInfo('author')
 __version__            = __addon__.getAddonInfo('version')
 __credits__            = "Ppic, Reaven, Imaginos, redje, Jair, "
 __credits2__           = "Chaos_666, Magnatism, Kode, Martijn"
-__version_date__       = "2-25-13"
-__dbversion__          = "2.7.8"
-__dbversionold__       = "1.5.3"
-__dbversionancient__   = "1.1.8"
+__version_date__       = "5-10-13"
+__dbversion__          = "3.0.3"
+__dbversionold__       = "2.7.8"
+__dbversionancient__   = "1.5.3"
 __addon_path__         = __addon__.getAddonInfo('path')
 __useragent__          = "%s\\%s (giftie61@hotmail.com)" % ( __scriptname__, __version__ )
 enable_hdlogos         = eval( __addon__.getSetting("enable_hdlogos") )
@@ -91,7 +91,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 
 from utils import settings_to_log, get_unicode, change_characters, unescape, log, dialog_msg
 from file_item import Thumbnails
-from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db, update_database, retrieve_album_details_full
+from database import build_local_artist_table, store_counts, new_local_count, get_local_artists_db, get_local_albums_db, update_database, retrieve_album_details_full, mbid_repair
 from jsonrpc_calls import retrieve_album_details, retrieve_artist_details, get_fanart_path, get_thumbnail_path
 from musicbrainz_utils import get_musicbrainz_artist_id, get_musicbrainz_album
 from fanarttv_scraper import check_fanart_new_artwork, first_check, remote_banner_list, remote_hdlogo_list, get_recognized, remote_cdart_list, remote_coverart_list, remote_fanart_list, remote_clearlogo_list, remote_artistthumb_list
@@ -477,7 +477,10 @@ if ( __name__ == "__main__" ):
                         if version[0][0] == __dbversion__:
                             log( "Database matched", xbmc.LOGNOTICE )
                         elif version[0][0] == __dbversionold__:
-                            log( "Version 1.5.3 found, Adding new column to Local Album Artist and Local Artists" , xbmc.LOGNOTICE )
+                            log( "Version 2.7.8 found, Removing Bach MBID's from database", xbmc.LOGNOTICE )
+                            mbid_repair()
+                        elif version[0][0] == __dbversionancient__:
+                            log( "Version 1.5.3 found, Adding new column to Local Album Artist and Local Artists", xbmc.LOGNOTICE )
                             all_artists  = []
                             local_artists  = []
                             file_copy( addon_db,addon_db_update )
