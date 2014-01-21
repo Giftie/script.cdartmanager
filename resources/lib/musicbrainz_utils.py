@@ -266,7 +266,7 @@ def get_musicbrainz_artists( artist_search, limit=1 ):
     xbmc.sleep( mb_delay )
     return artists
 
-def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
+def get_musicbrainz_artist_id( artist_search, limit=1, alias = False ):
     name = ""
     id = ""
     sortname = ""
@@ -299,10 +299,10 @@ def get_musicbrainz_artist_id( artist, limit=1, alias = False ):
         log( "Sort Name : %s" % sortname, xbmc.LOGDEBUG )
     else:
         if not alias:
-            log( "No Artist ID found trying aliases: %s" % artist, xbmc.LOGDEBUG )
-            name, id, sortname = get_musicbrainz_artist_id( artist, limit, True )
+            log( "No Artist ID found trying aliases: %s" % artist_search, xbmc.LOGDEBUG )
+            name, id, sortname = get_musicbrainz_artist_id( artist_search, limit, True )
         else:
-            log( "No Artist ID found for Artist: %s" % artist, xbmc.LOGDEBUG )
+            log( "No Artist ID found for Artist: %s" % artist_search, xbmc.LOGDEBUG )
     xbmc.sleep( mb_delay )
     return name, id, sortname
 
