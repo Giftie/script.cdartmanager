@@ -101,6 +101,10 @@ try:
 except:
     from utils import _makedirs
     
+def clear_skin_properties():
+    xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
+    xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+    xbmcgui.Window( 10000 ).setProperty( "cdart_manager_allartist", "False" )
 
 def artist_musicbrainz_id( artist_id, artist_mbid ):
     artist_details = retrieve_artist_details( artist_id )
@@ -310,7 +314,7 @@ if ( __name__ == "__main__" ):
         soft_exit = True
     settings_to_log( addon_work_folder, "[script.cdartmanager]" )
     try:
-        int( __addon__.getSetting( "recognized" ) )
+        recognized_ = int( __addon__.getSetting( "recognized" ) )
         soft_exit = False
     except:
         dialog_msg( "okdialog", heading = __language__( 32181 ), line1 = __language__( 32182 ) )
@@ -324,6 +328,10 @@ if ( __name__ == "__main__" ):
         xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "True" )
     if not soft_exit:
         try:
+            if enable_all_artists:
+                xbmcgui.Window( 10000 ).setProperty( "cdart_manager_allartist", "True" )
+            else:
+                xbmcgui.Window( 10000 ).setProperty( "cdart_manager_allartist", "False" )
             xbmc.executebuiltin('Dialog.Close(all, true)') 
             if script_mode in ( "database" ):
                 log( "Start method - Build Database in background", xbmc.LOGNOTICE )
@@ -528,25 +536,19 @@ if ( __name__ == "__main__" ):
                             xbmc.sleep(2000)
                             ui.doModal()
                             del ui
-                            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
-                            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+                            clear_skin_properties()
                         except:
                             log( "Error in script occured", xbmc.LOGNOTICE )
                             traceback.print_exc()
                             dialog_msg( "close" )
-                            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
-                            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+                            clear_skin_properties()
                 elif not background_db and not soft_exit:
                     log( "Problem accessing folder, exiting script", xbmc.LOGNOTICE )
                     xbmc.executebuiltin("Notification( %s, %s, %d, %s)" % ( __language__(32042), __language__(32110), 500, image) )
-            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
-            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+            clear_skin_properties()
         except:
             print "Unexpected error:", sys.exc_info()[0]
             raise
-            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
-            xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
+            clear_skin_properties()
     else:
-        xbmcgui.Window( 10000 ).setProperty( "cdart_manager_running", "False" )
-        xbmcgui.Window( 10000 ).setProperty( "cdart_manager_update", "False" )
-            
+        clear_skin_properties()    
